@@ -1,6 +1,5 @@
 import type { ConverterConfig } from '../../types';
 import { jsPDF } from 'jspdf';
-import * as XLSX from 'xlsx';
 import mammoth from 'mammoth';
 import * as pdfjsLib from 'pdfjs-dist';
 import html2canvas from 'html2canvas';
@@ -10,8 +9,8 @@ import { renderAsync } from 'docx-preview';
 pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
 
 export const documentConverter: ConverterConfig = {
-  inputFormats: ['txt', 'doc', 'docx', 'pdf', 'csv', 'xlsx', 'xls'],
-  outputFormats: ['pdf', 'txt', 'csv', 'xlsx', 'png', 'jpg'],
+  inputFormats: ['txt', 'doc', 'docx', 'pdf'],
+  outputFormats: ['pdf', 'txt', 'png', 'jpg'],
 
   // Define which output formats are available for each input format
   formatMap: {
@@ -19,9 +18,6 @@ export const documentConverter: ConverterConfig = {
     doc: ['pdf', 'txt', 'png', 'jpg'],
     docx: ['pdf', 'txt', 'png', 'jpg'],
     pdf: ['txt', 'png', 'jpg'],
-    csv: ['xlsx', 'txt', 'pdf', 'png', 'jpg'],
-    xlsx: ['csv', 'txt', 'pdf', 'png', 'jpg'],
-    xls: ['csv', 'xlsx', 'txt', 'pdf', 'png', 'jpg'],
   },
 
   async convert(file: File, outputFormat: string, onProgress?: (progress: number) => void): Promise<Blob> {
@@ -100,42 +96,6 @@ export const documentConverter: ConverterConfig = {
       }
 
       throw new Error(`Conversion PDF → ${outputFormat.toUpperCase()} non supportée`);
-    }
-
-    // Spreadsheet conversions (CSV, XLSX, XLS)
-    if (['csv', 'xlsx', 'xls'].includes(extension)) {
-      const data = await file.arrayBuffer();
-      const workbook = XLSX.read(data);
-      onProgress?.(50);
-
-      if (outputFormat === 'csv') {
-        const csv = XLSX.utils.sheet_to_csv(workbook.Sheets[workbook.SheetNames[0]]);
-        onProgress?.(100);
-        return new Blob([csv], { type: 'text/csv' });
-      }
-
-      if (outputFormat === 'xlsx') {
-        const xlsxData = XLSX.write(workbook, { type: 'array', bookType: 'xlsx' });
-        onProgress?.(100);
-        return new Blob([xlsxData], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-      }
-
-      if (outputFormat === 'txt') {
-        const text = XLSX.utils.sheet_to_txt(workbook.Sheets[workbook.SheetNames[0]]);
-        onProgress?.(100);
-        return new Blob([text], { type: 'text/plain' });
-      }
-
-      if (outputFormat === 'pdf') {
-        const csv = XLSX.utils.sheet_to_csv(workbook.Sheets[workbook.SheetNames[0]]);
-        return textToPdf(csv, onProgress);
-      }
-
-      if (outputFormat === 'png' || outputFormat === 'jpg') {
-        return spreadsheetToImage(workbook, outputFormat, onProgress);
-      }
-
-      throw new Error(`Conversion ${extension.toUpperCase()} → ${outputFormat.toUpperCase()} non supportée`);
     }
 
     throw new Error(`Format d'entrée ${extension.toUpperCase()} non supporté`);
@@ -565,81 +525,4 @@ async function pdfToImage(arrayBuffer: ArrayBuffer, format: 'png' | 'jpg', onPro
       resolve(blob!);
     }, mimeType, format === 'jpg' ? 0.92 : undefined);
   });
-}
-
-async function spreadsheetToImage(workbook: XLSX.WorkBook, format: 'png' | 'jpg', onProgress?: (progress: number) => void): Promise<Blob> {
-  const sheet = workbook.Sheets[workbook.SheetNames[0]];
-  const html = XLSX.utils.sheet_to_html(sheet);
-
-  onProgress?.(30);
-
-  // Create container in iframe
-  const iframe = document.createElement('iframe');
-  iframe.style.cssText = `
-    position: fixed;
-    left: -9999px;
-    top: 0;
-    width: 1200px;
-    height: auto;
-    border: none;
-    background: white;
-  `;
-  document.body.appendChild(iframe);
-
-  const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
-  if (!iframeDoc) {
-    document.body.removeChild(iframe);
-    throw new Error('Could not create iframe for rendering');
-  }
-
-  try {
-    iframeDoc.open();
-    iframeDoc.write(`
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <style>
-          * { box-sizing: border-box; }
-          body { margin: 0; padding: 20px; background: #ffffff; font-family: Arial, sans-serif; }
-          table { border-collapse: collapse; width: auto; }
-          td, th {
-            border: 1px solid #d1d5db;
-            padding: 8px 12px;
-            text-align: left;
-            white-space: nowrap;
-          }
-          th { background: #f3f4f6; font-weight: 600; }
-          tr:nth-child(even) { background: #f9fafb; }
-        </style>
-      </head>
-      <body>${html}</body>
-      </html>
-    `);
-    iframeDoc.close();
-
-    await new Promise((resolve) => setTimeout(resolve, 200));
-
-    onProgress?.(60);
-
-    // Render to canvas
-    const canvas = await html2canvas(iframeDoc.body, {
-      scale: 2,
-      useCORS: true,
-      logging: false,
-      backgroundColor: '#ffffff',
-    });
-
-    onProgress?.(90);
-
-    // Convert to blob
-    const mimeType = format === 'png' ? 'image/png' : 'image/jpeg';
-    return new Promise((resolve) => {
-      canvas.toBlob((blob) => {
-        onProgress?.(100);
-        resolve(blob!);
-      }, mimeType, format === 'jpg' ? 0.95 : undefined);
-    });
-  } finally {
-    document.body.removeChild(iframe);
-  }
 }

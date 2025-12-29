@@ -281,10 +281,10 @@ export function QrCodeGenerator() {
     e.target.value = '';
   };
 
-  const presets = [
+  const presets: { label: string; placeholder: string }[] = [
     { label: 'URL', placeholder: 'https://example.com' },
     { label: 'Email', placeholder: 'mailto:email@example.com' },
-    { labelKey: 'qrCode.preset.phone', placeholder: 'tel:+33123456789' },
+    { label: t('qrCode.preset.phone'), placeholder: 'tel:+33123456789' },
     { label: 'SMS', placeholder: 'sms:+33123456789?body=Hello' },
     { label: 'WiFi', placeholder: 'WIFI:T:WPA;S:NetworkName;P:password;;' },
   ];
@@ -334,7 +334,7 @@ export function QrCodeGenerator() {
               onClick={() => updateSetting('text', p.placeholder)}
               className="text-xs px-2 py-1 bg-gray-100 hover:bg-gray-200 rounded transition-colors"
             >
-              {'labelKey' in p ? t(p.labelKey) : p.label}
+              {p.label}
             </button>
           ))}
         </div>
