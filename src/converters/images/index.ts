@@ -3,7 +3,7 @@ import { jsPDF } from 'jspdf';
 
 export const imageConverter: ConverterConfig = {
   inputFormats: ['png', 'jpg', 'jpeg', 'webp', 'gif', 'bmp', 'heic'],
-  outputFormats: ['png', 'jpg', 'webp', 'gif'],
+  outputFormats: ['png', 'jpg', 'webp', 'gif', 'pdf'],
 
   async convert(file: File, outputFormat: string, onProgress?: (progress: number) => void): Promise<Blob> {
     onProgress?.(10);

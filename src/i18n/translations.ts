@@ -284,6 +284,8 @@ export const translations: Record<Language, Record<string, string>> = {
     // PDF Tools
     'utility.pdf-tools': 'Outils PDF',
     'utility.pdf-tools.desc': 'Fusionner, organiser, pivoter, numéroter vos PDFs',
+    'pdfTools.imagesToPdf': 'Images → PDF',
+    'pdfTools.createPdf': 'Créer le PDF',
     'pdfTools.merge': 'Fusionner',
     'pdfTools.organize': 'Organiser',
     'pdfTools.rotate': 'Pivoter',
@@ -605,6 +607,8 @@ export const translations: Record<Language, Record<string, string>> = {
     // PDF Tools
     'utility.pdf-tools': 'PDF Tools',
     'utility.pdf-tools.desc': 'Merge, organize, rotate, number your PDFs',
+    'pdfTools.imagesToPdf': 'Images → PDF',
+    'pdfTools.createPdf': 'Create PDF',
     'pdfTools.merge': 'Merge',
     'pdfTools.organize': 'Organize',
     'pdfTools.rotate': 'Rotate',
@@ -926,6 +930,8 @@ export const translations: Record<Language, Record<string, string>> = {
     // PDF Tools
     'utility.pdf-tools': 'Herramientas PDF',
     'utility.pdf-tools.desc': 'Fusionar, organizar, rotar, numerar tus PDFs',
+    'pdfTools.imagesToPdf': 'Imágenes → PDF',
+    'pdfTools.createPdf': 'Crear PDF',
     'pdfTools.merge': 'Fusionar',
     'pdfTools.organize': 'Organizar',
     'pdfTools.rotate': 'Rotar',
@@ -1247,6 +1253,8 @@ export const translations: Record<Language, Record<string, string>> = {
     // PDF Tools
     'utility.pdf-tools': 'PDF-Werkzeuge',
     'utility.pdf-tools.desc': 'PDFs zusammenführen, organisieren, drehen, nummerieren',
+    'pdfTools.imagesToPdf': 'Bilder → PDF',
+    'pdfTools.createPdf': 'PDF erstellen',
     'pdfTools.merge': 'Zusammenführen',
     'pdfTools.organize': 'Organisieren',
     'pdfTools.rotate': 'Drehen',

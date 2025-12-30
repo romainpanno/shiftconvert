@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
-import { Upload, Download, X, RotateCw, FileText, Combine, Layers, Type, GripVertical, Check, RotateCcw, Undo2 } from 'lucide-react';
+import { Upload, Download, X, RotateCw, FileText, Combine, Layers, Type, GripVertical, Check, RotateCcw, Undo2, ImageIcon } from 'lucide-react';
+import { jsPDF } from 'jspdf';
 import { PDFDocument, degrees } from 'pdf-lib';
 import * as pdfjsLib from 'pdfjs-dist';
 import { useLanguage } from '../../i18n';
@@ -8,7 +9,16 @@ import { formatSize } from '../../utils/formatSize';
 // Configure PDF.js worker
 pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
 
-type Tool = 'merge' | 'organize' | 'rotate' | 'pageNumbers';
+type Tool = 'merge' | 'organize' | 'rotate' | 'pageNumbers' | 'imagesToPdf';
+
+interface ImageFile {
+  id: string;
+  file: File;
+  name: string;
+  dataUrl: string;
+  width: number;
+  height: number;
+}
 
 interface PageThumbnail {
   pageNum: number;
@@ -43,6 +53,12 @@ export function PdfTools() {
 
   // History for undo
   const [history, setHistory] = useState<{ files: PdfFile[], fileOrder: string[] }[]>([]);
+
+  // Images to PDF state
+  const [imageFiles, setImageFiles] = useState<ImageFile[]>([]);
+  const [draggedImageId, setDraggedImageId] = useState<string | null>(null);
+  const [dropImageTargetId, setDropImageTargetId] = useState<string | null>(null);
+  const [dropImagePosition, setDropImagePosition] = useState<'before' | 'after' | null>(null);
 
   // Drag state - simplified, no visual reordering during drag
   const [draggedFileId, setDraggedFileId] = useState<string | null>(null);
@@ -517,7 +533,167 @@ export function PdfTools() {
     setIsProcessing(false);
   };
 
+  // Load image and get dimensions
+  const loadImage = (file: File): Promise<ImageFile> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          resolve({
+            id: Math.random().toString(36).substring(2, 11),
+            file,
+            name: file.name,
+            dataUrl: e.target?.result as string,
+            width: img.width,
+            height: img.height,
+          });
+        };
+        img.onerror = () => reject(new Error('Failed to load image'));
+        img.src = e.target?.result as string;
+      };
+      reader.onerror = () => reject(new Error('Failed to read file'));
+      reader.readAsDataURL(file);
+    });
+  };
+
+  // Handle image drop
+  const handleImageDrop = useCallback(async (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'));
+
+    const newImages: ImageFile[] = [];
+    for (const file of files) {
+      try {
+        const imageFile = await loadImage(file);
+        newImages.push(imageFile);
+      } catch (err) {
+        console.error('Failed to load image:', err);
+      }
+    }
+    setImageFiles(prev => [...prev, ...newImages]);
+  }, []);
+
+  // Handle image file input
+  const handleImageFileInput = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []).filter(f => f.type.startsWith('image/'));
+
+    const newImages: ImageFile[] = [];
+    for (const file of files) {
+      try {
+        const imageFile = await loadImage(file);
+        newImages.push(imageFile);
+      } catch (err) {
+        console.error('Failed to load image:', err);
+      }
+    }
+    setImageFiles(prev => [...prev, ...newImages]);
+    e.target.value = '';
+  }, []);
+
+  // Image drag handlers
+  const handleImageDragStart = (e: React.DragEvent, imageId: string) => {
+    setDraggedImageId(imageId);
+    e.dataTransfer.effectAllowed = 'move';
+    const dragImg = document.createElement('div');
+    dragImg.style.opacity = '0';
+    document.body.appendChild(dragImg);
+    e.dataTransfer.setDragImage(dragImg, 0, 0);
+    setTimeout(() => document.body.removeChild(dragImg), 0);
+  };
+
+  const handleImageDragOver = (e: React.DragEvent, imageId: string) => {
+    e.preventDefault();
+    if (!draggedImageId || draggedImageId === imageId) return;
+
+    const rect = e.currentTarget.getBoundingClientRect();
+    const midPoint = rect.left + rect.width / 2;
+    setDropImageTargetId(imageId);
+    setDropImagePosition(e.clientX < midPoint ? 'before' : 'after');
+  };
+
+  const handleImageDragEnd = () => {
+    if (draggedImageId && dropImageTargetId && dropImagePosition) {
+      setImageFiles(prev => {
+        const draggedIndex = prev.findIndex(img => img.id === draggedImageId);
+        const targetIndex = prev.findIndex(img => img.id === dropImageTargetId);
+        if (draggedIndex === -1 || targetIndex === -1) return prev;
+
+        const newImages = [...prev];
+        const [draggedImage] = newImages.splice(draggedIndex, 1);
+        const insertIndex = dropImagePosition === 'before' ? targetIndex : targetIndex + 1;
+        const adjustedIndex = draggedIndex < targetIndex ? insertIndex - 1 : insertIndex;
+        newImages.splice(adjustedIndex, 0, draggedImage);
+        return newImages;
+      });
+    }
+    setDraggedImageId(null);
+    setDropImageTargetId(null);
+    setDropImagePosition(null);
+  };
+
+  // Create PDF from images
+  const createPdfFromImages = async () => {
+    if (imageFiles.length === 0) return;
+    setIsProcessing(true);
+
+    try {
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+      });
+
+      let isFirstPage = true;
+
+      for (const imageFile of imageFiles) {
+        // Determine orientation based on image dimensions
+        const isLandscape = imageFile.width > imageFile.height;
+
+        if (!isFirstPage) {
+          pdf.addPage(undefined, isLandscape ? 'landscape' : 'portrait');
+        } else {
+          // Set first page orientation
+          if (isLandscape) {
+            pdf.deletePage(1);
+            pdf.addPage(undefined, 'landscape');
+          }
+          isFirstPage = false;
+        }
+
+        const pageWidth = pdf.internal.pageSize.getWidth();
+        const pageHeight = pdf.internal.pageSize.getHeight();
+        const margin = 10;
+
+        const maxWidth = pageWidth - 2 * margin;
+        const maxHeight = pageHeight - 2 * margin;
+
+        // Scale to fit
+        const widthRatio = maxWidth / imageFile.width;
+        const heightRatio = maxHeight / imageFile.height;
+        const ratio = Math.min(widthRatio, heightRatio);
+
+        const imgWidth = imageFile.width * ratio;
+        const imgHeight = imageFile.height * ratio;
+
+        // Center image on page
+        const x = (pageWidth - imgWidth) / 2;
+        const y = (pageHeight - imgHeight) / 2;
+
+        pdf.addImage(imageFile.dataUrl, 'JPEG', x, y, imgWidth, imgHeight);
+      }
+
+      const blob = pdf.output('blob');
+      downloadBlob(blob, 'images.pdf');
+    } catch (e) {
+      console.error('Images to PDF error:', e);
+      alert(t('common.error'));
+    }
+    setIsProcessing(false);
+  };
+
   const tools: { id: Tool; icon: React.ReactNode; label: string }[] = [
+    { id: 'imagesToPdf', icon: <ImageIcon className="w-4 h-4" />, label: t('pdfTools.imagesToPdf') },
     { id: 'merge', icon: <Combine className="w-4 h-4" />, label: t('pdfTools.merge') },
     { id: 'organize', icon: <Layers className="w-4 h-4" />, label: t('pdfTools.organize') },
     { id: 'rotate', icon: <RotateCw className="w-4 h-4" />, label: t('pdfTools.rotate') },
@@ -526,6 +702,7 @@ export function PdfTools() {
 
   const handleAction = () => {
     switch (tool) {
+      case 'imagesToPdf': createPdfFromImages(); break;
       case 'merge': mergePdfs(); break;
       case 'organize': organizePdf(); break;
       case 'rotate': rotatePdf(); break;
@@ -543,7 +720,7 @@ export function PdfTools() {
           {tools.map(t => (
             <button
               key={t.id}
-              onClick={() => { setTool(t.id); setPdfFiles([]); setRangeInput(''); setHistory([]); setInitialFileOrder([]); }}
+              onClick={() => { setTool(t.id); setPdfFiles([]); setImageFiles([]); setRangeInput(''); setHistory([]); setInitialFileOrder([]); }}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                 tool === t.id ? 'bg-primary-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
@@ -557,28 +734,145 @@ export function PdfTools() {
 
       {/* Dropzone */}
       <div className="card">
-        <label
-          className={`dropzone flex flex-col items-center justify-center min-h-[150px] ${isDragging ? 'active' : ''}`}
-          onDragOver={e => { e.preventDefault(); setIsDragging(true); }}
-          onDragLeave={e => { e.preventDefault(); setIsDragging(false); }}
-          onDrop={handleDrop}
-        >
-          <input
-            type="file"
-            className="hidden"
-            multiple={tool === 'merge'}
-            accept=".pdf"
-            onChange={handleFileInput}
-          />
-          <Upload className="w-10 h-10 text-gray-400 mb-3" />
-          <p className="text-base font-medium text-gray-700 mb-1">{t('dropzone.dragHere')}</p>
-          <p className="text-sm text-gray-500">PDF {tool === 'merge' && `(${t('pdfTools.multipleFiles')})`}</p>
-        </label>
+        {tool === 'imagesToPdf' ? (
+          <label
+            className={`dropzone flex flex-col items-center justify-center min-h-[150px] ${isDragging ? 'active' : ''}`}
+            onDragOver={e => { e.preventDefault(); setIsDragging(true); }}
+            onDragLeave={e => { e.preventDefault(); setIsDragging(false); }}
+            onDrop={handleImageDrop}
+          >
+            <input
+              type="file"
+              className="hidden"
+              multiple
+              accept="image/*"
+              onChange={handleImageFileInput}
+            />
+            <Upload className="w-10 h-10 text-gray-400 mb-3" />
+            <p className="text-base font-medium text-gray-700 mb-1">{t('dropzone.dragHere')}</p>
+            <p className="text-sm text-gray-500">PNG, JPG, WebP, GIF ({t('pdfTools.multipleFiles')})</p>
+          </label>
+        ) : (
+          <label
+            className={`dropzone flex flex-col items-center justify-center min-h-[150px] ${isDragging ? 'active' : ''}`}
+            onDragOver={e => { e.preventDefault(); setIsDragging(true); }}
+            onDragLeave={e => { e.preventDefault(); setIsDragging(false); }}
+            onDrop={handleDrop}
+          >
+            <input
+              type="file"
+              className="hidden"
+              multiple={tool === 'merge'}
+              accept=".pdf"
+              onChange={handleFileInput}
+            />
+            <Upload className="w-10 h-10 text-gray-400 mb-3" />
+            <p className="text-base font-medium text-gray-700 mb-1">{t('dropzone.dragHere')}</p>
+            <p className="text-sm text-gray-500">PDF {tool === 'merge' && `(${t('pdfTools.multipleFiles')})`}</p>
+          </label>
+        )}
       </div>
 
       {isLoadingThumbnails && (
         <div className="card p-4 text-center">
           <p className="text-gray-600">{t('pdfTools.loadingPreviews')}</p>
+        </div>
+      )}
+
+      {/* Images to PDF - Image grid */}
+      {tool === 'imagesToPdf' && imageFiles.length > 0 && (
+        <div className="card">
+          {/* Header */}
+          <div className="flex items-center justify-between mb-4 pb-3 border-b border-gray-100">
+            <div className="flex items-center gap-3">
+              <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-red-500 to-rose-500 text-white">
+                <FileText className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="font-medium text-gray-900">
+                  {imageFiles.length} {imageFiles.length > 1 ? 'images' : 'image'}
+                </h3>
+                <p className="text-xs text-gray-500 flex items-center gap-1">
+                  <GripVertical className="w-3 h-3" />
+                  {t('pdfTools.dragToReorder')}
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={() => setImageFiles([])}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+            >
+              <RotateCcw className="w-3.5 h-3.5" />
+              {t('common.reset')}
+            </button>
+          </div>
+
+          {/* Image grid */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+            {imageFiles.map((img, index) => (
+              <div
+                key={img.id}
+                draggable
+                onDragStart={(e) => handleImageDragStart(e, img.id)}
+                onDragOver={(e) => handleImageDragOver(e, img.id)}
+                onDragEnd={handleImageDragEnd}
+                onDragLeave={() => { setDropImageTargetId(null); setDropImagePosition(null); }}
+                className={`relative group cursor-grab active:cursor-grabbing rounded-xl overflow-hidden border-2 transition-all shadow-sm hover:shadow-md ${
+                  draggedImageId === img.id ? 'opacity-50 border-primary-300 scale-95' :
+                  dropImageTargetId === img.id ? 'border-primary-500 ring-2 ring-primary-200' : 'border-gray-200 hover:border-primary-300'
+                }`}
+              >
+                {/* Drop indicator */}
+                {dropImageTargetId === img.id && dropImagePosition === 'before' && (
+                  <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-primary-500 z-10 rounded-l" />
+                )}
+                {dropImageTargetId === img.id && dropImagePosition === 'after' && (
+                  <div className="absolute right-0 top-0 bottom-0 w-1.5 bg-primary-500 z-10 rounded-r" />
+                )}
+
+                <div className="aspect-square bg-gradient-to-br from-gray-50 to-gray-100">
+                  <img
+                    src={img.dataUrl}
+                    alt={img.name}
+                    className="w-full h-full object-contain p-1"
+                    draggable={false}
+                  />
+                </div>
+
+                {/* Page number badge */}
+                <div className="absolute top-2 left-2 flex items-center justify-center w-6 h-6 bg-primary-500 text-white text-xs font-bold rounded-full shadow-md">
+                  {index + 1}
+                </div>
+
+                {/* Remove button */}
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setImageFiles(prev => prev.filter(i => i.id !== img.id));
+                  }}
+                  className="absolute top-2 right-2 p-1.5 bg-white/90 text-red-500 rounded-full shadow-md opacity-0 group-hover:opacity-100 hover:bg-red-500 hover:text-white transition-all"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+
+                {/* File name */}
+                <div className="absolute bottom-0 left-0 right-0 bg-white/95 py-1.5 px-2">
+                  <p className="text-gray-700 text-xs font-medium truncate">
+                    {img.name}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Footer info */}
+          <div className="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between text-xs text-gray-500">
+            <span>{t('pdfTools.dragToReorderPages')}</span>
+            <span className="flex items-center gap-1">
+              <Check className="w-3.5 h-3.5 text-green-500" />
+              {imageFiles.length} page{imageFiles.length > 1 ? 's' : ''} PDF
+            </span>
+          </div>
         </div>
       )}
 
@@ -963,14 +1257,14 @@ export function PdfTools() {
       )}
 
       {/* Action button */}
-      {pdfFiles.length > 0 && (
+      {(pdfFiles.length > 0 || (tool === 'imagesToPdf' && imageFiles.length > 0)) && (
         <button
           onClick={handleAction}
-          disabled={isProcessing || (tool === 'merge' && pdfFiles.length < 2) || (tool === 'organize' && currentPdf?.pageOrder.length === 0)}
+          disabled={isProcessing || (tool === 'merge' && pdfFiles.length < 2) || (tool === 'organize' && currentPdf?.pageOrder.length === 0) || (tool === 'imagesToPdf' && imageFiles.length === 0)}
           className="btn btn-primary flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-150"
         >
           <Download className="w-4 h-4" />
-          {isProcessing ? t('common.processing') : t('pdfTools.download')}
+          {isProcessing ? t('common.processing') : tool === 'imagesToPdf' ? t('pdfTools.createPdf') : t('pdfTools.download')}
         </button>
       )}
     </div>
