@@ -30,19 +30,22 @@ export const translations: Record<Language, Record<string, string>> = {
     'home.searchResult.format': 'Format',
     'home.convert': 'Convertir',
 
+    // Footer
+    'footer.privacy': '100% client-side - Vos fichiers ne quittent jamais votre appareil',
+
     // Categories
     'category.images': 'Images',
-    'category.images.desc': 'PNG, JPG, WebP, GIF, HEIC',
+    'category.images.desc': 'PNG, JPG, WebP, GIF, HEIC, BMP → PNG, JPG, WebP, GIF, PDF',
     'category.documents': 'Documents',
-    'category.documents.desc': 'DOC, DOCX, PDF, TXT, CSV, Excel → PDF, TXT, CSV, XLSX',
+    'category.documents.desc': 'DOCX, PDF, TXT, CSV, XLSX → PDF, TXT, CSV, XLSX',
     'category.documents.limits': 'DOC (Word 97-2003) : non supporté, convertissez en DOCX d\'abord. DOCX : graphiques, SmartArt et équations non supportés.',
     'category.audio': 'Audio',
-    'category.audio.desc': 'MP3, WAV, OGG, FLAC',
+    'category.audio.desc': 'MP3, WAV, OGG, FLAC, M4A, AAC → MP3, WAV, OGG, FLAC',
     'category.video': 'Vidéo',
-    'category.video.desc': 'MP4, WebM, GIF',
+    'category.video.desc': 'MP4, WebM, AVI, MOV, MKV → MP4, WebM, GIF',
     'category.fonts': 'Polices',
-    'category.fonts.desc': 'TTF, OTF, WOFF → TTF, OTF, WOFF, WOFF2 + Métadonnées',
-    'category.fonts.limits': 'Import WOFF2 non supporté (limitation navigateur). Export WOFF2 disponible.',
+    'category.fonts.desc': 'TTF, OTF, WOFF → TTF, OTF, WOFF',
+    'category.fonts.limits': 'Import WOFF2 non supporté (limitation navigateur).',
 
     // Convert page
     'convert.title': 'Convertir',
@@ -59,6 +62,10 @@ export const translations: Record<Language, Record<string, string>> = {
     'convert.backHome': 'Retour à l\'accueil',
     'convert.multipleImagesToPdf': 'Besoin de combiner plusieurs images en un seul PDF ?',
     'convert.goToPdfTools': 'Utiliser les outils PDF',
+    'convert.editFontMetadata': 'Besoin d\'éditer les métadonnées de vos polices ?',
+    'convert.goToFontMetadata': 'Éditer les métadonnées',
+    'convert.onlyEditMetadata': 'Juste besoin d\'éditer les métadonnées sans convertir ?',
+    'convert.goToMetadataEditor': 'Aller à l\'éditeur de métadonnées',
 
     // Dropzone
     'dropzone.dragHere': 'Glissez vos fichiers ici',
@@ -353,19 +360,22 @@ export const translations: Record<Language, Record<string, string>> = {
     'home.searchResult.format': 'Format',
     'home.convert': 'Convert',
 
+    // Footer
+    'footer.privacy': '100% client-side - Your files never leave your device',
+
     // Categories
     'category.images': 'Images',
-    'category.images.desc': 'PNG, JPG, WebP, GIF, HEIC',
+    'category.images.desc': 'PNG, JPG, WebP, GIF, HEIC, BMP → PNG, JPG, WebP, GIF, PDF',
     'category.documents': 'Documents',
-    'category.documents.desc': 'DOC, DOCX, PDF, TXT, CSV, Excel → PDF, TXT, CSV, XLSX',
+    'category.documents.desc': 'DOCX, PDF, TXT, CSV, XLSX → PDF, TXT, CSV, XLSX',
     'category.documents.limits': 'DOC (Word 97-2003): not supported, convert to DOCX first. DOCX: graphics, SmartArt and equations not supported.',
     'category.audio': 'Audio',
-    'category.audio.desc': 'MP3, WAV, OGG, FLAC',
+    'category.audio.desc': 'MP3, WAV, OGG, FLAC, M4A, AAC → MP3, WAV, OGG, FLAC',
     'category.video': 'Video',
-    'category.video.desc': 'MP4, WebM, GIF',
+    'category.video.desc': 'MP4, WebM, AVI, MOV, MKV → MP4, WebM, GIF',
     'category.fonts': 'Fonts',
-    'category.fonts.desc': 'TTF, OTF, WOFF → TTF, OTF, WOFF, WOFF2 + Metadata',
-    'category.fonts.limits': 'WOFF2 import not supported (browser limitation). WOFF2 export available.',
+    'category.fonts.desc': 'TTF, OTF, WOFF → TTF, OTF, WOFF',
+    'category.fonts.limits': 'WOFF2 import not supported (browser limitation).',
 
     // Convert page
     'convert.title': 'Convert',
@@ -382,6 +392,10 @@ export const translations: Record<Language, Record<string, string>> = {
     'convert.backHome': 'Back to home',
     'convert.multipleImagesToPdf': 'Need to combine multiple images into a single PDF?',
     'convert.goToPdfTools': 'Use PDF tools',
+    'convert.editFontMetadata': 'Need to edit your font metadata?',
+    'convert.goToFontMetadata': 'Edit metadata',
+    'convert.onlyEditMetadata': 'Just need to edit metadata without converting?',
+    'convert.goToMetadataEditor': 'Go to metadata editor',
 
     // Dropzone
     'dropzone.dragHere': 'Drag your files here',
@@ -676,19 +690,22 @@ export const translations: Record<Language, Record<string, string>> = {
     'home.searchResult.format': 'Formato',
     'home.convert': 'Convertir',
 
+    // Footer
+    'footer.privacy': '100% del lado del cliente - Tus archivos nunca salen de tu dispositivo',
+
     // Categories
     'category.images': 'Imágenes',
-    'category.images.desc': 'PNG, JPG, WebP, GIF, HEIC',
+    'category.images.desc': 'PNG, JPG, WebP, GIF, HEIC, BMP → PNG, JPG, WebP, GIF, PDF',
     'category.documents': 'Documentos',
-    'category.documents.desc': 'DOC, DOCX, PDF, TXT, CSV, Excel → PDF, TXT, CSV, XLSX',
+    'category.documents.desc': 'DOCX, PDF, TXT, CSV, XLSX → PDF, TXT, CSV, XLSX',
     'category.documents.limits': 'DOC (Word 97-2003): no soportado, convierte a DOCX primero. DOCX: gráficos, SmartArt y ecuaciones no soportados.',
     'category.audio': 'Audio',
-    'category.audio.desc': 'MP3, WAV, OGG, FLAC',
+    'category.audio.desc': 'MP3, WAV, OGG, FLAC, M4A, AAC → MP3, WAV, OGG, FLAC',
     'category.video': 'Vídeo',
-    'category.video.desc': 'MP4, WebM, GIF',
+    'category.video.desc': 'MP4, WebM, AVI, MOV, MKV → MP4, WebM, GIF',
     'category.fonts': 'Fuentes',
-    'category.fonts.desc': 'TTF, OTF, WOFF → TTF, OTF, WOFF, WOFF2 + Metadatos',
-    'category.fonts.limits': 'Importación WOFF2 no soportada (limitación del navegador). Exportación WOFF2 disponible.',
+    'category.fonts.desc': 'TTF, OTF, WOFF → TTF, OTF, WOFF',
+    'category.fonts.limits': 'Importación WOFF2 no soportada (limitación del navegador).',
 
     // Convert page
     'convert.title': 'Convertir',
@@ -705,6 +722,10 @@ export const translations: Record<Language, Record<string, string>> = {
     'convert.backHome': 'Volver al inicio',
     'convert.multipleImagesToPdf': '¿Necesitas combinar varias imágenes en un solo PDF?',
     'convert.goToPdfTools': 'Usar herramientas PDF',
+    'convert.editFontMetadata': '¿Necesitas editar los metadatos de tus fuentes?',
+    'convert.goToFontMetadata': 'Editar metadatos',
+    'convert.onlyEditMetadata': '¿Solo necesitas editar los metadatos sin convertir?',
+    'convert.goToMetadataEditor': 'Ir al editor de metadatos',
 
     // Dropzone
     'dropzone.dragHere': 'Arrastra tus archivos aquí',
@@ -999,19 +1020,22 @@ export const translations: Record<Language, Record<string, string>> = {
     'home.searchResult.format': 'Format',
     'home.convert': 'Konvertieren',
 
+    // Footer
+    'footer.privacy': '100% clientseitig - Ihre Dateien verlassen niemals Ihr Gerät',
+
     // Categories
     'category.images': 'Bilder',
-    'category.images.desc': 'PNG, JPG, WebP, GIF, HEIC',
+    'category.images.desc': 'PNG, JPG, WebP, GIF, HEIC, BMP → PNG, JPG, WebP, GIF, PDF',
     'category.documents': 'Dokumente',
-    'category.documents.desc': 'DOC, DOCX, PDF, TXT, CSV, Excel → PDF, TXT, CSV, XLSX',
+    'category.documents.desc': 'DOCX, PDF, TXT, CSV, XLSX → PDF, TXT, CSV, XLSX',
     'category.documents.limits': 'DOC (Word 97-2003): nicht unterstützt, zuerst in DOCX konvertieren. DOCX: Grafiken, SmartArt und Gleichungen nicht unterstützt.',
     'category.audio': 'Audio',
-    'category.audio.desc': 'MP3, WAV, OGG, FLAC',
+    'category.audio.desc': 'MP3, WAV, OGG, FLAC, M4A, AAC → MP3, WAV, OGG, FLAC',
     'category.video': 'Video',
-    'category.video.desc': 'MP4, WebM, GIF',
+    'category.video.desc': 'MP4, WebM, AVI, MOV, MKV → MP4, WebM, GIF',
     'category.fonts': 'Schriftarten',
-    'category.fonts.desc': 'TTF, OTF, WOFF → TTF, OTF, WOFF, WOFF2 + Metadaten',
-    'category.fonts.limits': 'WOFF2-Import nicht unterstützt (Browser-Einschränkung). WOFF2-Export verfügbar.',
+    'category.fonts.desc': 'TTF, OTF, WOFF → TTF, OTF, WOFF',
+    'category.fonts.limits': 'WOFF2-Import nicht unterstützt (Browser-Einschränkung).',
 
     // Convert page
     'convert.title': 'Konvertieren',
@@ -1028,6 +1052,10 @@ export const translations: Record<Language, Record<string, string>> = {
     'convert.backHome': 'Zurück zur Startseite',
     'convert.multipleImagesToPdf': 'Müssen Sie mehrere Bilder zu einem PDF kombinieren?',
     'convert.goToPdfTools': 'PDF-Werkzeuge verwenden',
+    'convert.editFontMetadata': 'Müssen Sie die Metadaten Ihrer Schriftarten bearbeiten?',
+    'convert.goToFontMetadata': 'Metadaten bearbeiten',
+    'convert.onlyEditMetadata': 'Nur Metadaten bearbeiten ohne Konvertierung?',
+    'convert.goToMetadataEditor': 'Zum Metadaten-Editor',
 
     // Dropzone
     'dropzone.dragHere': 'Dateien hierher ziehen',

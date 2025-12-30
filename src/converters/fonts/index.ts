@@ -3,20 +3,35 @@ import { Font } from 'fonteditor-core';
 import { compress as woff2Compress, decompress as woff2Decompress } from 'wawoff2';
 
 export interface FontMetadata {
+  // Basic info
   fontFamily: string;
   fontSubFamily: string;
   fullName: string;
   version: string;
+  postScriptName: string;
+  uniqueSubFamily: string;
+  // Creator info
   copyright: string;
+  trademark: string;
+  manufacturer: string;
   designer: string;
   description: string;
+  // URLs
+  urlVendor: string;
+  urlDesigner: string;
+  // License
   license: string;
-  trademark: string;
+  licenseUrl: string;
+  // Extended
+  preferredFamily: string;
+  preferredSubFamily: string;
+  compatibleFull: string;
+  sampleText: string;
 }
 
 export const fontConverter: ConverterConfig = {
-  inputFormats: ['ttf', 'otf', 'woff', 'eot'],
-  outputFormats: ['ttf', 'otf', 'woff', 'woff2'],
+  inputFormats: ['ttf', 'otf', 'woff'],
+  outputFormats: ['ttf', 'otf', 'woff'],
 
   async convert(file: File, outputFormat: string, onProgress?: (progress: number) => void): Promise<Blob> {
     onProgress?.(10);
@@ -94,18 +109,33 @@ export async function readFontMetadata(file: File): Promise<FontMetadata> {
     type: actualInputFormat as 'ttf' | 'otf' | 'woff' | 'eot',
   });
 
-  const name = font.data.name || {};
+  const name = (font.data.name || {}) as Record<string, string>;
 
   return {
+    // Basic info
     fontFamily: name.fontFamily || '',
     fontSubFamily: name.fontSubFamily || '',
     fullName: name.fullName || '',
     version: name.version || '',
+    postScriptName: name.postScriptName || '',
+    uniqueSubFamily: name.uniqueSubFamily || '',
+    // Creator info
     copyright: name.copyright || '',
+    trademark: name.tradeMark || '',
+    manufacturer: name.manufacturer || '',
     designer: name.designer || '',
     description: name.description || '',
+    // URLs
+    urlVendor: name.urlVendor || '',
+    urlDesigner: name.urlDesigner || '',
+    // License
     license: name.licence || '',
-    trademark: name.tradeMark || '',
+    licenseUrl: name.licenceUrl || '',
+    // Extended
+    preferredFamily: name.preferredFamily || '',
+    preferredSubFamily: name.preferredSubFamily || '',
+    compatibleFull: name.compatibleFull || '',
+    sampleText: name.sampleText || '',
   };
 }
 
@@ -144,15 +174,30 @@ export async function convertFontWithMetadata(
 
   const nameTable = font.data.name as Record<string, string>;
   if (nameTable) {
+    // Basic info
     if (metadata.fontFamily) nameTable.fontFamily = metadata.fontFamily;
     if (metadata.fontSubFamily) nameTable.fontSubFamily = metadata.fontSubFamily;
     if (metadata.fullName) nameTable.fullName = metadata.fullName;
     if (metadata.version) nameTable.version = metadata.version;
+    if (metadata.postScriptName) nameTable.postScriptName = metadata.postScriptName;
+    if (metadata.uniqueSubFamily) nameTable.uniqueSubFamily = metadata.uniqueSubFamily;
+    // Creator info
     if (metadata.copyright) nameTable.copyright = metadata.copyright;
+    if (metadata.trademark) nameTable.tradeMark = metadata.trademark;
+    if (metadata.manufacturer) nameTable.manufacturer = metadata.manufacturer;
     if (metadata.designer) nameTable.designer = metadata.designer;
     if (metadata.description) nameTable.description = metadata.description;
+    // URLs
+    if (metadata.urlVendor) nameTable.urlVendor = metadata.urlVendor;
+    if (metadata.urlDesigner) nameTable.urlDesigner = metadata.urlDesigner;
+    // License
     if (metadata.license) nameTable.licence = metadata.license;
-    if (metadata.trademark) nameTable.tradeMark = metadata.trademark;
+    if (metadata.licenseUrl) nameTable.licenceUrl = metadata.licenseUrl;
+    // Extended
+    if (metadata.preferredFamily) nameTable.preferredFamily = metadata.preferredFamily;
+    if (metadata.preferredSubFamily) nameTable.preferredSubFamily = metadata.preferredSubFamily;
+    if (metadata.compatibleFull) nameTable.compatibleFull = metadata.compatibleFull;
+    if (metadata.sampleText) nameTable.sampleText = metadata.sampleText;
   }
 
   onProgress?.(60);

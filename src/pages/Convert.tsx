@@ -1,5 +1,5 @@
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, Play, Download, Trash2, AlertTriangle, Info, FileText, ArrowRight } from 'lucide-react';
+import { ArrowLeft, Play, Download, Trash2, AlertTriangle, Info, FileText, ArrowRight, Type } from 'lucide-react';
 import { useConversionStore } from '../stores/conversionStore';
 import { FileDropzone } from '../components/dropzone/FileDropzone';
 import { getCategoryById } from '../utils/categories';
@@ -248,6 +248,27 @@ export function Convert() {
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap"
               >
                 {t('convert.goToPdfTools')}
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
+          </div>
+        )}
+
+        {/* Tip for font metadata */}
+        {category === 'fonts' && (
+          <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-xl">
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <Type className="w-5 h-5 text-blue-600 flex-shrink-0" />
+                <span className="text-sm text-blue-800">
+                  {t('convert.editFontMetadata')}
+                </span>
+              </div>
+              <Link
+                to="/utility/font-metadata"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap"
+              >
+                {t('convert.goToFontMetadata')}
                 <ArrowRight className="w-4 h-4" />
               </Link>
             </div>

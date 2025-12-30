@@ -40,13 +40,13 @@ export function Home() {
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const navigate = useNavigate();
 
-  // Format keywords for search
+  // Format keywords for search - reflects actual supported formats
   const formatKeywords: Record<string, { formats: string[]; categoryId: string }> = {
-    images: { formats: ['png', 'jpg', 'jpeg', 'webp', 'gif', 'heic', 'bmp', 'svg', 'ico'], categoryId: 'images' },
-    documents: { formats: ['pdf', 'doc', 'docx', 'txt', 'csv', 'xlsx', 'xls', 'rtf', 'png', 'jpg'], categoryId: 'documents' },
-    audio: { formats: ['mp3', 'wav', 'ogg', 'flac', 'aac', 'm4a', 'wma'], categoryId: 'audio' },
-    video: { formats: ['mp4', 'webm', 'mov', 'avi', 'mkv', 'gif'], categoryId: 'video' },
-    fonts: { formats: ['ttf', 'otf', 'woff', 'woff2', 'eot'], categoryId: 'fonts' },
+    images: { formats: ['png', 'jpg', 'jpeg', 'webp', 'gif', 'heic', 'bmp', 'pdf', 'image', 'photo', 'picture'], categoryId: 'images' },
+    documents: { formats: ['pdf', 'docx', 'txt', 'csv', 'xlsx', 'xls', 'word', 'excel', 'document', 'text'], categoryId: 'documents' },
+    audio: { formats: ['mp3', 'wav', 'ogg', 'flac', 'aac', 'm4a', 'audio', 'music', 'sound'], categoryId: 'audio' },
+    video: { formats: ['mp4', 'webm', 'mov', 'avi', 'mkv', 'gif', 'video', 'movie', 'clip'], categoryId: 'video' },
+    fonts: { formats: ['ttf', 'otf', 'woff', 'font', 'police', 'typography', 'schriftart'], categoryId: 'fonts' },
   };
 
   // Build search index

@@ -1,8 +1,9 @@
 import { useCallback, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, Play, Download, Trash2, Upload, X, ChevronDown, ChevronUp } from 'lucide-react';
+import { ArrowLeft, Play, Download, Trash2, Upload, X, ChevronDown, ChevronUp, Type, ArrowRight } from 'lucide-react';
 import { formatSize } from '../utils/formatSize';
 import { fontConverter, readFontMetadata, convertFontWithMetadata, type FontMetadata } from '../converters/fonts';
+import { useLanguage } from '../i18n';
 
 interface FontFile {
   id: string;
@@ -22,6 +23,7 @@ interface FontFile {
 const outputFormats = ['ttf', 'otf', 'woff'];
 
 export function ConvertFonts() {
+  const { t } = useLanguage();
   const [files, setFiles] = useState<FontFile[]>([]);
   const [selectedFormat, setSelectedFormat] = useState('woff');
   const [isConverting, setIsConverting] = useState(false);
@@ -174,16 +176,16 @@ export function ConvertFonts() {
             className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 mb-4"
           >
             <ArrowLeft className="w-4 h-4" />
-            Retour
+            {t('convert.back')}
           </Link>
-          <h1 className="text-3xl font-bold text-gray-900">Convertir Fonts</h1>
-          <p className="text-gray-600 mt-1">TTF, OTF, WOFF + Édition des métadonnées</p>
+          <h1 className="text-3xl font-bold text-gray-900">{t('convert.title')} {t('category.fonts')}</h1>
+          <p className="text-gray-600 mt-1">{t('category.fonts.desc')}</p>
         </div>
 
         {/* Format selector */}
         <div className="card mb-6">
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Format de sortie
+            {t('convert.outputFormat')}
           </label>
           <div className="flex flex-wrap gap-2">
             {outputFormats.map((format) => (
@@ -222,7 +224,7 @@ export function ConvertFonts() {
               type="file"
               className="hidden"
               multiple
-              accept=".ttf,.otf,.woff,.eot"
+              accept=".ttf,.otf,.woff"
               onChange={(e) => {
                 const selected = e.target.files ? Array.from(e.target.files) : [];
                 if (selected.length > 0) addFiles(selected);
@@ -231,10 +233,29 @@ export function ConvertFonts() {
             />
             <Upload className="w-10 h-10 text-gray-400 mb-3" />
             <p className="text-base font-medium text-gray-700 mb-1">
-              Glissez vos fichiers de police ici
+              {t('dropzone.dragHere')}
             </p>
             <p className="text-sm text-gray-500">TTF, OTF, WOFF</p>
           </label>
+        </div>
+
+        {/* Tip for metadata editor */}
+        <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-xl">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <Type className="w-5 h-5 text-blue-600 flex-shrink-0" />
+              <span className="text-sm text-blue-800">
+                {t('convert.onlyEditMetadata')}
+              </span>
+            </div>
+            <Link
+              to="/utility/font-metadata"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap"
+            >
+              {t('convert.goToMetadataEditor')}
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
         </div>
 
         {/* Files list with metadata */}
@@ -261,7 +282,7 @@ export function ConvertFonts() {
                 className="btn btn-primary flex items-center gap-2"
               >
                 <Play className="w-4 h-4" />
-                {isConverting ? 'Conversion...' : 'Convertir'}
+                {isConverting ? t('convert.converting') : t('convert.convert')}
               </button>
             )}
 
@@ -280,7 +301,7 @@ export function ConvertFonts() {
                 className="btn btn-secondary flex items-center gap-2"
               >
                 <Download className="w-4 h-4" />
-                Tout télécharger
+                {t('convert.downloadAll')}
               </button>
             )}
 
@@ -289,7 +310,7 @@ export function ConvertFonts() {
               className="btn btn-secondary flex items-center gap-2 text-red-600"
             >
               <Trash2 className="w-4 h-4" />
-              Effacer tout
+              {t('convert.clearAll')}
             </button>
           </div>
         )}
@@ -297,6 +318,41 @@ export function ConvertFonts() {
     </div>
   );
 }
+
+const metadataFields: { key: keyof FontMetadata; label: string; category: string }[] = [
+  // Basic
+  { key: 'fontFamily', label: 'Famille', category: 'basic' },
+  { key: 'fontSubFamily', label: 'Sous-famille', category: 'basic' },
+  { key: 'fullName', label: 'Nom complet', category: 'basic' },
+  { key: 'version', label: 'Version', category: 'basic' },
+  { key: 'postScriptName', label: 'Nom PostScript', category: 'basic' },
+  { key: 'uniqueSubFamily', label: 'ID unique', category: 'basic' },
+  // Creator
+  { key: 'copyright', label: 'Copyright', category: 'creator' },
+  { key: 'trademark', label: 'Marque déposée', category: 'creator' },
+  { key: 'manufacturer', label: 'Fabricant', category: 'creator' },
+  { key: 'designer', label: 'Designer', category: 'creator' },
+  { key: 'description', label: 'Description', category: 'creator' },
+  // URLs
+  { key: 'urlVendor', label: 'URL Fabricant', category: 'urls' },
+  { key: 'urlDesigner', label: 'URL Designer', category: 'urls' },
+  // License
+  { key: 'license', label: 'Licence', category: 'license' },
+  { key: 'licenseUrl', label: 'URL Licence', category: 'license' },
+  // Extended
+  { key: 'preferredFamily', label: 'Famille préférée', category: 'extended' },
+  { key: 'preferredSubFamily', label: 'Sous-famille préférée', category: 'extended' },
+  { key: 'compatibleFull', label: 'Nom compatible', category: 'extended' },
+  { key: 'sampleText', label: 'Texte exemple', category: 'extended' },
+];
+
+const categoryLabels: Record<string, string> = {
+  basic: 'Informations de base',
+  creator: 'Créateur',
+  urls: 'URLs',
+  license: 'Licence',
+  extended: 'Étendu',
+};
 
 function FontFileCard({
   file,
@@ -308,18 +364,6 @@ function FontFileCard({
   onUpdateMetadata: (field: keyof FontMetadata, value: string) => void;
 }) {
   const [isExpanded, setIsExpanded] = useState(false);
-
-  const metadataFields: { key: keyof FontMetadata; label: string }[] = [
-    { key: 'fontFamily', label: 'Famille' },
-    { key: 'fontSubFamily', label: 'Sous-famille' },
-    { key: 'fullName', label: 'Nom complet' },
-    { key: 'version', label: 'Version' },
-    { key: 'designer', label: 'Designer' },
-    { key: 'copyright', label: 'Copyright' },
-    { key: 'license', label: 'Licence' },
-    { key: 'description', label: 'Description' },
-    { key: 'trademark', label: 'Marque' },
-  ];
 
   return (
     <div className="card p-4">
@@ -353,7 +397,7 @@ function FontFileCard({
             className="btn btn-primary text-sm flex items-center gap-1.5"
           >
             <Download className="w-3.5 h-3.5" />
-            {file.convertedFormat?.toUpperCase() || 'Télécharger'}
+            {file.convertedFormat?.toUpperCase()}
           </a>
         )}
 
@@ -380,24 +424,33 @@ function FontFileCard({
         </button>
       </div>
 
-      {/* Metadata editor */}
+      {/* Metadata editor - organized by category */}
       {isExpanded && file.editedMetadata && file.status !== 'done' && (
         <div className="mt-4 pt-4 border-t border-gray-100">
-          <h4 className="text-sm font-medium text-gray-700 mb-3">Métadonnées</h4>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {metadataFields.map(({ key, label }) => (
-              <div key={key}>
-                <label className="block text-xs text-gray-500 mb-1">{label}</label>
-                <input
-                  type="text"
-                  value={file.editedMetadata?.[key] || ''}
-                  onChange={(e) => onUpdateMetadata(key, e.target.value)}
-                  className="w-full px-3 py-1.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                  placeholder={label}
-                />
+          {Object.keys(categoryLabels).map((category) => {
+            const categoryFields = metadataFields.filter((f) => f.category === category);
+            return (
+              <div key={category} className="mb-4">
+                <h4 className="text-sm font-medium text-gray-700 mb-2 border-b border-gray-100 pb-1">
+                  {categoryLabels[category]}
+                </h4>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {categoryFields.map(({ key, label }) => (
+                    <div key={key}>
+                      <label className="block text-xs text-gray-500 mb-1">{label}</label>
+                      <input
+                        type="text"
+                        value={file.editedMetadata?.[key] || ''}
+                        onChange={(e) => onUpdateMetadata(key, e.target.value)}
+                        className="w-full px-3 py-1.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                        placeholder={label}
+                      />
+                    </div>
+                  ))}
+                </div>
               </div>
-            ))}
-          </div>
+            );
+          })}
         </div>
       )}
     </div>
