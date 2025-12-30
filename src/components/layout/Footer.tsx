@@ -12,7 +12,7 @@ export function Footer() {
 
           <div className="flex items-center gap-4">
             <a
-              href="https://github.com"
+              href="https://github.com/romainpanno/shiftconvert"
               target="_blank"
               rel="noopener noreferrer"
               className="text-gray-500 hover:text-gray-700 transition-colors"
