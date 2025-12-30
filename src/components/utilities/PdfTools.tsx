@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { Upload, Download, X, RotateCw, FileText, Combine, Layers, Type, GripVertical, Check, RotateCcw, Undo2 } from 'lucide-react';
 import { PDFDocument, degrees } from 'pdf-lib';
 import * as pdfjsLib from 'pdfjs-dist';
@@ -100,7 +100,7 @@ export function PdfTools() {
       canvas.height = viewport.height;
       const ctx = canvas.getContext('2d')!;
 
-      await page.render({ canvasContext: ctx, viewport }).promise;
+      await page.render({ canvasContext: ctx, viewport, canvas }).promise;
 
       thumbnails.push({
         pageNum: i,
@@ -419,7 +419,8 @@ export function PdfTools() {
         const pages = await mergedPdf.copyPages(pdf, pdf.getPageIndices());
         pages.forEach(page => mergedPdf.addPage(page));
       }
-      const blob = new Blob([await mergedPdf.save()], { type: 'application/pdf' });
+      const pdfBytes = await mergedPdf.save();
+      const blob = new Blob([pdfBytes as BlobPart], { type: 'application/pdf' });
       downloadBlob(blob, 'merged.pdf');
     } catch (e) {
       console.error('Merge error:', e);
@@ -446,7 +447,8 @@ export function PdfTools() {
       const pageIndices = pdfFile.pageOrder.map(p => p - 1);
       const pages = await newPdf.copyPages(srcPdf, pageIndices);
       pages.forEach(page => newPdf.addPage(page));
-      const blob = new Blob([await newPdf.save()], { type: 'application/pdf' });
+      const pdfBytes = await newPdf.save();
+      const blob = new Blob([pdfBytes as BlobPart], { type: 'application/pdf' });
       downloadBlob(blob, `${pdfFile.name.replace('.pdf', '')}_organized.pdf`);
     } catch (e) {
       console.error('Organize error:', e);
@@ -468,7 +470,8 @@ export function PdfTools() {
         const page = pages[pageNum - 1];
         if (page) page.setRotation(degrees(pdfFile.rotation));
       });
-      const blob = new Blob([await pdf.save()], { type: 'application/pdf' });
+      const pdfBytes = await pdf.save();
+      const blob = new Blob([pdfBytes as BlobPart], { type: 'application/pdf' });
       downloadBlob(blob, `${pdfFile.name.replace('.pdf', '')}_rotated.pdf`);
     } catch (e) {
       console.error('Rotate error:', e);
@@ -504,7 +507,8 @@ export function PdfTools() {
         page.drawText(text, { x, y, size: 10, font });
       });
 
-      const blob = new Blob([await pdf.save()], { type: 'application/pdf' });
+      const pdfBytes = await pdf.save();
+      const blob = new Blob([pdfBytes as BlobPart], { type: 'application/pdf' });
       downloadBlob(blob, `${pdfFile.name.replace('.pdf', '')}_numbered.pdf`);
     } catch (e) {
       console.error('Page numbers error:', e);
@@ -611,7 +615,7 @@ export function PdfTools() {
             onDrop={handleFileDrop}
             onDragLeave={handleFileDragLeave}
           >
-            {pdfFiles.map((pdf, index) => (
+            {pdfFiles.map((pdf) => (
               <div key={pdf.id}>
                 {/* Drop indicator before */}
                 {dropTargetId === pdf.id && dropPosition === 'before' && draggedFileId !== pdf.id && (

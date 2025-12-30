@@ -1,5 +1,6 @@
 import type { ConverterConfig } from '../../types';
 import { jsPDF } from 'jspdf';
+import html2canvas from 'html2canvas';
 import ExcelJS from 'exceljs';
 import mammoth from 'mammoth';
 import * as pdfjsLib from 'pdfjs-dist';

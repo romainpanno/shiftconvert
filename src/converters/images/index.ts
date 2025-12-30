@@ -1,4 +1,5 @@
 import type { ConverterConfig } from '../../types';
+import { jsPDF } from 'jspdf';
 
 export const imageConverter: ConverterConfig = {
   inputFormats: ['png', 'jpg', 'jpeg', 'webp', 'gif', 'bmp', 'heic'],
