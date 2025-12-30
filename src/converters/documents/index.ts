@@ -1,23 +1,26 @@
 import type { ConverterConfig } from '../../types';
 import { jsPDF } from 'jspdf';
+import ExcelJS from 'exceljs';
 import mammoth from 'mammoth';
 import * as pdfjsLib from 'pdfjs-dist';
-import html2canvas from 'html2canvas';
 import { renderAsync } from 'docx-preview';
 
 // Configure PDF.js worker - use unpkg for reliable CDN access
 pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
 
 export const documentConverter: ConverterConfig = {
-  inputFormats: ['txt', 'doc', 'docx', 'pdf'],
-  outputFormats: ['pdf', 'txt', 'png', 'jpg'],
+  inputFormats: ['txt', 'doc', 'docx', 'pdf', 'csv', 'xlsx', 'xls'],
+  outputFormats: ['pdf', 'txt', 'csv', 'xlsx'],
 
   // Define which output formats are available for each input format
   formatMap: {
-    txt: ['pdf', 'png', 'jpg'],
-    doc: ['pdf', 'txt', 'png', 'jpg'],
-    docx: ['pdf', 'txt', 'png', 'jpg'],
-    pdf: ['txt', 'png', 'jpg'],
+    txt: ['pdf'],
+    doc: ['pdf', 'txt'],
+    docx: ['pdf', 'txt'],
+    pdf: ['txt'],
+    csv: ['xlsx', 'txt', 'pdf'],
+    xlsx: ['csv', 'txt', 'pdf'],
+    xls: ['csv', 'xlsx', 'txt', 'pdf'],
   },
 
   async convert(file: File, outputFormat: string, onProgress?: (progress: number) => void): Promise<Blob> {
@@ -32,10 +35,6 @@ export const documentConverter: ConverterConfig = {
 
       if (outputFormat === 'pdf') {
         return textToPdf(text, onProgress);
-      }
-
-      if (outputFormat === 'png' || outputFormat === 'jpg') {
-        return textToImage(text, outputFormat, onProgress);
       }
 
       throw new Error(`Conversion TXT → ${outputFormat.toUpperCase()} non supportée`);
@@ -72,10 +71,6 @@ export const documentConverter: ConverterConfig = {
         return docxToPdf(arrayBuffer, onProgress);
       }
 
-      if (outputFormat === 'png' || outputFormat === 'jpg') {
-        return docxToImage(arrayBuffer, outputFormat, onProgress);
-      }
-
       throw new Error(`Conversion ${extension.toUpperCase()} → ${outputFormat.toUpperCase()} non supportée`);
     }
 
@@ -89,13 +84,53 @@ export const documentConverter: ConverterConfig = {
         return new Blob([text], { type: 'text/plain' });
       }
 
-      if (outputFormat === 'png' || outputFormat === 'jpg') {
-        const arrayBuffer = await file.arrayBuffer();
-        onProgress?.(20);
-        return pdfToImage(arrayBuffer, outputFormat, onProgress);
+      throw new Error(`Conversion PDF → ${outputFormat.toUpperCase()} non supportée`);
+    }
+
+    // Spreadsheet conversions (CSV, XLSX, XLS)
+    if (['csv', 'xlsx', 'xls'].includes(extension)) {
+      const data = await file.arrayBuffer();
+      const workbook = new ExcelJS.Workbook();
+
+      if (extension === 'csv') {
+        const text = await file.text();
+        const worksheet = workbook.addWorksheet('Sheet1');
+        const rows = text.split('\n').map(line => line.split(',').map(cell => cell.trim().replace(/^"|"$/g, '')));
+        rows.forEach(row => worksheet.addRow(row));
+      } else {
+        await workbook.xlsx.load(data);
+      }
+      onProgress?.(50);
+
+      const worksheet = workbook.worksheets[0];
+      if (!worksheet) {
+        throw new Error('No worksheet found in the file');
       }
 
-      throw new Error(`Conversion PDF → ${outputFormat.toUpperCase()} non supportée`);
+      if (outputFormat === 'csv') {
+        const csv = worksheetToCsv(worksheet);
+        onProgress?.(100);
+        return new Blob([csv], { type: 'text/csv' });
+      }
+
+      if (outputFormat === 'xlsx') {
+        const buffer = await workbook.xlsx.writeBuffer();
+        onProgress?.(100);
+        return new Blob([new Uint8Array(buffer as ArrayBuffer)], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      }
+
+      if (outputFormat === 'txt') {
+        const text = worksheetToText(worksheet);
+        onProgress?.(100);
+        return new Blob([text], { type: 'text/plain' });
+      }
+
+      if (outputFormat === 'pdf') {
+        const csv = worksheetToCsv(worksheet);
+        return textToPdf(csv, onProgress);
+      }
+
+      throw new Error(`Conversion ${extension.toUpperCase()} → ${outputFormat.toUpperCase()} non supportée`);
     }
 
     throw new Error(`Format d'entrée ${extension.toUpperCase()} non supporté`);
@@ -298,231 +333,32 @@ async function textToPdf(text: string, onProgress?: (progress: number) => void):
   return pdf.output('blob');
 }
 
-async function textToImage(text: string, format: 'png' | 'jpg', onProgress?: (progress: number) => void): Promise<Blob> {
-  const canvas = document.createElement('canvas');
-  const ctx = canvas.getContext('2d')!;
-
-  // Calculate dimensions
-  const padding = 40;
-  const lineHeight = 24;
-  const fontSize = 16;
-  const maxWidth = 800;
-
-  ctx.font = `${fontSize}px monospace`;
-
-  // Split text into lines that fit
-  const words = text.split(/\s+/);
-  const lines: string[] = [];
-  let currentLine = '';
-
-  for (const word of words) {
-    const testLine = currentLine ? `${currentLine} ${word}` : word;
-    const metrics = ctx.measureText(testLine);
-    if (metrics.width > maxWidth - 2 * padding) {
-      if (currentLine) lines.push(currentLine);
-      currentLine = word;
-    } else {
-      currentLine = testLine;
-    }
-  }
-  if (currentLine) lines.push(currentLine);
-
-  // Handle newlines in original text
-  const finalLines: string[] = [];
-  for (const line of lines) {
-    const subLines = line.split('\n');
-    finalLines.push(...subLines);
-  }
-
-  onProgress?.(50);
-
-  // Set canvas size
-  canvas.width = maxWidth;
-  canvas.height = Math.max(200, finalLines.length * lineHeight + 2 * padding);
-
-  // Draw background
-  ctx.fillStyle = '#ffffff';
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-  // Draw text
-  ctx.font = `${fontSize}px monospace`;
-  ctx.fillStyle = '#1f2937';
-  ctx.textBaseline = 'top';
-
-  let y = padding;
-  for (const line of finalLines) {
-    ctx.fillText(line, padding, y);
-    y += lineHeight;
-  }
-
-  onProgress?.(80);
-
-  // Convert to blob
-  const mimeType = format === 'png' ? 'image/png' : 'image/jpeg';
-  return new Promise((resolve) => {
-    canvas.toBlob((blob) => {
-      onProgress?.(100);
-      resolve(blob!);
-    }, mimeType, format === 'jpg' ? 0.95 : undefined);
+// Helper function to convert ExcelJS worksheet to CSV
+function worksheetToCsv(worksheet: ExcelJS.Worksheet): string {
+  const rows: string[] = [];
+  worksheet.eachRow((row) => {
+    const cells: string[] = [];
+    row.eachCell({ includeEmpty: true }, (cell) => {
+      let value = cell.value?.toString() || '';
+      if (value.includes(',') || value.includes('"') || value.includes('\n')) {
+        value = '"' + value.replace(/"/g, '""') + '"';
+      }
+      cells.push(value);
+    });
+    rows.push(cells.join(','));
   });
+  return rows.join('\n');
 }
 
-async function docxToImage(arrayBuffer: ArrayBuffer, format: 'png' | 'jpg', onProgress?: (progress: number) => void): Promise<Blob> {
-  // Create an iframe to isolate from page styles
-  const iframe = document.createElement('iframe');
-  iframe.style.cssText = `
-    position: fixed;
-    left: -9999px;
-    top: 0;
-    width: 210mm;
-    height: auto;
-    border: none;
-    background: white;
-  `;
-  document.body.appendChild(iframe);
-
-  const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
-  if (!iframeDoc) {
-    document.body.removeChild(iframe);
-    throw new Error('Could not create iframe for image rendering');
-  }
-
-  try {
-    // Setup iframe document
-    iframeDoc.open();
-    iframeDoc.write(`
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <style>
-          * { box-sizing: border-box; }
-          body { margin: 0; padding: 20px; background: #ffffff; }
-        </style>
-      </head>
-      <body><div id="docx-container"></div></body>
-      </html>
-    `);
-    iframeDoc.close();
-
-    const container = iframeDoc.getElementById('docx-container')!;
-
-    // Render DOCX
-    await renderAsync(arrayBuffer, container, undefined, {
-      className: 'docx-preview',
-      inWrapper: false,
-      ignoreWidth: false,
-      ignoreHeight: false,
-      ignoreFonts: false,
-      breakPages: false, // Single continuous page for image
-      renderHeaders: true,
-      renderFooters: true,
-      useBase64URL: true,
+// Helper function to convert ExcelJS worksheet to plain text
+function worksheetToText(worksheet: ExcelJS.Worksheet): string {
+  const rows: string[] = [];
+  worksheet.eachRow((row) => {
+    const cells: string[] = [];
+    row.eachCell({ includeEmpty: true }, (cell) => {
+      cells.push(cell.value?.toString() || '');
     });
-
-    onProgress?.(50);
-
-    // Wait for images to load
-    const images = container.querySelectorAll('img');
-    await Promise.all(
-      Array.from(images).map(
-        (img) =>
-          new Promise<void>((resolve) => {
-            if (img.complete) resolve();
-            else {
-              img.onload = () => resolve();
-              img.onerror = () => resolve();
-            }
-          })
-      )
-    );
-
-    await new Promise((resolve) => setTimeout(resolve, 300));
-
-    onProgress?.(70);
-
-    // Render to canvas
-    const canvas = await html2canvas(container, {
-      scale: 2,
-      useCORS: true,
-      logging: false,
-      backgroundColor: '#ffffff',
-      allowTaint: true,
-    });
-
-    onProgress?.(90);
-
-    // Convert to blob
-    const mimeType = format === 'png' ? 'image/png' : 'image/jpeg';
-    return new Promise((resolve) => {
-      canvas.toBlob((blob) => {
-        onProgress?.(100);
-        resolve(blob!);
-      }, mimeType, format === 'jpg' ? 0.95 : undefined);
-    });
-  } finally {
-    document.body.removeChild(iframe);
-  }
-}
-
-async function pdfToImage(arrayBuffer: ArrayBuffer, format: 'png' | 'jpg', onProgress?: (progress: number) => void): Promise<Blob> {
-  const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-  const numPages = pdf.numPages;
-
-  // Render all pages to canvases
-  const pageCanvases: HTMLCanvasElement[] = [];
-  const scale = 2; // High quality
-
-  for (let i = 1; i <= numPages; i++) {
-    const page = await pdf.getPage(i);
-    const viewport = page.getViewport({ scale });
-
-    const canvas = document.createElement('canvas');
-    canvas.width = viewport.width;
-    canvas.height = viewport.height;
-
-    const ctx = canvas.getContext('2d')!;
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    await page.render({
-      canvasContext: ctx,
-      viewport,
-      canvas,
-    }).promise;
-
-    pageCanvases.push(canvas);
-    onProgress?.(30 + (i / numPages) * 50);
-  }
-
-  // Combine all pages into one image (stacked vertically)
-  const totalHeight = pageCanvases.reduce((sum, c) => sum + c.height, 0);
-  const maxWidth = Math.max(...pageCanvases.map((c) => c.width));
-  const gap = 20;
-
-  const finalCanvas = document.createElement('canvas');
-  finalCanvas.width = maxWidth;
-  finalCanvas.height = totalHeight + gap * (numPages - 1);
-
-  const finalCtx = finalCanvas.getContext('2d')!;
-  finalCtx.fillStyle = '#e5e7eb'; // Gray background between pages
-  finalCtx.fillRect(0, 0, finalCanvas.width, finalCanvas.height);
-
-  let y = 0;
-  for (const pageCanvas of pageCanvases) {
-    // Center horizontally
-    const x = (maxWidth - pageCanvas.width) / 2;
-    finalCtx.drawImage(pageCanvas, x, y);
-    y += pageCanvas.height + gap;
-  }
-
-  onProgress?.(90);
-
-  // Convert to blob
-  const mimeType = format === 'png' ? 'image/png' : 'image/jpeg';
-  return new Promise((resolve) => {
-    finalCanvas.toBlob((blob) => {
-      onProgress?.(100);
-      resolve(blob!);
-    }, mimeType, format === 'jpg' ? 0.92 : undefined);
+    rows.push(cells.join('\t'));
   });
+  return rows.join('\n');
 }

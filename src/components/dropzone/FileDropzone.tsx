@@ -151,16 +151,24 @@ function FilePreview({ file }: { file: FileItem }) {
   const { removeFile } = useConversionStore();
 
   return (
-    <div className="flex items-center gap-3 p-3 bg-white rounded-lg border border-gray-200">
+    <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 sm:gap-3 p-3 bg-white rounded-lg border border-gray-200">
       <FileIcon className="w-8 h-8 text-gray-400 flex-shrink-0" />
       <div className="flex-1 min-w-0">
         <p className="text-sm font-medium text-gray-900 truncate">{file.name}</p>
         <p className="text-xs text-gray-500">{formatSize(file.size)}</p>
       </div>
 
+      <button
+        onClick={() => removeFile(file.id)}
+        className="text-gray-400 hover:text-red-500 p-1.5 transition-colors sm:order-last"
+        title={t('dropzone.remove')}
+      >
+        <X className="w-5 h-5 sm:w-4 sm:h-4" />
+      </button>
+
       {file.status === 'converting' && (
-        <div className="flex items-center gap-2">
-          <div className="w-24">
+        <div className="flex items-center gap-2 w-full sm:w-auto mt-2 sm:mt-0">
+          <div className="flex-1 sm:w-24 sm:flex-none">
             <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
               <div
                 className="h-full bg-primary-500 transition-all duration-300"
@@ -176,7 +184,7 @@ function FilePreview({ file }: { file: FileItem }) {
         <a
           href={file.outputUrl}
           download={file.outputName}
-          className="btn btn-primary text-sm flex items-center gap-1.5"
+          className="btn btn-primary text-sm flex items-center gap-1.5 w-full sm:w-auto justify-center mt-2 sm:mt-0"
         >
           <Download className="w-3.5 h-3.5" />
           {file.outputFormat?.toUpperCase() || t('common.download')}
@@ -184,19 +192,11 @@ function FilePreview({ file }: { file: FileItem }) {
       )}
 
       {file.status === 'error' && (
-        <div className="flex items-center gap-1.5 text-red-600">
-          <AlertCircle className="w-4 h-4" />
-          <span className="text-sm">{file.error || t('common.error')}</span>
+        <div className="flex items-center gap-1.5 text-red-600 w-full sm:w-auto mt-2 sm:mt-0">
+          <AlertCircle className="w-4 h-4 flex-shrink-0" />
+          <span className="text-sm truncate">{file.error || t('common.error')}</span>
         </div>
       )}
-
-      <button
-        onClick={() => removeFile(file.id)}
-        className="text-gray-400 hover:text-red-500 p-1 transition-colors"
-        title={t('dropzone.remove')}
-      >
-        <X className="w-4 h-4" />
-      </button>
     </div>
   );
 }

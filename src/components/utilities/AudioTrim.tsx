@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { Upload, Download, X, Play, Pause, SkipBack, SkipForward } from 'lucide-react';
+import { Upload, Download, X, Play, Pause, SkipBack, SkipForward, RotateCcw } from 'lucide-react';
 import { FFmpeg } from '@ffmpeg/ffmpeg';
 import { fetchFile } from '@ffmpeg/util';
 import { useLanguage } from '../../i18n';
@@ -176,17 +176,23 @@ export function AudioTrim() {
     seekTo(Math.max(0, Math.min(duration, time)));
   };
 
-  const handleHandleMouseDown = (handle: 'start' | 'end') => (e: React.MouseEvent) => {
+  const handleHandleMouseDown = (handle: 'start' | 'end') => (e: React.MouseEvent | React.TouchEvent) => {
     e.stopPropagation();
+    e.preventDefault();
     setDraggingHandle(handle);
   };
 
   const handleMouseMove = useCallback(
-    (e: MouseEvent) => {
+    (e: MouseEvent | TouchEvent) => {
       if (!draggingHandle || !timelineRef.current) return;
 
+      e.preventDefault();
+      const clientX = 'touches' in e && e.touches.length > 0
+        ? e.touches[0].clientX
+        : (e as MouseEvent).clientX;
+
       const rect = timelineRef.current.getBoundingClientRect();
-      const percent = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+      const percent = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
       const time = percent * duration;
 
       if (draggingHandle === 'start') {
@@ -206,13 +212,28 @@ export function AudioTrim() {
     setDraggingHandle(null);
   }, []);
 
+  const resetSelection = () => {
+    setStartTime(0);
+    setEndTime(duration);
+    if (audioRef.current) {
+      audioRef.current.currentTime = 0;
+      setCurrentTime(0);
+    }
+  };
+
+  const hasSelection = startTime > 0 || endTime < duration;
+
   useEffect(() => {
     if (draggingHandle) {
       window.addEventListener('mousemove', handleMouseMove);
       window.addEventListener('mouseup', handleMouseUp);
+      window.addEventListener('touchmove', handleMouseMove, { passive: false });
+      window.addEventListener('touchend', handleMouseUp);
       return () => {
         window.removeEventListener('mousemove', handleMouseMove);
         window.removeEventListener('mouseup', handleMouseUp);
+        window.removeEventListener('touchmove', handleMouseMove);
+        window.removeEventListener('touchend', handleMouseUp);
       };
     }
   }, [draggingHandle, handleMouseMove, handleMouseUp]);
@@ -314,9 +335,21 @@ export function AudioTrim() {
           <div className="card">
             <div className="flex items-center justify-between mb-3">
               <span className="text-sm font-medium text-gray-700">Timeline</span>
-              <span className="text-sm text-gray-500">
-                {t('audioTrim.duration')}: {formatTime(endTime - startTime)}
-              </span>
+              <div className="flex items-center gap-3">
+                {hasSelection && (
+                  <button
+                    onClick={resetSelection}
+                    className="flex items-center gap-1 px-2 py-1 text-xs text-gray-600 bg-gray-100 rounded hover:bg-gray-200 transition-colors"
+                    title={t('common.reset')}
+                  >
+                    <RotateCcw className="w-3 h-3" />
+                    {t('common.reset')}
+                  </button>
+                )}
+                <span className="text-sm text-gray-500">
+                  {t('audioTrim.duration')}: {formatTime(endTime - startTime)}
+                </span>
+              </div>
             </div>
 
             <div className="text-xs text-gray-500 mb-3">
@@ -381,18 +414,20 @@ export function AudioTrim() {
 
               {/* Start handle */}
               <div
-                className="absolute top-0 bottom-0 w-4 bg-green-500 cursor-ew-resize flex items-center justify-center z-10 hover:bg-green-400 transition-colors"
-                style={{ left: `calc(${(startTime / duration) * 100}% - 8px)` }}
+                className="absolute top-0 bottom-0 w-6 bg-green-500 cursor-ew-resize flex items-center justify-center z-10 hover:bg-green-400 transition-colors touch-none"
+                style={{ left: `calc(${(startTime / duration) * 100}% - 12px)` }}
                 onMouseDown={handleHandleMouseDown('start')}
+                onTouchStart={handleHandleMouseDown('start')}
               >
                 <div className="w-1 h-10 bg-white rounded-full" />
               </div>
 
               {/* End handle */}
               <div
-                className="absolute top-0 bottom-0 w-4 bg-green-500 cursor-ew-resize flex items-center justify-center z-10 hover:bg-green-400 transition-colors"
-                style={{ left: `calc(${(endTime / duration) * 100}% - 8px)` }}
+                className="absolute top-0 bottom-0 w-6 bg-green-500 cursor-ew-resize flex items-center justify-center z-10 hover:bg-green-400 transition-colors touch-none"
+                style={{ left: `calc(${(endTime / duration) * 100}% - 12px)` }}
                 onMouseDown={handleHandleMouseDown('end')}
+                onTouchStart={handleHandleMouseDown('end')}
               >
                 <div className="w-1 h-10 bg-white rounded-full" />
               </div>

@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { Upload, Download, X, Link, Unlink, Maximize2, Square, RectangleHorizontal, Move, Shrink, Expand, ArrowRight } from 'lucide-react';
+import { Upload, Download, X, Link, Unlink, Maximize2, Square, RectangleHorizontal, Move, Shrink, Expand, ArrowRight, RotateCcw } from 'lucide-react';
 import { useLanguage } from '../../i18n';
 
 type FitMode = 'scale' | 'cover' | 'contain' | 'fill' | 'fit-width' | 'fit-height';
@@ -233,6 +233,14 @@ export function ImageResize() {
 
   const scaleInfo = getScaleLabel();
 
+  const resetSettings = () => {
+    setNewSize({ width: originalSize.width, height: originalSize.height });
+    setScalePercent(100);
+    setKeepRatio(true);
+    setFitMode('scale');
+    setBgColor('#ffffff');
+  };
+
   // Calculate preview sizes - show actual proportions
   const maxPreviewWidth = 160;
   const maxPreviewHeight = 120;
@@ -294,15 +302,24 @@ export function ImageResize() {
                 <Maximize2 className="w-4 h-4" />
                 {t('resize.preview')}
               </h3>
-              <button
-                onClick={() => {
-                  setImage(null);
-                  setFileName('');
-                }}
-                className="text-gray-400 hover:text-red-500 transition-colors"
-              >
-                <X className="w-5 h-5" />
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={resetSettings}
+                  className="p-1.5 text-gray-400 hover:text-gray-600 transition-colors"
+                  title={t('common.reset')}
+                >
+                  <RotateCcw className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => {
+                    setImage(null);
+                    setFileName('');
+                  }}
+                  className="text-gray-400 hover:text-red-500 transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
             </div>
 
             {/* Visual comparison - real proportions */}

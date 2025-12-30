@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef } from 'react';
-import { Upload, Download, X, RotateCw, RotateCcw, FlipHorizontal, FlipVertical } from 'lucide-react';
+import { Upload, Download, X, RotateCw, RotateCcw, FlipHorizontal, FlipVertical, RefreshCcw } from 'lucide-react';
 import { useLanguage } from '../../i18n';
 
 export function ImageRotate() {
@@ -72,6 +72,14 @@ export function ImageRotate() {
     }, 'image/png');
   };
 
+  const resetTransforms = () => {
+    setRotation(0);
+    setFlipH(false);
+    setFlipV(false);
+  };
+
+  const hasChanges = rotation !== 0 || flipH || flipV;
+
   return (
     <div className="space-y-6">
       {!image ? (
@@ -140,6 +148,15 @@ export function ImageRotate() {
                 <FlipVertical className="w-4 h-4" />
                 {t('rotate.mirrorV')}
               </button>
+              {hasChanges && (
+                <button
+                  onClick={resetTransforms}
+                  className="btn btn-secondary flex items-center gap-2 text-orange-600"
+                >
+                  <RefreshCcw className="w-4 h-4" />
+                  {t('common.reset')}
+                </button>
+              )}
             </div>
             <p className="text-sm text-gray-500 mt-3">
               {t('rotate.rotation')}: {rotation}° | {t('rotate.mirrorH')}: {flipH ? t('rotate.yes') : t('rotate.no')} | {t('rotate.mirrorV')}: {flipV ? t('rotate.yes') : t('rotate.no')}

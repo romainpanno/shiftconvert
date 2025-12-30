@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { Upload, Download, X, FolderArchive } from 'lucide-react';
+import { Upload, Download, X, FolderArchive, Trash2 } from 'lucide-react';
 import JSZip from 'jszip';
 import { formatSize } from '../../utils/formatSize';
 import { useLanguage } from '../../i18n';
@@ -98,7 +98,17 @@ export function CreateZip() {
                 <FolderArchive className="w-5 h-5 text-gray-500" />
                 <span className="text-sm font-medium text-gray-900">{files.length} {t('zip.files')}</span>
               </div>
-              <span className="text-sm text-gray-500">{formatSize(totalSize)}</span>
+              <div className="flex items-center gap-3">
+                <span className="text-sm text-gray-500">{formatSize(totalSize)}</span>
+                <button
+                  onClick={() => setFiles([])}
+                  className="flex items-center gap-1 px-2 py-1 text-xs text-red-600 bg-red-50 rounded hover:bg-red-100 transition-colors"
+                  title={t('convert.clearAll')}
+                >
+                  <Trash2 className="w-3 h-3" />
+                  {t('convert.clearAll')}
+                </button>
+              </div>
             </div>
             <div className="space-y-1 max-h-[200px] overflow-y-auto">
               {files.map((file, i) => (

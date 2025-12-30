@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { Upload, Download, Save, X } from 'lucide-react';
+import { Upload, Download, Save, X, RotateCcw, Trash2 } from 'lucide-react';
 import { Font } from 'fonteditor-core';
 import { formatSize } from '../../utils/formatSize';
 import { useLanguage } from '../../i18n';
@@ -187,6 +187,21 @@ export function FontMetadataEditor() {
     setFiles((prev) => prev.filter((f) => f.id !== id));
   };
 
+  const resetFontMetadata = (id: string) => {
+    setFiles((prev) =>
+      prev.map((f) =>
+        f.id === id
+          ? { ...f, editedMetadata: { ...f.metadata }, modified: false }
+          : f
+      )
+    );
+  };
+
+  const clearAllFiles = () => {
+    setFiles([]);
+    setBatchEdit({});
+  };
+
   const saveFont = async (fontFile: FontFile) => {
     try {
       const buffer = await fontFile.file.arrayBuffer();
@@ -351,6 +366,17 @@ export function FontMetadataEditor() {
       {/* Files list */}
       {files.length > 0 && (
         <div className="space-y-4">
+          {files.length > 1 && (
+            <div className="flex justify-end">
+              <button
+                onClick={clearAllFiles}
+                className="flex items-center gap-1 px-3 py-1.5 text-sm text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition-colors"
+              >
+                <Trash2 className="w-4 h-4" />
+                {t('convert.clearAll')}
+              </button>
+            </div>
+          )}
           {files.map((fontFile) => (
             <div key={fontFile.id} className="card p-4">
               <div className="flex items-center justify-between mb-4">
@@ -365,9 +391,18 @@ export function FontMetadataEditor() {
                 </div>
                 <div className="flex items-center gap-2">
                   {fontFile.modified && (
-                    <span className="text-xs text-amber-600 bg-amber-50 px-2 py-1 rounded">
-                      Modifié
-                    </span>
+                    <>
+                      <span className="text-xs text-amber-600 bg-amber-50 px-2 py-1 rounded">
+                        Modifié
+                      </span>
+                      <button
+                        onClick={() => resetFontMetadata(fontFile.id)}
+                        className="p-1.5 text-gray-400 hover:text-orange-500 transition-colors"
+                        title={t('common.reset')}
+                      >
+                        <RotateCcw className="w-4 h-4" />
+                      </button>
+                    </>
                   )}
                   <button
                     onClick={() => saveFont(fontFile)}

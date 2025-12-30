@@ -60,6 +60,14 @@ export const utilities: UtilityInfo[] = [
     category: 'video',
   },
   {
+    id: 'video-crop',
+    label: 'Recadrer Vidéo',
+    description: 'Recadrer et rogner des vidéos',
+    icon: 'Crop',
+    color: 'from-purple-500 to-violet-500',
+    category: 'video',
+  },
+  {
     id: 'video-resize',
     label: 'Redimensionner Vidéo',
     description: 'Changer la résolution vidéo',
@@ -123,6 +131,14 @@ export const utilities: UtilityInfo[] = [
     description: 'Créer des QR codes à partir de texte/URL',
     icon: 'QrCode',
     color: 'from-slate-500 to-zinc-500',
+    category: 'files',
+  },
+  {
+    id: 'pdf-tools',
+    label: 'Outils PDF',
+    description: 'Fusionner, diviser, réorganiser, numéroter vos PDFs',
+    icon: 'FileText',
+    color: 'from-red-500 to-rose-500',
     category: 'files',
   },
 ];

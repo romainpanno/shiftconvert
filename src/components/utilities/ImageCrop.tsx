@@ -14,7 +14,7 @@ export function ImageCrop() {
   const [image, setImage] = useState<string | null>(null);
   const [fileName, setFileName] = useState('');
   const [isDragging, setIsDragging] = useState(false);
-  const [cropArea, setCropArea] = useState<CropArea>({ x: 10, y: 10, width: 80, height: 80 });
+  const [cropArea, setCropArea] = useState<CropArea>({ x: 0, y: 0, width: 100, height: 100 });
   const [imageSize, setImageSize] = useState({ width: 0, height: 0 });
   const [displayedImageBounds, setDisplayedImageBounds] = useState({ width: 0, height: 0, left: 0, top: 0 });
   const [isCropping, setIsCropping] = useState(false);
@@ -34,19 +34,9 @@ export function ImageCrop() {
       const img = new Image();
       img.onload = () => {
         setImageSize({ width: img.width, height: img.height });
-
-        // Calculate initial crop based on image aspect ratio
-        // Center a 80% crop area that respects the image proportions
-        const margin = 10; // 10% margin on each side
-        const cropW = 100 - margin * 2;
-        const cropH = 100 - margin * 2;
-
-        setCropArea({
-          x: margin,
-          y: margin,
-          width: cropW,
-          height: cropH
-        });
+        // Start with full image selected
+        setCropArea({ x: 0, y: 0, width: 100, height: 100 });
+        setAspectRatio(null);
       };
       img.src = e.target?.result as string;
       setImage(e.target?.result as string);
@@ -102,65 +92,119 @@ export function ImageCrop() {
     return () => window.removeEventListener('resize', updateDisplayedImageBounds);
   }, [updateDisplayedImageBounds]);
 
-  const handleMouseDown = (e: React.MouseEvent, handle: string) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setActiveHandle(handle);
-    setDragStart({ x: e.clientX, y: e.clientY });
+  const getEventCoords = (e: React.MouseEvent | React.TouchEvent | MouseEvent | TouchEvent) => {
+    if ('touches' in e && e.touches.length > 0) {
+      return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    }
+    if ('clientX' in e) {
+      return { x: e.clientX, y: e.clientY };
+    }
+    return { x: 0, y: 0 };
   };
 
-  const handleCropDragStart = (e: React.MouseEvent) => {
+  const handleMouseDown = (e: React.MouseEvent | React.TouchEvent, handle: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const coords = getEventCoords(e);
+    setActiveHandle(handle);
+    setDragStart(coords);
+  };
+
+  const handleCropDragStart = (e: React.MouseEvent | React.TouchEvent) => {
     e.preventDefault();
     if (activeHandle) return;
+    const coords = getEventCoords(e);
     setIsDraggingCrop(true);
-    setDragStart({ x: e.clientX, y: e.clientY });
+    setDragStart(coords);
   };
 
   const handleMouseMove = useCallback(
-    (e: MouseEvent) => {
+    (e: MouseEvent | TouchEvent) => {
       if (!containerRef.current || displayedImageBounds.width === 0) return;
 
+      e.preventDefault();
+      const coords = 'touches' in e && e.touches.length > 0
+        ? { x: e.touches[0].clientX, y: e.touches[0].clientY }
+        : { x: (e as MouseEvent).clientX, y: (e as MouseEvent).clientY };
+
       // Use the displayed image bounds for calculating delta
-      const deltaX = ((e.clientX - dragStart.x) / displayedImageBounds.width) * 100;
-      const deltaY = ((e.clientY - dragStart.y) / displayedImageBounds.height) * 100;
+      const deltaX = ((coords.x - dragStart.x) / displayedImageBounds.width) * 100;
+      const deltaY = ((coords.y - dragStart.y) / displayedImageBounds.height) * 100;
 
       if (isDraggingCrop) {
         setCropArea((prev) => {
           let newX = prev.x + deltaX;
           let newY = prev.y + deltaY;
 
+          // Constrain to bounds
           newX = Math.max(0, Math.min(newX, 100 - prev.width));
           newY = Math.max(0, Math.min(newY, 100 - prev.height));
 
           return { ...prev, x: newX, y: newY };
         });
-        setDragStart({ x: e.clientX, y: e.clientY });
+        setDragStart(coords);
       } else if (activeHandle) {
         setCropArea((prev) => {
           let { x, y, width, height } = prev;
+          const minSize = 5; // Minimum crop size in percent
 
+          // East edge (right side)
           if (activeHandle.includes('e')) {
-            width = Math.max(5, Math.min(100 - x, width + deltaX));
+            const newWidth = width + deltaX;
+            // Ensure width is at least minSize and doesn't exceed right boundary
+            width = Math.max(minSize, Math.min(100 - x, newWidth));
           }
+
+          // West edge (left side)
           if (activeHandle.includes('w')) {
-            const maxMove = prev.x + prev.width - 5;
-            const actualDeltaX = Math.min(deltaX, maxMove);
-            if (width - actualDeltaX >= 5) {
-              x = Math.max(0, x + actualDeltaX);
-              width = prev.width - actualDeltaX;
+            const newX = x + deltaX;
+            const newWidth = width - deltaX;
+            // If moving left, x can go down to 0; if moving right, ensure minSize width
+            if (newX >= 0 && newWidth >= minSize) {
+              x = newX;
+              width = newWidth;
+            } else if (newX < 0) {
+              // Hit left boundary
+              width = width + x; // Extend width by the amount x was going to move
+              x = 0;
+            } else if (newWidth < minSize) {
+              // Would make width too small, limit x movement
+              x = x + width - minSize;
+              width = minSize;
             }
           }
+
+          // South edge (bottom)
           if (activeHandle.includes('s')) {
-            height = Math.max(5, Math.min(100 - y, height + deltaY));
+            const newHeight = height + deltaY;
+            // Ensure height is at least minSize and doesn't exceed bottom boundary
+            height = Math.max(minSize, Math.min(100 - y, newHeight));
           }
+
+          // North edge (top)
           if (activeHandle.includes('n')) {
-            const maxMove = prev.y + prev.height - 5;
-            const actualDeltaY = Math.min(deltaY, maxMove);
-            if (height - actualDeltaY >= 5) {
-              y = Math.max(0, y + actualDeltaY);
-              height = prev.height - actualDeltaY;
+            const newY = y + deltaY;
+            const newHeight = height - deltaY;
+            // If moving up, y can go down to 0; if moving down, ensure minSize height
+            if (newY >= 0 && newHeight >= minSize) {
+              y = newY;
+              height = newHeight;
+            } else if (newY < 0) {
+              // Hit top boundary
+              height = height + y; // Extend height by the amount y was going to move
+              y = 0;
+            } else if (newHeight < minSize) {
+              // Would make height too small, limit y movement
+              y = y + height - minSize;
+              height = minSize;
             }
           }
+
+          // Final safety clamp to ensure values stay within bounds
+          x = Math.max(0, Math.min(100 - minSize, x));
+          y = Math.max(0, Math.min(100 - minSize, y));
+          width = Math.max(minSize, Math.min(100 - x, width));
+          height = Math.max(minSize, Math.min(100 - y, height));
 
           // Apply aspect ratio constraint
           if (aspectRatio && activeHandle !== 'move') {
@@ -170,11 +214,14 @@ export function ImageCrop() {
             } else {
               height = (width / 100 * imageSize.width / aspectRatio) / imageSize.height * 100;
             }
+            // Re-clamp after aspect ratio adjustment
+            width = Math.min(100 - x, width);
+            height = Math.min(100 - y, height);
           }
 
           return { x, y, width, height };
         });
-        setDragStart({ x: e.clientX, y: e.clientY });
+        setDragStart(coords);
       }
     },
     [isDraggingCrop, activeHandle, dragStart, aspectRatio, imageSize, displayedImageBounds]
@@ -189,9 +236,13 @@ export function ImageCrop() {
     if (activeHandle || isDraggingCrop) {
       window.addEventListener('mousemove', handleMouseMove);
       window.addEventListener('mouseup', handleMouseUp);
+      window.addEventListener('touchmove', handleMouseMove, { passive: false });
+      window.addEventListener('touchend', handleMouseUp);
       return () => {
         window.removeEventListener('mousemove', handleMouseMove);
         window.removeEventListener('mouseup', handleMouseUp);
+        window.removeEventListener('touchmove', handleMouseMove);
+        window.removeEventListener('touchend', handleMouseUp);
       };
     }
   }, [activeHandle, isDraggingCrop, handleMouseMove, handleMouseUp]);
@@ -272,13 +323,7 @@ export function ImageCrop() {
   };
 
   const resetCrop = () => {
-    const margin = 10;
-    setCropArea({
-      x: margin,
-      y: margin,
-      width: 100 - margin * 2,
-      height: 100 - margin * 2
-    });
+    setCropArea({ x: 0, y: 0, width: 100, height: 100 });
     setAspectRatio(null);
   };
 
@@ -446,7 +491,7 @@ export function ImageCrop() {
               {/* Crop selection box - positioned over image */}
               {displayedImageBounds.width > 0 && (
                 <div
-                  className="absolute border-2 border-white cursor-move"
+                  className="absolute border-2 border-white cursor-move touch-none"
                   style={{
                     left: displayedImageBounds.left + (cropArea.x / 100) * displayedImageBounds.width,
                     top: displayedImageBounds.top + (cropArea.y / 100) * displayedImageBounds.height,
@@ -454,6 +499,7 @@ export function ImageCrop() {
                     height: (cropArea.height / 100) * displayedImageBounds.height,
                   }}
                   onMouseDown={handleCropDragStart}
+                  onTouchStart={handleCropDragStart}
                 >
                 {/* Grid lines */}
                 <div className="absolute inset-0 pointer-events-none">
@@ -466,38 +512,46 @@ export function ImageCrop() {
                 {/* Resize handles */}
                 {/* Corners */}
                 <div
-                  className="absolute -left-2 -top-2 w-4 h-4 bg-white border-2 border-primary-500 rounded-sm cursor-nw-resize"
+                  className="absolute -left-2 -top-2 w-6 h-6 bg-white border-2 border-primary-500 rounded-sm cursor-nw-resize touch-none"
                   onMouseDown={(e) => handleMouseDown(e, 'nw')}
+                  onTouchStart={(e) => handleMouseDown(e, 'nw')}
                 />
                 <div
-                  className="absolute -right-2 -top-2 w-4 h-4 bg-white border-2 border-primary-500 rounded-sm cursor-ne-resize"
+                  className="absolute -right-2 -top-2 w-6 h-6 bg-white border-2 border-primary-500 rounded-sm cursor-ne-resize touch-none"
                   onMouseDown={(e) => handleMouseDown(e, 'ne')}
+                  onTouchStart={(e) => handleMouseDown(e, 'ne')}
                 />
                 <div
-                  className="absolute -left-2 -bottom-2 w-4 h-4 bg-white border-2 border-primary-500 rounded-sm cursor-sw-resize"
+                  className="absolute -left-2 -bottom-2 w-6 h-6 bg-white border-2 border-primary-500 rounded-sm cursor-sw-resize touch-none"
                   onMouseDown={(e) => handleMouseDown(e, 'sw')}
+                  onTouchStart={(e) => handleMouseDown(e, 'sw')}
                 />
                 <div
-                  className="absolute -right-2 -bottom-2 w-4 h-4 bg-white border-2 border-primary-500 rounded-sm cursor-se-resize"
+                  className="absolute -right-2 -bottom-2 w-6 h-6 bg-white border-2 border-primary-500 rounded-sm cursor-se-resize touch-none"
                   onMouseDown={(e) => handleMouseDown(e, 'se')}
+                  onTouchStart={(e) => handleMouseDown(e, 'se')}
                 />
 
                 {/* Edge handles */}
                 <div
-                  className="absolute left-1/2 -translate-x-1/2 -top-2 w-8 h-4 bg-white border-2 border-primary-500 rounded-sm cursor-n-resize"
+                  className="absolute left-1/2 -translate-x-1/2 -top-2 w-10 h-6 bg-white border-2 border-primary-500 rounded-sm cursor-n-resize touch-none"
                   onMouseDown={(e) => handleMouseDown(e, 'n')}
+                  onTouchStart={(e) => handleMouseDown(e, 'n')}
                 />
                 <div
-                  className="absolute left-1/2 -translate-x-1/2 -bottom-2 w-8 h-4 bg-white border-2 border-primary-500 rounded-sm cursor-s-resize"
+                  className="absolute left-1/2 -translate-x-1/2 -bottom-2 w-10 h-6 bg-white border-2 border-primary-500 rounded-sm cursor-s-resize touch-none"
                   onMouseDown={(e) => handleMouseDown(e, 's')}
+                  onTouchStart={(e) => handleMouseDown(e, 's')}
                 />
                 <div
-                  className="absolute top-1/2 -translate-y-1/2 -left-2 w-4 h-8 bg-white border-2 border-primary-500 rounded-sm cursor-w-resize"
+                  className="absolute top-1/2 -translate-y-1/2 -left-2 w-6 h-10 bg-white border-2 border-primary-500 rounded-sm cursor-w-resize touch-none"
                   onMouseDown={(e) => handleMouseDown(e, 'w')}
+                  onTouchStart={(e) => handleMouseDown(e, 'w')}
                 />
                 <div
-                  className="absolute top-1/2 -translate-y-1/2 -right-2 w-4 h-8 bg-white border-2 border-primary-500 rounded-sm cursor-e-resize"
+                  className="absolute top-1/2 -translate-y-1/2 -right-2 w-6 h-10 bg-white border-2 border-primary-500 rounded-sm cursor-e-resize touch-none"
                   onMouseDown={(e) => handleMouseDown(e, 'e')}
+                  onTouchStart={(e) => handleMouseDown(e, 'e')}
                 />
               </div>
               )}

@@ -22,6 +22,8 @@
 @layer components {
   .btn {
     @apply px-4 py-2 rounded-lg font-medium transition-all duration-200;
+    /* Larger touch targets on mobile */
+    @apply min-h-[44px] sm:min-h-0;
   }
 
   .btn-primary {
@@ -33,11 +35,11 @@
   }
 
   .card {
-    @apply bg-white rounded-xl shadow-sm border border-gray-200 p-6;
+    @apply bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6;
   }
 
   .dropzone {
-    @apply border-2 border-dashed border-gray-300 rounded-xl p-8 text-center cursor-pointer transition-all duration-200;
+    @apply border-2 border-dashed border-gray-300 rounded-xl p-6 sm:p-8 text-center cursor-pointer transition-all duration-200;
   }
 
   .dropzone:hover {
@@ -46,5 +48,20 @@
 
   .dropzone.active {
     @apply border-primary-500 bg-primary-100;
+  }
+}
+
+/* Mobile-specific improvements */
+@layer utilities {
+  /* Prevent text selection during drag on touch devices */
+  .touch-none {
+    touch-action: none;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  /* Improve scrolling performance */
+  .scroll-touch {
+    -webkit-overflow-scrolling: touch;
   }
 }

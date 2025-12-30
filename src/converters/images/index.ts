@@ -21,6 +21,11 @@ export const imageConverter: ConverterConfig = {
     const img = await loadImage(imageFile);
     onProgress?.(50);
 
+    // PDF output
+    if (outputFormat === 'pdf') {
+      return imageToPdf(img, onProgress);
+    }
+
     const canvas = document.createElement('canvas');
     canvas.width = img.width;
     canvas.height = img.height;
@@ -56,6 +61,55 @@ export const imageConverter: ConverterConfig = {
     });
   },
 };
+
+async function imageToPdf(img: HTMLImageElement, onProgress?: (progress: number) => void): Promise<Blob> {
+  // Determine orientation based on image dimensions
+  const isLandscape = img.width > img.height;
+  const pdf = new jsPDF({
+    orientation: isLandscape ? 'landscape' : 'portrait',
+    unit: 'mm',
+  });
+
+  const pageWidth = pdf.internal.pageSize.getWidth();
+  const pageHeight = pdf.internal.pageSize.getHeight();
+  const margin = 10;
+
+  // Calculate dimensions to fit image within page with margin
+  const maxWidth = pageWidth - 2 * margin;
+  const maxHeight = pageHeight - 2 * margin;
+
+  let imgWidth = img.width;
+  let imgHeight = img.height;
+
+  // Scale to fit
+  const widthRatio = maxWidth / imgWidth;
+  const heightRatio = maxHeight / imgHeight;
+  const ratio = Math.min(widthRatio, heightRatio);
+
+  imgWidth *= ratio;
+  imgHeight *= ratio;
+
+  // Center image on page
+  const x = (pageWidth - imgWidth) / 2;
+  const y = (pageHeight - imgHeight) / 2;
+
+  onProgress?.(70);
+
+  // Convert image to base64
+  const canvas = document.createElement('canvas');
+  canvas.width = img.width;
+  canvas.height = img.height;
+  const ctx = canvas.getContext('2d')!;
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.drawImage(img, 0, 0);
+  const imgData = canvas.toDataURL('image/jpeg', 0.95);
+
+  pdf.addImage(imgData, 'JPEG', x, y, imgWidth, imgHeight);
+
+  onProgress?.(100);
+  return pdf.output('blob');
+}
 
 function loadImage(file: File): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {

@@ -10,6 +10,7 @@ import { ImageResize } from '../components/utilities/ImageResize';
 import { ImageCompress } from '../components/utilities/ImageCompress';
 import { ImageRotate } from '../components/utilities/ImageRotate';
 import { VideoTrim } from '../components/utilities/VideoTrim';
+import { VideoCrop } from '../components/utilities/VideoCrop';
 import { VideoResize } from '../components/utilities/VideoResize';
 import { VideoCompress } from '../components/utilities/VideoCompress';
 import { VideoExtractAudio } from '../components/utilities/VideoExtractAudio';
@@ -18,6 +19,7 @@ import { AudioNormalize } from '../components/utilities/AudioNormalize';
 import { CreateZip } from '../components/utilities/CreateZip';
 import { ExtractZip } from '../components/utilities/ExtractZip';
 import { QrCodeGenerator } from '../components/utilities/QrCodeGenerator';
+import { PdfTools } from '../components/utilities/PdfTools';
 
 const utilityComponents: Record<string, React.ComponentType> = {
   'font-metadata': FontMetadataEditor,
@@ -26,6 +28,7 @@ const utilityComponents: Record<string, React.ComponentType> = {
   'image-compress': ImageCompress,
   'image-rotate': ImageRotate,
   'video-trim': VideoTrim,
+  'video-crop': VideoCrop,
   'video-resize': VideoResize,
   'video-compress': VideoCompress,
   'video-extract-audio': VideoExtractAudio,
@@ -34,6 +37,7 @@ const utilityComponents: Record<string, React.ComponentType> = {
   'create-zip': CreateZip,
   'extract-zip': ExtractZip,
   'qr-code': QrCodeGenerator,
+  'pdf-tools': PdfTools,
 };
 
 export function Utility() {

@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { Download, QrCode, X, Image } from 'lucide-react';
+import { Download, QrCode, X, Image, RotateCcw } from 'lucide-react';
 import QRCode from 'qrcode';
 import { useLanguage } from '../../i18n';
 
@@ -20,21 +20,23 @@ interface QrSettings {
   errorCorrection: 'L' | 'M' | 'Q' | 'H';
 }
 
+const defaultSettings: QrSettings = {
+  text: '',
+  size: 300,
+  margin: 2,
+  darkColor: '#000000',
+  lightColor: '#ffffff',
+  dotStyle: 'square',
+  eyeStyle: 'square',
+  eyeColor: '#000000',
+  logo: null,
+  logoSize: 20,
+  errorCorrection: 'H',
+};
+
 export function QrCodeGenerator() {
   const { t } = useLanguage();
-  const [settings, setSettings] = useState<QrSettings>({
-    text: '',
-    size: 300,
-    margin: 2,
-    darkColor: '#000000',
-    lightColor: '#ffffff',
-    dotStyle: 'square',
-    eyeStyle: 'square',
-    eyeColor: '#000000',
-    logo: null,
-    logoSize: 20,
-    errorCorrection: 'H',
-  });
+  const [settings, setSettings] = useState<QrSettings>({ ...defaultSettings });
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const logoInputRef = useRef<HTMLInputElement>(null);
@@ -42,6 +44,20 @@ export function QrCodeGenerator() {
   const updateSetting = <K extends keyof QrSettings>(key: K, value: QrSettings[K]) => {
     setSettings((prev) => ({ ...prev, [key]: value }));
   };
+
+  const resetSettings = () => {
+    setSettings({ ...defaultSettings });
+  };
+
+  const hasCustomSettings =
+    settings.size !== 300 ||
+    settings.margin !== 2 ||
+    settings.darkColor !== '#000000' ||
+    settings.lightColor !== '#ffffff' ||
+    settings.dotStyle !== 'square' ||
+    settings.eyeStyle !== 'square' ||
+    settings.eyeColor !== '#000000' ||
+    settings.logo !== null;
 
   const drawRoundedRect = (
     ctx: CanvasRenderingContext2D,
@@ -317,9 +333,21 @@ export function QrCodeGenerator() {
     <div className="space-y-6">
       {/* Content input */}
       <div className="card">
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          {t('qrCode.content')}
-        </label>
+        <div className="flex items-center justify-between mb-2">
+          <label className="block text-sm font-medium text-gray-700">
+            {t('qrCode.content')}
+          </label>
+          {hasCustomSettings && (
+            <button
+              onClick={resetSettings}
+              className="flex items-center gap-1 px-2 py-1 text-xs text-gray-600 bg-gray-100 rounded hover:bg-gray-200 transition-colors"
+              title={t('common.reset')}
+            >
+              <RotateCcw className="w-3 h-3" />
+              {t('common.reset')}
+            </button>
+          )}
+        </div>
         <textarea
           value={settings.text}
           onChange={(e) => updateSetting('text', e.target.value)}
