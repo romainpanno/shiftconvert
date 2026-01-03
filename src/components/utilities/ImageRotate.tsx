@@ -141,7 +141,6 @@ export function ImageRotate() {
       canvas.height = isRotated90 ? img.naturalWidth : img.naturalHeight;
 
       // Get original format
-      const originalExt = originalFile.name.split('.').pop()?.toLowerCase() || 'jpg';
       const mimeType = originalFile.type || 'image/jpeg';
       const outputMime = mimeType === 'image/gif' ? 'image/png' : mimeType;
 

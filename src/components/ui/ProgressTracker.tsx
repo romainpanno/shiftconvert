@@ -15,11 +15,6 @@ interface ProgressTrackerProps {
   fileSizeMB?: number; // Optional: file size to display
 }
 
-// Keep this export for compatibility but it's no longer used for estimation
-export function estimateProcessingTime(fileSizeMB: number, operationType: 'image' | 'video' | 'audio' | 'gif'): number {
-  return 0; // Not used anymore - we calculate dynamically
-}
-
 function formatTime(seconds: number): string {
   if (seconds < 60) {
     return `${Math.round(seconds)}s`;
@@ -167,7 +162,6 @@ export function ProgressTracker({
         {steps.map((step, index) => {
           const isCompleted = index < currentStepIndex;
           const isCurrent = index === currentStepIndex;
-          const isPending = index > currentStepIndex;
 
           return (
             <div key={step.id} className="flex-1 flex items-center">
