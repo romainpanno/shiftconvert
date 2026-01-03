@@ -42,7 +42,7 @@ export const translations: Record<Language, Record<string, string>> = {
     'category.audio': 'Audio',
     'category.audio.desc': 'MP3, WAV, OGG, FLAC, M4A, AAC → MP3, WAV, OGG, FLAC',
     'category.video': 'Vidéo',
-    'category.video.desc': 'MP4, WebM, AVI, MOV, MKV → MP4, WebM, GIF',
+    'category.video.desc': 'MP4, WebM, AVI, MOV, MKV, GIF → MP4, WebM, GIF',
     'category.fonts': 'Polices',
     'category.fonts.desc': 'TTF, OTF, WOFF → TTF, OTF, WOFF',
     'category.fonts.limits': 'Import WOFF2 non supporté (limitation navigateur).',
@@ -125,6 +125,7 @@ export const translations: Record<Language, Record<string, string>> = {
     'common.close': 'Fermer',
     'common.reset': 'Réinitialiser',
     'common.loading': 'Chargement...',
+    'common.loadingEngine': 'Chargement du moteur de traitement...',
 
     // Image Resize
     'resize.preview': 'Aperçu du redimensionnement',
@@ -372,7 +373,7 @@ export const translations: Record<Language, Record<string, string>> = {
     'category.audio': 'Audio',
     'category.audio.desc': 'MP3, WAV, OGG, FLAC, M4A, AAC → MP3, WAV, OGG, FLAC',
     'category.video': 'Video',
-    'category.video.desc': 'MP4, WebM, AVI, MOV, MKV → MP4, WebM, GIF',
+    'category.video.desc': 'MP4, WebM, AVI, MOV, MKV, GIF → MP4, WebM, GIF',
     'category.fonts': 'Fonts',
     'category.fonts.desc': 'TTF, OTF, WOFF → TTF, OTF, WOFF',
     'category.fonts.limits': 'WOFF2 import not supported (browser limitation).',
@@ -455,6 +456,7 @@ export const translations: Record<Language, Record<string, string>> = {
     'common.close': 'Close',
     'common.reset': 'Reset',
     'common.loading': 'Loading...',
+    'common.loadingEngine': 'Loading processing engine...',
 
     // Image Resize
     'resize.preview': 'Resize preview',
@@ -702,7 +704,7 @@ export const translations: Record<Language, Record<string, string>> = {
     'category.audio': 'Audio',
     'category.audio.desc': 'MP3, WAV, OGG, FLAC, M4A, AAC → MP3, WAV, OGG, FLAC',
     'category.video': 'Vídeo',
-    'category.video.desc': 'MP4, WebM, AVI, MOV, MKV → MP4, WebM, GIF',
+    'category.video.desc': 'MP4, WebM, AVI, MOV, MKV, GIF → MP4, WebM, GIF',
     'category.fonts': 'Fuentes',
     'category.fonts.desc': 'TTF, OTF, WOFF → TTF, OTF, WOFF',
     'category.fonts.limits': 'Importación WOFF2 no soportada (limitación del navegador).',
@@ -785,6 +787,7 @@ export const translations: Record<Language, Record<string, string>> = {
     'common.close': 'Cerrar',
     'common.reset': 'Restablecer',
     'common.loading': 'Cargando...',
+    'common.loadingEngine': 'Cargando motor de procesamiento...',
 
     // Image Resize
     'resize.preview': 'Vista previa del redimensionamiento',
@@ -1032,7 +1035,7 @@ export const translations: Record<Language, Record<string, string>> = {
     'category.audio': 'Audio',
     'category.audio.desc': 'MP3, WAV, OGG, FLAC, M4A, AAC → MP3, WAV, OGG, FLAC',
     'category.video': 'Video',
-    'category.video.desc': 'MP4, WebM, AVI, MOV, MKV → MP4, WebM, GIF',
+    'category.video.desc': 'MP4, WebM, AVI, MOV, MKV, GIF → MP4, WebM, GIF',
     'category.fonts': 'Schriftarten',
     'category.fonts.desc': 'TTF, OTF, WOFF → TTF, OTF, WOFF',
     'category.fonts.limits': 'WOFF2-Import nicht unterstützt (Browser-Einschränkung).',
@@ -1115,6 +1118,7 @@ export const translations: Record<Language, Record<string, string>> = {
     'common.close': 'Schließen',
     'common.reset': 'Zurücksetzen',
     'common.loading': 'Laden...',
+    'common.loadingEngine': 'Verarbeitungsmodul wird geladen...',
 
     // Image Resize
     'resize.preview': 'Vorschau der Größenänderung',

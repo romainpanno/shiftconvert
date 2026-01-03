@@ -3,6 +3,7 @@ import { Upload, Download, X, Link, Unlink, RotateCcw, Monitor, Smartphone, Tabl
 import { FFmpeg } from '@ffmpeg/ffmpeg';
 import { fetchFile } from '@ffmpeg/util';
 import { useLanguage } from '../../i18n';
+import { ProgressTracker, STEPS_VIDEO } from '../ui/ProgressTracker';
 
 interface VideoInfo {
   width: number;
@@ -29,7 +30,9 @@ export function VideoResize() {
   const [height, setHeight] = useState(720);
   const [keepRatio, setKeepRatio] = useState(true);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [progress, setProgress] = useState(0);
+  const [currentStep, setCurrentStep] = useState(0);
+  const [stepProgress, setStepProgress] = useState(0);
+  const [error, setError] = useState<string | null>(null);
   const [selectedPreset, setSelectedPreset] = useState<string | null>('720p');
   const ffmpegRef = useRef<FFmpeg | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -147,22 +150,39 @@ export function VideoResize() {
     if (!video) return;
 
     setIsProcessing(true);
-    setProgress(0);
+    setError(null);
+    setCurrentStep(0);
+    setStepProgress(0);
 
     try {
+      // Step 0: Init FFmpeg
       if (!ffmpegRef.current) {
         ffmpegRef.current = new FFmpeg();
+        ffmpegRef.current.on('progress', ({ progress: p }) => {
+          setStepProgress(Math.round(p * 100));
+        });
         await ffmpegRef.current.load({
           coreURL: 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/esm/ffmpeg-core.js',
           wasmURL: 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/esm/ffmpeg-core.wasm',
         });
       }
+      setStepProgress(100);
 
+      // Step 1: Load file
+      setCurrentStep(1);
+      setStepProgress(0);
       const ff = ffmpegRef.current;
-      ff.on('progress', ({ progress: p }) => setProgress(Math.round(p * 100)));
-
       const inputName = 'input' + video.name.substring(video.name.lastIndexOf('.'));
       await ff.writeFile(inputName, await fetchFile(video));
+      setStepProgress(100);
+
+      // Step 2: Analyze
+      setCurrentStep(2);
+      setStepProgress(100);
+
+      // Step 3: Process
+      setCurrentStep(3);
+      setStepProgress(0);
 
       // Ensure dimensions are even (required by most codecs)
       const finalWidth = width % 2 === 0 ? width : width + 1;
@@ -179,9 +199,14 @@ export function VideoResize() {
         'output.mp4',
       ]);
 
+      // Step 4: Encode/Download
+      setCurrentStep(4);
+      setStepProgress(0);
+
       const data = await ff.readFile('output.mp4');
       const blob = new Blob([data as unknown as BlobPart], { type: 'video/mp4' });
       const url = URL.createObjectURL(blob);
+      setStepProgress(50);
 
       const a = document.createElement('a');
       a.href = url;
@@ -191,9 +216,10 @@ export function VideoResize() {
 
       await ff.deleteFile(inputName);
       await ff.deleteFile('output.mp4');
-    } catch (error) {
-      console.error('Resize error:', error);
-      alert(t('common.error'));
+      setStepProgress(100);
+    } catch (err) {
+      console.error('Resize error:', err);
+      setError(t('common.error'));
     }
 
     setIsProcessing(false);
@@ -373,18 +399,24 @@ export function VideoResize() {
             )}
           </div>
 
-          {/* Progress */}
-          {isProcessing && (
-            <div className="card">
-              <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-primary-500 transition-all"
-                  style={{ width: `${progress}%` }}
-                />
+          {/* Error message */}
+          {error && (
+            <div className="card bg-red-50 border-red-200">
+              <div className="flex items-center gap-2 text-red-700">
+                <X className="w-5 h-5" />
+                <span className="font-medium">{error}</span>
               </div>
-              <p className="text-sm text-center text-gray-600 mt-2">{progress}%</p>
             </div>
           )}
+
+          {/* Progress tracker */}
+          <ProgressTracker
+            steps={STEPS_VIDEO}
+            currentStepIndex={currentStep}
+            progress={stepProgress}
+            isProcessing={isProcessing}
+            fileSizeMB={video ? video.size / (1024 * 1024) : undefined}
+          />
 
           {/* Actions */}
           <button

@@ -1,28 +1,59 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { Upload, Download, X, Link, Unlink, Maximize2, Square, RectangleHorizontal, Move, Shrink, Expand, ArrowRight, RotateCcw } from 'lucide-react';
+import { ColorPicker } from '../ui/ColorPicker';
+import { ProgressTracker, STEPS_IMAGE, STEPS_IMAGE_FFMPEG } from '../ui/ProgressTracker';
+import { FFmpeg } from '@ffmpeg/ffmpeg';
+import { fetchFile } from '@ffmpeg/util';
 import { useLanguage } from '../../i18n';
 
 type FitMode = 'scale' | 'cover' | 'contain' | 'fill' | 'fit-width' | 'fit-height';
 
+// Check if a GIF file is animated
+async function isAnimatedGif(file: File): Promise<boolean> {
+  if (!file.type.includes('gif')) return false;
+  const buffer = await file.arrayBuffer();
+  const view = new Uint8Array(buffer);
+  let frameCount = 0;
+  for (let i = 0; i < view.length - 3; i++) {
+    if (view[i] === 0x21 && view[i + 1] === 0xF9) {
+      frameCount++;
+      if (frameCount > 1) return true;
+    }
+  }
+  return false;
+}
+
 export function ImageResize() {
   const { t } = useLanguage();
   const [image, setImage] = useState<string | null>(null);
+  const [originalFile, setOriginalFile] = useState<File | null>(null);
+  const [isAnimated, setIsAnimated] = useState(false);
   const [fileName, setFileName] = useState('');
   const [isDragging, setIsDragging] = useState(false);
   const [originalSize, setOriginalSize] = useState({ width: 0, height: 0 });
   const [newSize, setNewSize] = useState({ width: 0, height: 0 });
   const [keepRatio, setKeepRatio] = useState(true);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [currentStep, setCurrentStep] = useState(0);
+  const [stepProgress, setStepProgress] = useState(0);
+  const [error, setError] = useState<string | null>(null);
   const [scalePercent, setScalePercent] = useState(100);
   const [fitMode, setFitMode] = useState<FitMode>('scale');
   const [bgColor, setBgColor] = useState('#ffffff');
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [previewSize, setPreviewSize] = useState({ width: 0, height: 0 });
+  const [imageLoaded, setImageLoaded] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const previewCanvasRef = useRef<HTMLCanvasElement>(null);
   const imageRef = useRef<HTMLImageElement>(null);
+  const ffmpegRef = useRef<FFmpeg | null>(null);
 
-  const loadImage = useCallback((file: File) => {
+  const loadImage = useCallback(async (file: File) => {
+    const animated = await isAnimatedGif(file);
+    setIsAnimated(animated);
+    setOriginalFile(file);
+    setImageLoaded(false);
+
     const reader = new FileReader();
     reader.onload = (e) => {
       const img = new Image();
@@ -83,77 +114,186 @@ export function ImageResize() {
     setScalePercent(Math.round((width / originalSize.width) * 100));
   };
 
+  const getOutputExt = () => {
+    if (isAnimated) return 'gif';
+    const originalExt = fileName.split('.').pop()?.toLowerCase() || 'png';
+    if (originalExt === 'gif') return 'png';
+    return originalExt;
+  };
+
   const handleResize = async () => {
-    if (!imageRef.current || !canvasRef.current) return;
+    if (!imageRef.current || !canvasRef.current || !originalFile) return;
 
     setIsProcessing(true);
+    setError(null);
+    setCurrentStep(0);
+    setStepProgress(0);
 
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    canvas.width = newSize.width;
-    canvas.height = newSize.height;
+    const img = imageRef.current;
+    const sw = img.naturalWidth, sh = img.naturalHeight;
 
-    // Fill background for contain mode
-    if (fitMode === 'contain') {
+    let finalWidth = newSize.width;
+    let finalHeight = newSize.height;
+
+    if (fitMode === 'fit-width') {
+      const scale = newSize.width / sw;
+      finalHeight = Math.round(sh * scale);
+    } else if (fitMode === 'fit-height') {
+      const scale = newSize.height / sh;
+      finalWidth = Math.round(sw * scale);
+    }
+
+    // For animated GIFs, use FFmpeg
+    if (isAnimated) {
+      try {
+        // Step 0: Init FFmpeg
+        setCurrentStep(0);
+        setStepProgress(0);
+
+        if (!ffmpegRef.current) {
+          ffmpegRef.current = new FFmpeg();
+          ffmpegRef.current.on('progress', ({ progress: p }) => {
+            setStepProgress(Math.round(p * 100));
+          });
+          await ffmpegRef.current.load({
+            coreURL: 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/esm/ffmpeg-core.js',
+            wasmURL: 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/esm/ffmpeg-core.wasm',
+          });
+        }
+        setStepProgress(100);
+
+        // Step 1: Load file
+        setCurrentStep(1);
+        setStepProgress(0);
+        const ff = ffmpegRef.current;
+        await ff.writeFile('input.gif', await fetchFile(originalFile));
+        setStepProgress(100);
+
+        // Step 2: Process
+        setCurrentStep(2);
+        setStepProgress(0);
+
+        // Build filter based on fit mode
+        let scaleFilter: string;
+        const hexToFFmpeg = (hex: string) => hex.replace('#', '0x');
+
+        if (fitMode === 'contain') {
+          scaleFilter = `scale=${finalWidth}:${finalHeight}:force_original_aspect_ratio=decrease,pad=${finalWidth}:${finalHeight}:(ow-iw)/2:(oh-ih)/2:color=${hexToFFmpeg(bgColor)}`;
+        } else if (fitMode === 'cover') {
+          scaleFilter = `scale=${finalWidth}:${finalHeight}:force_original_aspect_ratio=increase,crop=${finalWidth}:${finalHeight}`;
+        } else {
+          scaleFilter = `scale=${finalWidth}:${finalHeight}:flags=lanczos`;
+        }
+
+        await ff.exec([
+          '-i', 'input.gif',
+          '-vf', `${scaleFilter},split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse`,
+          '-loop', '0',
+          '-y', 'output.gif'
+        ]);
+
+        // Step 3: Encode/Download
+        setCurrentStep(3);
+        setStepProgress(0);
+
+        const data = await ff.readFile('output.gif');
+        const blob = new Blob([data as unknown as BlobPart], { type: 'image/gif' });
+        const url = URL.createObjectURL(blob);
+        setStepProgress(50);
+
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = fileName.replace(/\.[^.]+$/, `_${finalWidth}x${finalHeight}.gif`);
+        a.click();
+        URL.revokeObjectURL(url);
+
+        await ff.deleteFile('input.gif');
+        await ff.deleteFile('output.gif');
+        setStepProgress(100);
+      } catch (err) {
+        console.error('GIF resize error:', err);
+        setError(t('common.error'));
+      }
+      setIsProcessing(false);
+      return;
+    }
+
+    // For static images, use canvas with original format
+    // Step 0: Load
+    setCurrentStep(0);
+    setStepProgress(50);
+
+    canvas.width = finalWidth;
+    canvas.height = finalHeight;
+
+    const mimeType = originalFile.type || 'image/png';
+    const outputMime = mimeType === 'image/gif' ? 'image/png' : mimeType;
+    setStepProgress(100);
+
+    // Step 1: Process
+    setCurrentStep(1);
+    setStepProgress(0);
+
+    // Fill background for contain mode or JPG
+    if (fitMode === 'contain' || outputMime === 'image/jpeg') {
       ctx.fillStyle = bgColor;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
     }
 
-    const img = imageRef.current;
-    const sw = img.naturalWidth, sh = img.naturalHeight;
-    let dx = 0, dy = 0, dw = newSize.width, dh = newSize.height;
+    let dx = 0, dy = 0, dw = finalWidth, dh = finalHeight;
 
     if (fitMode === 'cover') {
-      const scale = Math.max(newSize.width / sw, newSize.height / sh);
+      const scale = Math.max(finalWidth / sw, finalHeight / sh);
       const scaledW = sw * scale;
       const scaledH = sh * scale;
-      dx = (newSize.width - scaledW) / 2;
-      dy = (newSize.height - scaledH) / 2;
+      dx = (finalWidth - scaledW) / 2;
+      dy = (finalHeight - scaledH) / 2;
       dw = scaledW;
       dh = scaledH;
     } else if (fitMode === 'contain') {
-      const scale = Math.min(newSize.width / sw, newSize.height / sh);
+      const scale = Math.min(finalWidth / sw, finalHeight / sh);
       dw = sw * scale;
       dh = sh * scale;
-      dx = (newSize.width - dw) / 2;
-      dy = (newSize.height - dh) / 2;
-    } else if (fitMode === 'fit-width') {
-      const scale = newSize.width / sw;
-      canvas.height = Math.round(sh * scale);
-      dh = canvas.height;
-    } else if (fitMode === 'fit-height') {
-      const scale = newSize.height / sh;
-      canvas.width = Math.round(sw * scale);
-      dw = canvas.width;
+      dx = (finalWidth - dw) / 2;
+      dy = (finalHeight - dh) / 2;
     }
 
     ctx.drawImage(img, 0, 0, sw, sh, dx, dy, dw, dh);
+    setStepProgress(100);
+
+    // Step 2: Encode
+    setCurrentStep(2);
+    setStepProgress(0);
+
+    const useQuality = outputMime === 'image/jpeg' || outputMime === 'image/webp';
 
     canvas.toBlob((blob) => {
       if (blob) {
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = fileName.replace(/\.[^.]+$/, `_${canvas.width}x${canvas.height}.png`);
+        a.download = fileName.replace(/\.[^.]+$/, `_${canvas.width}x${canvas.height}.${getOutputExt()}`);
         a.click();
         URL.revokeObjectURL(url);
       }
+      setStepProgress(100);
       setIsProcessing(false);
-    }, 'image/png');
+    }, outputMime, useQuality ? 0.9 : undefined);
   };
 
   // Generate live preview
   useEffect(() => {
-    if (!imageRef.current || !previewCanvasRef.current || !image) return;
-
-    const canvas = previewCanvasRef.current;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
+    if (!imageRef.current || !image || !imageLoaded) return;
 
     const img = imageRef.current;
     const sw = img.naturalWidth, sh = img.naturalHeight;
+
+    // Skip if image dimensions not available yet
+    if (sw === 0 || sh === 0) return;
 
     let canvasW = newSize.width;
     let canvasH = newSize.height;
@@ -166,6 +306,19 @@ export function ImageResize() {
       const scale = newSize.height / sh;
       canvasW = Math.round(sw * scale);
     }
+
+    // For animated GIFs, skip canvas rendering - use CSS scaling instead
+    if (isAnimated) {
+      setPreviewUrl(image); // Use original animated GIF
+      setPreviewSize({ width: canvasW, height: canvasH });
+      return;
+    }
+
+    // For static images, use canvas preview
+    const canvas = previewCanvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
 
     canvas.width = canvasW;
     canvas.height = canvasH;
@@ -201,7 +354,7 @@ export function ImageResize() {
     // Update preview URL
     setPreviewUrl(canvas.toDataURL('image/png'));
     setPreviewSize({ width: canvasW, height: canvasH });
-  }, [image, newSize.width, newSize.height, fitMode, bgColor]);
+  }, [image, newSize.width, newSize.height, fitMode, bgColor, isAnimated, imageLoaded]);
 
   const fitModes: { id: FitMode; label: string; icon: React.ReactNode }[] = [
     { id: 'scale', label: t('resize.scale'), icon: <Expand className="w-4 h-4" /> },
@@ -242,11 +395,14 @@ export function ImageResize() {
   };
 
   // Calculate preview sizes - show actual proportions
-  const maxPreviewWidth = 160;
-  const maxPreviewHeight = 120;
+  const maxPreviewWidth = 180;
+  const maxPreviewHeight = 160;
 
   // Scale to fit within max bounds while preserving aspect ratio
   const getPreviewDimensions = (w: number, h: number) => {
+    if (w === 0 || h === 0) {
+      return { width: maxPreviewWidth, height: maxPreviewHeight };
+    }
     const scaleW = maxPreviewWidth / w;
     const scaleH = maxPreviewHeight / h;
     const scale = Math.min(scaleW, scaleH, 1);
@@ -257,6 +413,24 @@ export function ImageResize() {
   };
 
   const originalPreview = getPreviewDimensions(originalSize.width, originalSize.height);
+
+  // Calculate target preview dimensions directly (not from state) for responsive updates
+  const getTargetPreviewDimensions = () => {
+    let targetW = newSize.width;
+    let targetH = newSize.height;
+
+    if (fitMode === 'fit-width' && originalSize.width > 0) {
+      const scale = newSize.width / originalSize.width;
+      targetH = Math.round(originalSize.height * scale);
+    } else if (fitMode === 'fit-height' && originalSize.height > 0) {
+      const scale = newSize.height / originalSize.height;
+      targetW = Math.round(originalSize.width * scale);
+    }
+
+    return getPreviewDimensions(targetW, targetH);
+  };
+
+  const targetPreview = getTargetPreviewDimensions();
 
   return (
     <div className="space-y-6">
@@ -334,6 +508,11 @@ export function ImageResize() {
                     background: 'repeating-conic-gradient(#e5e7eb 0% 25%, white 0% 50%) 50% / 12px 12px'
                   }}
                 >
+                  {isAnimated && (
+                    <div className="absolute top-1 left-1 bg-purple-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded z-10">
+                      GIF
+                    </div>
+                  )}
                   <img
                     src={image}
                     alt="Original"
@@ -361,23 +540,44 @@ export function ImageResize() {
               {/* Live preview - actual render */}
               <div className="flex flex-col items-center">
                 <div
-                  className="relative rounded-lg shadow-md overflow-hidden border-2 border-primary-500"
+                  className="relative rounded-lg shadow-md overflow-hidden border-2 border-primary-500 flex items-center justify-center"
                   style={{
-                    maxWidth: 200,
-                    maxHeight: 150,
-                    background: 'repeating-conic-gradient(#e5e7eb 0% 25%, white 0% 50%) 50% / 12px 12px'
+                    ...targetPreview,
+                    backgroundColor: fitMode === 'contain' ? bgColor : undefined,
+                    background: fitMode !== 'contain' ? 'repeating-conic-gradient(#e5e7eb 0% 25%, white 0% 50%) 50% / 12px 12px' : undefined,
                   }}
                 >
+                  {isAnimated && (
+                    <div className="absolute top-1 left-1 bg-purple-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded z-10">
+                      GIF
+                    </div>
+                  )}
                   {previewUrl ? (
-                    <img
-                      src={previewUrl}
-                      alt={t('resize.preview')}
-                      style={{
-                        maxWidth: 200,
-                        maxHeight: 150,
-                        objectFit: 'contain',
-                      }}
-                    />
+                    isAnimated ? (
+                      // For animated GIFs, use CSS to simulate fit modes
+                      <img
+                        key={`${fitMode}-${previewSize.width}-${previewSize.height}`}
+                        src={previewUrl}
+                        alt={t('resize.preview')}
+                        className="w-full h-full"
+                        style={{
+                          objectFit: fitMode === 'cover' ? 'cover' :
+                                     fitMode === 'contain' ? 'contain' :
+                                     'fill',
+                        }}
+                      />
+                    ) : (
+                      // For static images, canvas already rendered correctly - just display it
+                      <img
+                        key={`preview-${fitMode}-${previewSize.width}-${previewSize.height}`}
+                        src={previewUrl}
+                        alt={t('resize.preview')}
+                        style={{
+                          maxWidth: '100%',
+                          maxHeight: '100%',
+                        }}
+                      />
+                    )
                   ) : (
                     <div className="w-32 h-24 flex items-center justify-center text-gray-400 text-xs">
                       {t('common.loading')}
@@ -386,13 +586,25 @@ export function ImageResize() {
                 </div>
                 <div className="mt-3 text-center">
                   <p className="text-xs text-primary-600">{t('resize.finalRender')}</p>
-                  <p className="text-sm font-bold text-primary-700">{previewSize.width} × {previewSize.height}</p>
+                  <p className="text-sm font-bold text-primary-700">
+                    {fitMode === 'fit-width' && originalSize.width > 0
+                      ? `${newSize.width} × ${Math.round(originalSize.height * (newSize.width / originalSize.width))}`
+                      : fitMode === 'fit-height' && originalSize.height > 0
+                      ? `${Math.round(originalSize.width * (newSize.height / originalSize.height))} × ${newSize.height}`
+                      : `${newSize.width} × ${newSize.height}`}
+                  </p>
                 </div>
               </div>
             </div>
 
             {/* Hidden image for processing */}
-            <img ref={imageRef} src={image} alt="" className="hidden" />
+            <img
+              ref={imageRef}
+              src={image}
+              alt=""
+              className="hidden"
+              onLoad={() => setImageLoaded(true)}
+            />
           </div>
 
           {/* Fit Mode */}
@@ -420,29 +632,11 @@ export function ImageResize() {
             {/* Background color for contain mode */}
             {fitMode === 'contain' && (
               <div className="mt-4 p-4 bg-gray-50 rounded-xl">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {t('resize.bgColor')}
-                </label>
-                <div className="flex items-center gap-3">
-                  <input
-                    type="color"
-                    value={bgColor}
-                    onChange={(e) => setBgColor(e.target.value)}
-                    className="w-10 h-10 rounded-lg cursor-pointer border-2 border-gray-200"
-                  />
-                  <div className="flex gap-2">
-                    {['#ffffff', '#000000', '#f3f4f6', '#1f2937', '#3b82f6', '#10b981'].map((color) => (
-                      <button
-                        key={color}
-                        onClick={() => setBgColor(color)}
-                        className={`w-8 h-8 rounded-full border-2 transition-transform hover:scale-110 ${
-                          bgColor === color ? 'border-primary-500 scale-110' : 'border-gray-300'
-                        }`}
-                        style={{ backgroundColor: color }}
-                      />
-                    ))}
-                  </div>
-                </div>
+                <ColorPicker
+                  value={bgColor}
+                  onChange={setBgColor}
+                  label={t('resize.bgColor')}
+                />
               </div>
             )}
           </div>
@@ -582,6 +776,25 @@ export function ImageResize() {
               ))}
             </div>
           </div>
+
+          {/* Error message */}
+          {error && (
+            <div className="card bg-red-50 border-red-200">
+              <div className="flex items-center gap-2 text-red-700">
+                <X className="w-5 h-5" />
+                <span className="font-medium">{error}</span>
+              </div>
+            </div>
+          )}
+
+          {/* Progress tracker */}
+          <ProgressTracker
+            steps={isAnimated ? STEPS_IMAGE_FFMPEG : STEPS_IMAGE}
+            currentStepIndex={currentStep}
+            progress={stepProgress}
+            isProcessing={isProcessing}
+            fileSizeMB={originalFile ? originalFile.size / (1024 * 1024) : undefined}
+          />
 
           {/* Actions */}
           <div className="flex gap-3">

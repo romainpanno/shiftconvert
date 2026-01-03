@@ -69,11 +69,40 @@ export const videoConverter: ConverterConfig = {
 };
 
 function buildFFmpegArgs(input: string, output: string, format: string): string[] {
+  const inputExt = input.split('.').pop()?.toLowerCase() || '';
+  const isGifInput = inputExt === 'gif';
+
   switch (format) {
     case 'mp4':
+      if (isGifInput) {
+        // GIF to MP4: no audio, need to handle loop and pixel format
+        return [
+          '-i', input,
+          '-movflags', 'faststart',
+          '-pix_fmt', 'yuv420p',
+          '-vf', 'scale=trunc(iw/2)*2:trunc(ih/2)*2',
+          '-c:v', 'libx264',
+          '-preset', 'fast',
+          '-crf', '23',
+          '-an',
+          '-y', output
+        ];
+      }
       // Use libx264 which is widely supported
       return ['-i', input, '-c:v', 'libx264', '-preset', 'fast', '-crf', '23', '-c:a', 'aac', '-b:a', '128k', '-y', output];
     case 'webm':
+      if (isGifInput) {
+        // GIF to WebM: no audio
+        return [
+          '-i', input,
+          '-c:v', 'libvpx',
+          '-crf', '30',
+          '-b:v', '1M',
+          '-pix_fmt', 'yuva420p',
+          '-an',
+          '-y', output
+        ];
+      }
       // Use libvpx for WebM - simpler settings for better compatibility
       return ['-i', input, '-c:v', 'libvpx', '-crf', '30', '-b:v', '1M', '-c:a', 'libvorbis', '-b:a', '128k', '-y', output];
     case 'gif':

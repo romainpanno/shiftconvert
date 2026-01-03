@@ -37,7 +37,7 @@ export const utilities: UtilityInfo[] = [
   {
     id: 'image-compress',
     label: 'Compresser Image',
-    description: 'Réduire la taille des fichiers image',
+    description: 'Réduire la taille des fichiers image et GIF animés',
     icon: 'Minimize2',
     color: 'from-pink-500 to-rose-500',
     category: 'images',

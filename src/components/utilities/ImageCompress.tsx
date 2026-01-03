@@ -1,21 +1,46 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { Upload, Download, X, Gauge, Sparkles, FileDown } from 'lucide-react';
+import { FFmpeg } from '@ffmpeg/ffmpeg';
+import { fetchFile } from '@ffmpeg/util';
 import { formatSize } from '../../utils/formatSize';
 import { useLanguage } from '../../i18n';
 
+// Check if a GIF file is animated by looking for multiple frames
+async function isAnimatedGif(file: File): Promise<boolean> {
+  if (!file.type.includes('gif')) return false;
+
+  const buffer = await file.arrayBuffer();
+  const view = new Uint8Array(buffer);
+
+  // Count NETSCAPE extension (for looping) or multiple graphic control extensions
+  let frameCount = 0;
+  for (let i = 0; i < view.length - 3; i++) {
+    // Look for Graphic Control Extension (0x21 0xF9)
+    if (view[i] === 0x21 && view[i + 1] === 0xF9) {
+      frameCount++;
+      if (frameCount > 1) return true;
+    }
+  }
+  return false;
+}
+
 export function ImageCompress() {
   const { t } = useLanguage();
-  const [files, setFiles] = useState<{ file: File; preview: string; compressed?: Blob; compressedUrl?: string }[]>([]);
+  const [files, setFiles] = useState<{ file: File; preview: string; compressed?: Blob; compressedUrl?: string; isAnimated?: boolean }[]>([]);
   const [isDragging, setIsDragging] = useState(false);
   const [quality, setQuality] = useState(80);
   const [isProcessing, setIsProcessing] = useState(false);
+  const ffmpegRef = useRef<FFmpeg | null>(null);
 
-  const addFiles = useCallback((newFiles: File[]) => {
+  const addFiles = useCallback(async (newFiles: File[]) => {
     const imageFiles = newFiles.filter((f) => /^image\//i.test(f.type));
-    const filesWithPreview = imageFiles.map((file) => ({
-      file,
-      preview: URL.createObjectURL(file),
-    }));
+    const filesWithPreview = await Promise.all(
+      imageFiles.map(async (file) => ({
+        file,
+        preview: URL.createObjectURL(file),
+        isAnimated: await isAnimatedGif(file),
+      }))
+    );
     setFiles((prev) => [...prev, ...filesWithPreview]);
   }, []);
 
@@ -33,6 +58,51 @@ export function ImageCompress() {
 
     const compressed = await Promise.all(
       files.map(async (item) => {
+        // For animated GIFs, use FFmpeg to preserve animation
+        if (item.isAnimated) {
+          try {
+            if (!ffmpegRef.current) {
+              ffmpegRef.current = new FFmpeg();
+              await ffmpegRef.current.load({
+                coreURL: 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/esm/ffmpeg-core.js',
+                wasmURL: 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/esm/ffmpeg-core.wasm',
+              });
+            }
+
+            const ff = ffmpegRef.current;
+            const inputName = 'input.gif';
+            const outputName = 'output.gif';
+
+            await ff.writeFile(inputName, await fetchFile(item.file));
+
+            // Calculate color reduction based on quality (higher quality = more colors)
+            const maxColors = Math.max(32, Math.min(256, Math.round(quality * 2.56)));
+
+            await ff.exec([
+              '-i', inputName,
+              '-vf', `fps=10,scale='min(480,iw)':-1:flags=lanczos,split[s0][s1];[s0]palettegen=max_colors=${maxColors}:stats_mode=diff[p];[s1][p]paletteuse=dither=bayer`,
+              '-loop', '0',
+              '-y', outputName
+            ]);
+
+            const data = await ff.readFile(outputName);
+            const blob = new Blob([data as unknown as BlobPart], { type: 'image/gif' });
+
+            await ff.deleteFile(inputName);
+            await ff.deleteFile(outputName);
+
+            return {
+              ...item,
+              compressed: blob,
+              compressedUrl: URL.createObjectURL(blob),
+            };
+          } catch (error) {
+            console.error('GIF compression error:', error);
+            return item;
+          }
+        }
+
+        // For static images, use canvas - preserve original format
         const img = new Image();
         img.src = item.preview;
         await new Promise((resolve) => (img.onload = resolve));
@@ -41,10 +111,25 @@ export function ImageCompress() {
         canvas.width = img.width;
         canvas.height = img.height;
         const ctx = canvas.getContext('2d')!;
+
+        // Get original format
+        const originalExt = item.file.name.split('.').pop()?.toLowerCase() || 'jpg';
+        const mimeType = item.file.type || 'image/jpeg';
+
+        // For formats that don't support transparency or for JPG, fill with white background
+        if (mimeType === 'image/jpeg' || originalExt === 'jpg' || originalExt === 'jpeg') {
+          ctx.fillStyle = '#ffffff';
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+
         ctx.drawImage(img, 0, 0);
 
+        // Use original mime type, with quality for lossy formats
+        const outputMime = mimeType === 'image/gif' ? 'image/png' : mimeType; // Static GIF -> PNG
+        const useQuality = outputMime === 'image/jpeg' || outputMime === 'image/webp';
+
         const blob = await new Promise<Blob>((resolve) =>
-          canvas.toBlob((b) => resolve(b!), 'image/jpeg', quality / 100)
+          canvas.toBlob((b) => resolve(b!), outputMime, useQuality ? quality / 100 : undefined)
         );
 
         return {
@@ -59,12 +144,20 @@ export function ImageCompress() {
     setIsProcessing(false);
   };
 
+  const getOutputExt = (item: typeof files[0]) => {
+    if (item.isAnimated) return 'gif';
+    const originalExt = item.file.name.split('.').pop()?.toLowerCase() || 'jpg';
+    // Static GIF becomes PNG
+    if (originalExt === 'gif') return 'png';
+    return originalExt;
+  };
+
   const downloadAll = () => {
     files.forEach((item) => {
       if (item.compressedUrl) {
         const a = document.createElement('a');
         a.href = item.compressedUrl;
-        a.download = item.file.name.replace(/\.[^.]+$/, '_compressed.jpg');
+        a.download = item.file.name.replace(/\.[^.]+$/, `_compressed.${getOutputExt(item)}`);
         a.click();
       }
     });
@@ -138,7 +231,7 @@ export function ImageCompress() {
           <p className="text-base font-medium text-gray-700 mb-1">
             {t('dropzone.dragHere')}
           </p>
-          <p className="text-sm text-gray-500">PNG, JPG, WebP</p>
+          <p className="text-sm text-gray-500">PNG, JPG, WebP, GIF</p>
         </label>
       </div>
 
@@ -230,6 +323,11 @@ export function ImageCompress() {
                     alt=""
                     className="w-14 h-14 object-cover rounded-lg"
                   />
+                  {item.isAnimated && (
+                    <div className="absolute -top-1 -left-1 bg-purple-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded">
+                      GIF
+                    </div>
+                  )}
                   {item.compressed && (
                     <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 rounded-full flex items-center justify-center">
                       <Sparkles className="w-3 h-3 text-white" />
@@ -258,7 +356,7 @@ export function ImageCompress() {
                 {item.compressedUrl && (
                   <a
                     href={item.compressedUrl}
-                    download={item.file.name.replace(/\.[^.]+$/, '_compressed.jpg')}
+                    download={item.file.name.replace(/\.[^.]+$/, `_compressed.${getOutputExt(item)}`)}
                     className="btn btn-primary text-sm p-2"
                   >
                     <Download className="w-4 h-4" />

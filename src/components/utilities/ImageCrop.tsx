@@ -1,5 +1,7 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { Upload, Download, X, RotateCcw } from 'lucide-react';
+import { FFmpeg } from '@ffmpeg/ffmpeg';
+import { fetchFile } from '@ffmpeg/util';
 import { useLanguage } from '../../i18n';
 
 interface CropArea {
@@ -9,9 +11,26 @@ interface CropArea {
   height: number;
 }
 
+// Check if a GIF file is animated
+async function isAnimatedGif(file: File): Promise<boolean> {
+  if (!file.type.includes('gif')) return false;
+  const buffer = await file.arrayBuffer();
+  const view = new Uint8Array(buffer);
+  let frameCount = 0;
+  for (let i = 0; i < view.length - 3; i++) {
+    if (view[i] === 0x21 && view[i + 1] === 0xF9) {
+      frameCount++;
+      if (frameCount > 1) return true;
+    }
+  }
+  return false;
+}
+
 export function ImageCrop() {
   const { t } = useLanguage();
   const [image, setImage] = useState<string | null>(null);
+  const [originalFile, setOriginalFile] = useState<File | null>(null);
+  const [isAnimated, setIsAnimated] = useState(false);
   const [fileName, setFileName] = useState('');
   const [isDragging, setIsDragging] = useState(false);
   const [cropArea, setCropArea] = useState<CropArea>({ x: 0, y: 0, width: 100, height: 100 });
@@ -27,8 +46,13 @@ export function ImageCrop() {
   const imageRef = useRef<HTMLImageElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
+  const ffmpegRef = useRef<FFmpeg | null>(null);
 
-  const loadImage = useCallback((file: File) => {
+  const loadImage = useCallback(async (file: File) => {
+    const animated = await isAnimatedGif(file);
+    setIsAnimated(animated);
+    setOriginalFile(file);
+
     const reader = new FileReader();
     reader.onload = (e) => {
       const img = new Image();
@@ -247,22 +271,78 @@ export function ImageCrop() {
     }
   }, [activeHandle, isDraggingCrop, handleMouseMove, handleMouseUp]);
 
+  const getOutputExt = () => {
+    if (isAnimated) return 'gif';
+    const originalExt = fileName.split('.').pop()?.toLowerCase() || 'png';
+    if (originalExt === 'gif') return 'png'; // Static GIF -> PNG
+    return originalExt;
+  };
+
   const handleCrop = async () => {
-    if (!imageRef.current || !canvasRef.current) return;
+    if (!imageRef.current || !canvasRef.current || !originalFile) return;
 
     setIsCropping(true);
 
+    const realX = Math.round((cropArea.x / 100) * imageSize.width);
+    const realY = Math.round((cropArea.y / 100) * imageSize.height);
+    const realWidth = Math.round((cropArea.width / 100) * imageSize.width);
+    const realHeight = Math.round((cropArea.height / 100) * imageSize.height);
+
+    // For animated GIFs, use FFmpeg
+    if (isAnimated) {
+      try {
+        if (!ffmpegRef.current) {
+          ffmpegRef.current = new FFmpeg();
+          await ffmpegRef.current.load({
+            coreURL: 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/esm/ffmpeg-core.js',
+            wasmURL: 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/esm/ffmpeg-core.wasm',
+          });
+        }
+
+        const ff = ffmpegRef.current;
+        await ff.writeFile('input.gif', await fetchFile(originalFile));
+
+        await ff.exec([
+          '-i', 'input.gif',
+          '-vf', `crop=${realWidth}:${realHeight}:${realX}:${realY},split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse`,
+          '-loop', '0',
+          '-y', 'output.gif'
+        ]);
+
+        const data = await ff.readFile('output.gif');
+        const blob = new Blob([data as unknown as BlobPart], { type: 'image/gif' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = fileName.replace(/\.[^.]+$/, '_cropped.gif');
+        a.click();
+        URL.revokeObjectURL(url);
+
+        await ff.deleteFile('input.gif');
+        await ff.deleteFile('output.gif');
+      } catch (error) {
+        console.error('GIF crop error:', error);
+      }
+      setIsCropping(false);
+      return;
+    }
+
+    // For static images, use canvas with original format
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    const realX = (cropArea.x / 100) * imageSize.width;
-    const realY = (cropArea.y / 100) * imageSize.height;
-    const realWidth = (cropArea.width / 100) * imageSize.width;
-    const realHeight = (cropArea.height / 100) * imageSize.height;
-
     canvas.width = realWidth;
     canvas.height = realHeight;
+
+    const mimeType = originalFile.type || 'image/png';
+    const outputMime = mimeType === 'image/gif' ? 'image/png' : mimeType;
+
+    // Fill background for JPG
+    if (outputMime === 'image/jpeg') {
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
 
     ctx.drawImage(
       imageRef.current,
@@ -276,17 +356,19 @@ export function ImageCrop() {
       realHeight
     );
 
+    const useQuality = outputMime === 'image/jpeg' || outputMime === 'image/webp';
+
     canvas.toBlob((blob) => {
       if (blob) {
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = fileName.replace(/\.[^.]+$/, '_cropped.png');
+        a.download = fileName.replace(/\.[^.]+$/, `_cropped.${getOutputExt()}`);
         a.click();
         URL.revokeObjectURL(url);
       }
       setIsCropping(false);
-    }, 'image/png');
+    }, outputMime, useQuality ? 0.9 : undefined);
   };
 
   const aspectRatios = [

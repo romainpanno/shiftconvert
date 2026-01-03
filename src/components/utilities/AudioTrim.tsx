@@ -454,7 +454,7 @@ export function AudioTrim() {
           {/* Fine-tune controls */}
           <div className="card">
             <h4 className="text-sm font-medium text-gray-700 mb-3">{t('resize.dimensions')}</h4>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs text-gray-500 mb-1">{t('audioTrim.start')}</label>
                 <div className="flex items-center gap-2">
@@ -465,14 +465,14 @@ export function AudioTrim() {
                       const val = parseFloat(e.target.value) || 0;
                       setStartTime(Math.max(0, Math.min(val, endTime - 0.5)));
                     }}
-                    className="flex-1 px-3 py-1.5 text-sm border border-gray-200 rounded-lg"
+                    className="flex-1 px-3 py-2 text-sm border border-gray-200 rounded-lg min-h-[44px]"
                     step="0.1"
                     min="0"
                     max={endTime - 0.5}
                   />
                   <button
                     onClick={() => setStartTime(currentTime)}
-                    className="px-2 py-1.5 text-xs bg-gray-100 hover:bg-gray-200 rounded-lg"
+                    className="px-3 py-2 text-xs bg-gray-100 hover:bg-gray-200 rounded-lg min-h-[44px] whitespace-nowrap"
                     title="Utiliser la position actuelle"
                   >
                     Ici
@@ -489,14 +489,14 @@ export function AudioTrim() {
                       const val = parseFloat(e.target.value) || 0;
                       setEndTime(Math.max(startTime + 0.5, Math.min(val, duration)));
                     }}
-                    className="flex-1 px-3 py-1.5 text-sm border border-gray-200 rounded-lg"
+                    className="flex-1 px-3 py-2 text-sm border border-gray-200 rounded-lg min-h-[44px]"
                     step="0.1"
                     min={startTime + 0.5}
                     max={duration}
                   />
                   <button
                     onClick={() => setEndTime(currentTime)}
-                    className="px-2 py-1.5 text-xs bg-gray-100 hover:bg-gray-200 rounded-lg"
+                    className="px-3 py-2 text-xs bg-gray-100 hover:bg-gray-200 rounded-lg min-h-[44px] whitespace-nowrap"
                     title="Utiliser la position actuelle"
                   >
                     Ici

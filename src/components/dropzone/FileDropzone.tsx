@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useRef } from 'react';
 import { Upload, File as FileIcon, Download, X, AlertCircle } from 'lucide-react';
 import { useConversionStore } from '../../stores/conversionStore';
 import { formatSize } from '../../utils/formatSize';
@@ -56,6 +56,7 @@ export function FileDropzone({ acceptedFormats }: FileDropzoneProps) {
   const { t } = useLanguage();
   const [isDragging, setIsDragging] = useState(false);
   const { addFiles, files, clearCompletedFiles } = useConversionStore();
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -82,6 +83,12 @@ export function FileDropzone({ acceptedFormats }: FileDropzoneProps) {
     [addFiles, clearCompletedFiles]
   );
 
+  // Handle touch tap to open file picker on mobile
+  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
+    e.preventDefault();
+    inputRef.current?.click();
+  }, []);
+
   const handleFileSelect = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const selectedFiles = e.target.files ? Array.from(e.target.files) : [];
@@ -107,14 +114,16 @@ export function FileDropzone({ acceptedFormats }: FileDropzoneProps) {
   return (
     <div className="space-y-4">
       <label
-        className={`dropzone flex flex-col items-center justify-center min-h-[200px] ${
+        className={`dropzone flex flex-col items-center justify-center min-h-[200px] cursor-pointer ${
           isDragging ? 'active' : ''
         }`}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
+        onTouchEnd={handleTouchEnd}
       >
         <input
+          ref={inputRef}
           type="file"
           className="hidden"
           multiple
