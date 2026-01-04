@@ -128,13 +128,36 @@ export function VideoTrim() {
       await ff.writeFile(inputName, await fetchFile(video));
 
       const durationSec = endTime - startTime;
-      await ff.exec([
-        '-i', inputName,
-        '-ss', startTime.toString(),
-        '-t', durationSec.toString(),
-        '-c', 'copy',
-        outputName,
-      ]);
+
+      // For short durations (< 3s) or precise cuts, use re-encoding for frame-accurate trimming
+      // -c copy only cuts at keyframes which doesn't work for short clips
+      const useReencode = durationSec < 3 || startTime > 0;
+
+      const ffmpegArgs = useReencode
+        ? [
+            '-i', inputName,
+            '-ss', startTime.toFixed(3),
+            '-t', durationSec.toFixed(3),
+            '-c:v', 'libx264',
+            '-preset', 'fast',
+            '-crf', '18',
+            '-c:a', 'aac',
+            '-b:a', '128k',
+            '-avoid_negative_ts', 'make_zero',
+            '-y',
+            outputName,
+          ]
+        : [
+            '-ss', startTime.toFixed(3),
+            '-i', inputName,
+            '-t', durationSec.toFixed(3),
+            '-c', 'copy',
+            '-avoid_negative_ts', 'make_zero',
+            '-y',
+            outputName,
+          ];
+
+      await ff.exec(ffmpegArgs);
 
       const data = await ff.readFile(outputName);
       const blob = new Blob([data as unknown as BlobPart], { type: 'video/mp4' });

@@ -316,9 +316,12 @@ export function VideoCrop() {
       let cropW = Math.round((cropArea.width / 100) * videoInfo.width);
       let cropH = Math.round((cropArea.height / 100) * videoInfo.height);
 
-      // Ensure even dimensions
-      cropW = cropW % 2 === 0 ? cropW : cropW - 1;
-      cropH = cropH % 2 === 0 ? cropH : cropH - 1;
+      // Ensure even dimensions (round down to avoid adding extra pixels)
+      cropW = cropW - (cropW % 2);
+      cropH = cropH - (cropH % 2);
+      // Ensure minimum size
+      cropW = Math.max(2, cropW);
+      cropH = Math.max(2, cropH);
 
       await ff.exec([
         '-i', inputName,
@@ -328,6 +331,8 @@ export function VideoCrop() {
         '-crf', '23',
         '-c:a', 'aac',
         '-b:a', '128k',
+        '-pix_fmt', 'yuv420p',
+        '-y',
         'output.mp4',
       ]);
 

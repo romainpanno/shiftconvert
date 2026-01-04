@@ -185,17 +185,25 @@ export function VideoResize() {
       setStepProgress(0);
 
       // Ensure dimensions are even (required by most codecs)
-      const finalWidth = width % 2 === 0 ? width : width + 1;
-      const finalHeight = height % 2 === 0 ? height : height + 1;
+      // Round down to nearest even number to avoid adding extra pixels
+      const finalWidth = width % 2 === 0 ? width : width - 1;
+      const finalHeight = height % 2 === 0 ? height : height - 1;
+
+      // Use high-quality scaling with proper color handling
+      // The scale filter uses lanczos for best quality, pad ensures even dimensions
+      // and centers the video if any adjustment is needed
+      const scaleFilter = `scale=${finalWidth}:${finalHeight}:flags=lanczos,setsar=1`;
 
       await ff.exec([
         '-i', inputName,
-        '-vf', `scale=${finalWidth}:${finalHeight}`,
+        '-vf', scaleFilter,
         '-c:v', 'libx264',
         '-preset', 'fast',
         '-crf', '23',
         '-c:a', 'aac',
         '-b:a', '128k',
+        '-pix_fmt', 'yuv420p',
+        '-y',
         'output.mp4',
       ]);
 

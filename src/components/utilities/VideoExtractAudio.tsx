@@ -48,10 +48,10 @@ export function VideoExtractAudio() {
 
       const outputName = `output.${format}`;
       const args = format === 'mp3'
-        ? ['-i', inputName, '-vn', '-acodec', 'libmp3lame', '-q:a', '2', outputName]
+        ? ['-i', inputName, '-vn', '-acodec', 'libmp3lame', '-q:a', '2', '-y', outputName]
         : format === 'wav'
-        ? ['-i', inputName, '-vn', '-acodec', 'pcm_s16le', outputName]
-        : ['-i', inputName, '-vn', '-acodec', 'aac', '-b:a', '192k', outputName];
+        ? ['-i', inputName, '-vn', '-acodec', 'pcm_s16le', '-y', outputName]
+        : ['-i', inputName, '-vn', '-acodec', 'aac', '-b:a', '192k', '-y', outputName];
 
       await ff.exec(args);
 

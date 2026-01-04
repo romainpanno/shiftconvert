@@ -122,13 +122,28 @@ export function AudioTrim() {
       const ext = audio.name.substring(audio.name.lastIndexOf('.'));
       await ff.writeFile('input' + ext, await fetchFile(audio));
 
-      await ff.exec([
-        '-i', 'input' + ext,
-        '-ss', startTime.toString(),
-        '-t', (endTime - startTime).toString(),
-        '-c', 'copy',
-        'output' + ext,
-      ]);
+      const durationSec = endTime - startTime;
+      // For short durations (< 2s), use re-encoding for precise cuts
+      const useReencode = durationSec < 2;
+
+      const ffmpegArgs = useReencode
+        ? [
+            '-i', 'input' + ext,
+            '-ss', startTime.toFixed(3),
+            '-t', durationSec.toFixed(3),
+            '-y',
+            'output' + ext,
+          ]
+        : [
+            '-ss', startTime.toFixed(3),
+            '-i', 'input' + ext,
+            '-t', durationSec.toFixed(3),
+            '-c', 'copy',
+            '-y',
+            'output' + ext,
+          ];
+
+      await ff.exec(ffmpegArgs);
 
       const data = await ff.readFile('output' + ext);
       const blob = new Blob([data as unknown as BlobPart], { type: audio.type });

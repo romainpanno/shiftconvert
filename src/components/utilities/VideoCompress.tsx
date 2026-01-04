@@ -47,7 +47,7 @@ export function VideoCompress() {
       const inputName = 'input' + video.name.substring(video.name.lastIndexOf('.'));
       await ff.writeFile(inputName, await fetchFile(video));
 
-      await ff.exec(['-i', inputName, '-c:v', 'libx264', '-crf', quality.toString(), '-preset', 'fast', '-c:a', 'aac', '-b:a', '128k', 'output.mp4']);
+      await ff.exec(['-i', inputName, '-c:v', 'libx264', '-crf', quality.toString(), '-preset', 'fast', '-c:a', 'aac', '-b:a', '128k', '-pix_fmt', 'yuv420p', '-y', 'output.mp4']);
 
       const data = await ff.readFile('output.mp4');
       const blob = new Blob([data as unknown as BlobPart], { type: 'video/mp4' });

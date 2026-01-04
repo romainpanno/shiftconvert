@@ -250,16 +250,18 @@ export function ImageResize() {
       const scale = Math.max(finalWidth / sw, finalHeight / sh);
       const scaledW = sw * scale;
       const scaledH = sh * scale;
-      dx = (finalWidth - scaledW) / 2;
-      dy = (finalHeight - scaledH) / 2;
-      dw = scaledW;
-      dh = scaledH;
+      // Use Math.floor for offset to avoid subpixel rendering issues
+      dx = Math.floor((finalWidth - scaledW) / 2);
+      dy = Math.floor((finalHeight - scaledH) / 2);
+      dw = Math.ceil(scaledW);
+      dh = Math.ceil(scaledH);
     } else if (fitMode === 'contain') {
       const scale = Math.min(finalWidth / sw, finalHeight / sh);
-      dw = sw * scale;
-      dh = sh * scale;
-      dx = (finalWidth - dw) / 2;
-      dy = (finalHeight - dh) / 2;
+      // Round dimensions and center precisely
+      dw = Math.round(sw * scale);
+      dh = Math.round(sh * scale);
+      dx = Math.floor((finalWidth - dw) / 2);
+      dy = Math.floor((finalHeight - dh) / 2);
     }
 
     ctx.drawImage(img, 0, 0, sw, sh, dx, dy, dw, dh);
@@ -337,16 +339,18 @@ export function ImageResize() {
       const scale = Math.max(canvasW / sw, canvasH / sh);
       const scaledW = sw * scale;
       const scaledH = sh * scale;
-      dx = (canvasW - scaledW) / 2;
-      dy = (canvasH - scaledH) / 2;
-      dw = scaledW;
-      dh = scaledH;
+      // Use Math.floor for offset to avoid subpixel rendering issues
+      dx = Math.floor((canvasW - scaledW) / 2);
+      dy = Math.floor((canvasH - scaledH) / 2);
+      dw = Math.ceil(scaledW);
+      dh = Math.ceil(scaledH);
     } else if (fitMode === 'contain') {
       const scale = Math.min(canvasW / sw, canvasH / sh);
-      dw = sw * scale;
-      dh = sh * scale;
-      dx = (canvasW - dw) / 2;
-      dy = (canvasH - dh) / 2;
+      // Round dimensions and center precisely
+      dw = Math.round(sw * scale);
+      dh = Math.round(sh * scale);
+      dx = Math.floor((canvasW - dw) / 2);
+      dy = Math.floor((canvasH - dh) / 2);
     }
 
     ctx.drawImage(img, 0, 0, sw, sh, dx, dy, dw, dh);
