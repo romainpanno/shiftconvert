@@ -1,73 +1,111 @@
-# React + TypeScript + Vite
+# ShiftConvert
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+**ShiftConvert** est une application web de conversion et d'édition multimédia qui fonctionne entièrement côté client. Aucun fichier n'est envoyé sur un serveur — tout le traitement se fait directement dans votre navigateur.
 
-Currently, two official plugins are available:
+![Page principale](docs/pictures/MainPageTop.png)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Fonctionnalités
 
-## React Compiler
+### Conversions de fichiers
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Convertissez facilement entre de nombreux formats :
 
-## Expanding the ESLint configuration
+- **Images** : PNG, JPG, WebP, GIF, BMP, ICO, TIFF, HEIC
+- **Vidéos** : MP4, WebM, AVI, MOV, MKV, GIF
+- **Audio** : MP3, WAV, OGG, FLAC, AAC, M4A
+- **Documents** : PDF, DOCX, Markdown, Excel, et plus
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+![Liste des conversions disponibles](docs/pictures/MainPageListOfConversions.png)
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+### Conversion d'images
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+Interface intuitive pour convertir vos images entre différents formats avec aperçu en temps réel.
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+![Conversion d'images](docs/pictures/ConvertImagesFeature.png)
+
+### Utilitaires multimédia
+
+Une suite complète d'outils pour éditer vos fichiers :
+
+![Liste des utilitaires](docs/pictures/ListOfUtilities.png)
+
+#### Vidéo
+- **Découpage vidéo** — Extraire des segments avec timeline interactive
+- **Recadrage vidéo** — Rogner avec préréglages de ratio (16:9, 9:16, 1:1...)
+- **Redimensionnement** — Changer la résolution (4K, 1080p, 720p...)
+- **Compression** — Réduire la taille avec contrôle de qualité
+- **Extraction audio** — Extraire la piste audio en MP3, WAV ou AAC
+
+![Découpage vidéo](docs/pictures/VideoTrim.png)
+
+#### Audio
+- **Découpage audio** — Extraire des segments avec visualisation de forme d'onde
+- **Normalisation** — Ajuster le volume automatiquement
+
+#### Images
+- **Redimensionnement** — Avec modes scale, cover, contain, fill
+- **Compression** — Optimiser la taille des fichiers
+- **Recadrage** — Rogner avec ratios prédéfinis
+- **Rotation** — Pivoter et retourner
+
+#### PDF
+- **Fusion** — Combiner plusieurs PDF en un seul
+- **Division** — Séparer un PDF en plusieurs fichiers
+- **Réorganisation** — Changer l'ordre des pages
+- **Numérotation** — Ajouter des numéros de page
+
+![Outils PDF](docs/pictures/PDFTools.png)
+
+#### Autres outils
+- **Éditeur de métadonnées de polices** — Modifier les informations des fichiers de polices
+- **Générateur de QR Code** — Créer des codes QR personnalisés
+- **Création/Extraction ZIP** — Compresser et décompresser des archives
+
+### Recherche intelligente
+
+Trouvez rapidement la conversion ou l'outil dont vous avez besoin grâce à la barre de recherche.
+
+![Barre de recherche](docs/pictures/SearchBarFeature.png)
+
+## Technologies
+
+- **React 19** + **TypeScript** — Interface utilisateur moderne et typée
+- **Vite** — Build rapide et développement avec HMR
+- **Tailwind CSS 4** — Styles utilitaires
+- **FFmpeg.wasm** — Traitement vidéo/audio dans le navigateur
+- **pdf-lib** / **pdfjs-dist** — Manipulation de PDF
+- **Canvas API** — Traitement d'images
+
+## Installation
+
+```bash
+# Cloner le projet
+git clone https://github.com/romainpanno/shiftconvert.git
+cd shiftconvert
+
+# Installer les dépendances
+npm install
+
+# Lancer en développement
+npm run dev
+
+# Build de production
+npm run build
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Scripts disponibles
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+| Commande | Description |
+|----------|-------------|
+| `npm run dev` | Lance le serveur de développement |
+| `npm run build` | Compile pour la production |
+| `npm run preview` | Prévisualise le build de production |
+| `npm run lint` | Vérifie le code avec ESLint |
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+## Confidentialité
+
+**Vos fichiers restent privés.** ShiftConvert traite tous les fichiers localement dans votre navigateur. Aucune donnée n'est envoyée à un serveur externe.
+
+## Licence
+
+MIT
