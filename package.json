@@ -15,9 +15,10 @@
     "@tailwindcss/postcss": "^4.1.18",
     "browser-image-compression": "^2.0.2",
     "docx-preview": "^0.3.7",
+    "exceljs": "^4.4.0",
     "fonteditor-core": "^2.6.3",
     "heic2any": "^0.0.4",
-    "jspdf": "^3.0.4",
+    "jspdf": "^4.1.0",
     "jszip": "^3.10.1",
     "lucide-react": "^0.562.0",
     "mammoth": "^1.11.0",
@@ -30,7 +31,6 @@
     "react-dom": "^19.2.0",
     "react-router-dom": "^7.11.0",
     "wawoff2": "^2.0.1",
-    "exceljs": "^4.4.0",
     "zustand": "^5.0.9"
   },
   "devDependencies": {
