@@ -1,8 +1,9 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { Upload, Download, X, Music } from 'lucide-react';
 import { FFmpeg } from '@ffmpeg/ffmpeg';
 import { fetchFile } from '@ffmpeg/util';
 import { useLanguage } from '../../i18n';
+import { consumePendingFiles } from '../../stores/pendingFiles';
 
 export function VideoExtractAudio() {
   const { t } = useLanguage();
@@ -75,6 +76,12 @@ export function VideoExtractAudio() {
     setIsProcessing(false);
   };
 
+
+  useEffect(() => {
+    const pending = consumePendingFiles();
+    const first = pending.find((f) => /^video\//i.test(f.type));
+    if (first) loadVideo(first);
+  }, [loadVideo]);
   return (
     <div className="space-y-6">
       {!video ? (

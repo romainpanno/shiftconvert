@@ -3,6 +3,7 @@ import { Upload, Download, X, Play, Pause, RotateCcw, Square, RectangleHorizonta
 import { FFmpeg } from '@ffmpeg/ffmpeg';
 import { fetchFile } from '@ffmpeg/util';
 import { useLanguage } from '../../i18n';
+import { consumePendingFiles } from '../../stores/pendingFiles';
 
 interface VideoInfo {
   width: number;
@@ -367,6 +368,12 @@ export function VideoCrop() {
   // For reset button and crop button: check if there's actual cropping (not 100%)
   const hasCropToDo = cropArea.width < 100 || cropArea.height < 100 || cropArea.x > 0 || cropArea.y > 0;
 
+
+  useEffect(() => {
+    const pending = consumePendingFiles();
+    const first = pending.find((f) => /^video\//i.test(f.type));
+    if (first) loadVideo(first);
+  }, [loadVideo]);
   return (
     <div className="space-y-6">
       {!video ? (

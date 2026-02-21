@@ -1,9 +1,10 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { Upload, Download, X, Volume2 } from 'lucide-react';
 import { FFmpeg } from '@ffmpeg/ffmpeg';
 import { fetchFile } from '@ffmpeg/util';
 import { formatSize } from '../../utils/formatSize';
 import { useLanguage } from '../../i18n';
+import { consumePendingFiles } from '../../stores/pendingFiles';
 
 export function AudioNormalize() {
   const { t } = useLanguage();
@@ -87,6 +88,11 @@ export function AudioNormalize() {
     setCurrentFile('');
   };
 
+
+  useEffect(() => {
+    const pending = consumePendingFiles();
+    if (pending.length > 0) addFiles(pending.filter((f) => /^audio\//i.test(f.type)));
+  }, [addFiles]);
   return (
     <div className="space-y-6">
       <div className="card">

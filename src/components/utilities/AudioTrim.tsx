@@ -3,6 +3,7 @@ import { Upload, Download, X, Play, Pause, SkipBack, SkipForward, RotateCcw } fr
 import { FFmpeg } from '@ffmpeg/ffmpeg';
 import { fetchFile } from '@ffmpeg/util';
 import { useLanguage } from '../../i18n';
+import { consumePendingFiles } from '../../stores/pendingFiles';
 
 export function AudioTrim() {
   const { t } = useLanguage();
@@ -253,6 +254,12 @@ export function AudioTrim() {
     }
   }, [draggingHandle, handleMouseMove, handleMouseUp]);
 
+
+  useEffect(() => {
+    const pending = consumePendingFiles();
+    const first = pending.find((f) => /^audio\//i.test(f.type));
+    if (first) loadAudio(first);
+  }, [loadAudio]);
   return (
     <div className="space-y-6">
       {!audio ? (

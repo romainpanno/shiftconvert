@@ -29,6 +29,41 @@ export const translations: Record<Language, Record<string, string>> = {
     'home.searchResult.tool': 'Outil',
     'home.searchResult.format': 'Format',
     'home.convert': 'Convertir',
+    'home.orSearch': 'ou recherchez',
+
+    // Smart dropzone
+    'smartdropzone.dropHere': 'Déposez vos fichiers ici',
+    'smartdropzone.orClick': 'ou cliquez pour sélectionner',
+    'smartdropzone.convertTo': 'Convertir en',
+    'smartdropzone.tools': 'Outils disponibles',
+    'smartdropzone.change': 'Changer de fichier',
+    'smartdropzone.others': 'autres',
+    'smartdropzone.unsupported': 'Format non reconnu',
+    'smartdropzone.unsupportedDesc': 'Ce type de fichier n\'est pas pris en charge.',
+    'smartdropzone.someUnsupported': 'Certains fichiers ont un format non reconnu et ont été ignorés.',
+    'smartdropzone.fileOnly': 'fichier',
+
+    // Merge utilities
+    'merge.addVideos': 'Ajoutez vos vidéos ici',
+    'merge.videoFormats': 'MP4, WebM, AVI, MOV, MKV',
+    'merge.addAudios': 'Ajoutez vos fichiers audio ici',
+    'merge.audioFormats': 'MP3, WAV, OGG, FLAC, M4A, AAC',
+    'merge.order': 'Ordre de fusion',
+    'merge.files': 'fichiers',
+    'merge.orderHint': 'Les fichiers seront assemblés dans cet ordre',
+    'merge.moveUp': 'Monter',
+    'merge.moveDown': 'Descendre',
+    'merge.remove': 'Supprimer',
+    'merge.outputFormat': 'Format de sortie',
+    'merge.mergeVideos': 'Fusionner les vidéos',
+    'merge.mergeAudios': 'Fusionner les audios',
+    'merge.merging': 'Fusion en cours...',
+    'merge.needMoreVideos': 'Ajoutez au moins 2 vidéos pour fusionner',
+    'merge.needMoreAudios': 'Ajoutez au moins 2 fichiers audio pour fusionner',
+    'merge.done': 'Fusion terminée !',
+    'merge.videoDoneDesc': 'Votre vidéo fusionnée est prête',
+    'merge.audioDoneDesc': 'Votre audio fusionné est prêt',
+    'merge.download': 'Télécharger',
 
     // Footer
     'footer.privacy': '100% client-side - Vos fichiers ne quittent jamais votre appareil',
@@ -289,6 +324,11 @@ export const translations: Record<Language, Record<string, string>> = {
     'qrCode.error.high': 'Élevé (30%)',
     'qrCode.svgBasic': 'SVG (basique)',
 
+    'utility.video-merge': 'Fusionner Vidéos',
+    'utility.video-merge.desc': 'Assembler plusieurs vidéos en une seule',
+    'utility.audio-merge': 'Fusionner Audio',
+    'utility.audio-merge.desc': 'Assembler plusieurs fichiers audio en un seul',
+
     // PDF Tools
     'utility.pdf-tools': 'Outils PDF',
     'utility.pdf-tools.desc': 'Fusionner, organiser, pivoter, numéroter vos PDFs',
@@ -360,6 +400,18 @@ export const translations: Record<Language, Record<string, string>> = {
     'home.searchResult.tool': 'Tool',
     'home.searchResult.format': 'Format',
     'home.convert': 'Convert',
+    'home.orSearch': 'or search',
+
+    // Smart dropzone
+    'smartdropzone.dropHere': 'Drop your files here',
+    'smartdropzone.orClick': 'or click to select',
+    'smartdropzone.convertTo': 'Convert to',
+    'smartdropzone.tools': 'Available tools',
+    'smartdropzone.change': 'Change file',
+    'smartdropzone.others': 'others',
+    'smartdropzone.unsupported': 'Unrecognized format',
+    'smartdropzone.unsupportedDesc': 'This file type is not supported.',
+    'smartdropzone.someUnsupported': 'Some files have an unrecognized format and were ignored.',
 
     // Footer
     'footer.privacy': '100% client-side - Your files never leave your device',
@@ -620,6 +672,35 @@ export const translations: Record<Language, Record<string, string>> = {
     'qrCode.error.high': 'High (30%)',
     'qrCode.svgBasic': 'SVG (basic)',
 
+    'utility.video-merge': 'Merge Videos',
+    'utility.video-merge.desc': 'Combine multiple videos into one',
+    'utility.audio-merge': 'Merge Audio',
+    'utility.audio-merge.desc': 'Combine multiple audio files into one',
+
+    'smartdropzone.fileOnly': 'file',
+
+    // Merge utilities
+    'merge.addVideos': 'Add your videos here',
+    'merge.videoFormats': 'MP4, WebM, AVI, MOV, MKV',
+    'merge.addAudios': 'Add your audio files here',
+    'merge.audioFormats': 'MP3, WAV, OGG, FLAC, M4A, AAC',
+    'merge.order': 'Merge order',
+    'merge.files': 'files',
+    'merge.orderHint': 'Files will be assembled in this order',
+    'merge.moveUp': 'Move up',
+    'merge.moveDown': 'Move down',
+    'merge.remove': 'Remove',
+    'merge.outputFormat': 'Output format',
+    'merge.mergeVideos': 'Merge videos',
+    'merge.mergeAudios': 'Merge audios',
+    'merge.merging': 'Merging...',
+    'merge.needMoreVideos': 'Add at least 2 videos to merge',
+    'merge.needMoreAudios': 'Add at least 2 audio files to merge',
+    'merge.done': 'Merge complete!',
+    'merge.videoDoneDesc': 'Your merged video is ready',
+    'merge.audioDoneDesc': 'Your merged audio is ready',
+    'merge.download': 'Download',
+
     // PDF Tools
     'utility.pdf-tools': 'PDF Tools',
     'utility.pdf-tools.desc': 'Merge, organize, rotate, number your PDFs',
@@ -691,6 +772,18 @@ export const translations: Record<Language, Record<string, string>> = {
     'home.searchResult.tool': 'Herramienta',
     'home.searchResult.format': 'Formato',
     'home.convert': 'Convertir',
+    'home.orSearch': 'o busca',
+
+    // Smart dropzone
+    'smartdropzone.dropHere': 'Suelta tus archivos aquí',
+    'smartdropzone.orClick': 'o haz clic para seleccionar',
+    'smartdropzone.convertTo': 'Convertir a',
+    'smartdropzone.tools': 'Herramientas disponibles',
+    'smartdropzone.change': 'Cambiar archivo',
+    'smartdropzone.others': 'más',
+    'smartdropzone.unsupported': 'Formato no reconocido',
+    'smartdropzone.unsupportedDesc': 'Este tipo de archivo no está soportado.',
+    'smartdropzone.someUnsupported': 'Algunos archivos tienen un formato no reconocido y fueron ignorados.',
 
     // Footer
     'footer.privacy': '100% del lado del cliente - Tus archivos nunca salen de tu dispositivo',
@@ -951,6 +1044,35 @@ export const translations: Record<Language, Record<string, string>> = {
     'qrCode.error.high': 'Alto (30%)',
     'qrCode.svgBasic': 'SVG (básico)',
 
+    'utility.video-merge': 'Fusionar Vídeos',
+    'utility.video-merge.desc': 'Combinar varios vídeos en uno solo',
+    'utility.audio-merge': 'Fusionar Audio',
+    'utility.audio-merge.desc': 'Combinar varios archivos de audio en uno solo',
+
+    'smartdropzone.fileOnly': 'archivo',
+
+    // Merge utilities
+    'merge.addVideos': 'Agrega tus vídeos aquí',
+    'merge.videoFormats': 'MP4, WebM, AVI, MOV, MKV',
+    'merge.addAudios': 'Agrega tus archivos de audio aquí',
+    'merge.audioFormats': 'MP3, WAV, OGG, FLAC, M4A, AAC',
+    'merge.order': 'Orden de fusión',
+    'merge.files': 'archivos',
+    'merge.orderHint': 'Los archivos se ensamblarán en este orden',
+    'merge.moveUp': 'Subir',
+    'merge.moveDown': 'Bajar',
+    'merge.remove': 'Eliminar',
+    'merge.outputFormat': 'Formato de salida',
+    'merge.mergeVideos': 'Fusionar vídeos',
+    'merge.mergeAudios': 'Fusionar audios',
+    'merge.merging': 'Fusionando...',
+    'merge.needMoreVideos': 'Agrega al menos 2 vídeos para fusionar',
+    'merge.needMoreAudios': 'Agrega al menos 2 archivos de audio para fusionar',
+    'merge.done': '¡Fusión completada!',
+    'merge.videoDoneDesc': 'Tu vídeo fusionado está listo',
+    'merge.audioDoneDesc': 'Tu audio fusionado está listo',
+    'merge.download': 'Descargar',
+
     // PDF Tools
     'utility.pdf-tools': 'Herramientas PDF',
     'utility.pdf-tools.desc': 'Fusionar, organizar, rotar, numerar tus PDFs',
@@ -1022,6 +1144,18 @@ export const translations: Record<Language, Record<string, string>> = {
     'home.searchResult.tool': 'Werkzeug',
     'home.searchResult.format': 'Format',
     'home.convert': 'Konvertieren',
+    'home.orSearch': 'oder suchen',
+
+    // Smart dropzone
+    'smartdropzone.dropHere': 'Dateien hier ablegen',
+    'smartdropzone.orClick': 'oder klicken zum Auswählen',
+    'smartdropzone.convertTo': 'Konvertieren zu',
+    'smartdropzone.tools': 'Verfügbare Werkzeuge',
+    'smartdropzone.change': 'Datei ändern',
+    'smartdropzone.others': 'weitere',
+    'smartdropzone.unsupported': 'Unbekanntes Format',
+    'smartdropzone.unsupportedDesc': 'Dieser Dateityp wird nicht unterstützt.',
+    'smartdropzone.someUnsupported': 'Einige Dateien haben ein unbekanntes Format und wurden ignoriert.',
 
     // Footer
     'footer.privacy': '100% clientseitig - Ihre Dateien verlassen niemals Ihr Gerät',
@@ -1281,6 +1415,35 @@ export const translations: Record<Language, Record<string, string>> = {
     'qrCode.error.good': 'Gut (25%)',
     'qrCode.error.high': 'Hoch (30%)',
     'qrCode.svgBasic': 'SVG (einfach)',
+
+    'utility.video-merge': 'Videos zusammenführen',
+    'utility.video-merge.desc': 'Mehrere Videos zu einem zusammenführen',
+    'utility.audio-merge': 'Audio zusammenführen',
+    'utility.audio-merge.desc': 'Mehrere Audiodateien zu einer zusammenführen',
+
+    'smartdropzone.fileOnly': 'Datei',
+
+    // Merge utilities
+    'merge.addVideos': 'Videos hier hinzufügen',
+    'merge.videoFormats': 'MP4, WebM, AVI, MOV, MKV',
+    'merge.addAudios': 'Audiodateien hier hinzufügen',
+    'merge.audioFormats': 'MP3, WAV, OGG, FLAC, M4A, AAC',
+    'merge.order': 'Zusammenführungsreihenfolge',
+    'merge.files': 'Dateien',
+    'merge.orderHint': 'Dateien werden in dieser Reihenfolge zusammengeführt',
+    'merge.moveUp': 'Nach oben',
+    'merge.moveDown': 'Nach unten',
+    'merge.remove': 'Entfernen',
+    'merge.outputFormat': 'Ausgabeformat',
+    'merge.mergeVideos': 'Videos zusammenführen',
+    'merge.mergeAudios': 'Audios zusammenführen',
+    'merge.merging': 'Zusammenführen...',
+    'merge.needMoreVideos': 'Mindestens 2 Videos zum Zusammenführen hinzufügen',
+    'merge.needMoreAudios': 'Mindestens 2 Audiodateien zum Zusammenführen hinzufügen',
+    'merge.done': 'Zusammenführung abgeschlossen!',
+    'merge.videoDoneDesc': 'Ihr zusammengeführtes Video ist fertig',
+    'merge.audioDoneDesc': 'Ihre zusammengeführte Audiodatei ist fertig',
+    'merge.download': 'Herunterladen',
 
     // PDF Tools
     'utility.pdf-tools': 'PDF-Werkzeuge',

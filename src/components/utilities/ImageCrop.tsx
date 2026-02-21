@@ -3,6 +3,7 @@ import { Upload, Download, X, RotateCcw } from 'lucide-react';
 import { FFmpeg } from '@ffmpeg/ffmpeg';
 import { fetchFile } from '@ffmpeg/util';
 import { useLanguage } from '../../i18n';
+import { consumePendingFiles } from '../../stores/pendingFiles';
 
 interface CropArea {
   x: number;
@@ -420,6 +421,12 @@ export function ImageCrop() {
 
   const pixels = getCropPixels();
 
+
+  useEffect(() => {
+    const pending = consumePendingFiles();
+    const first = pending.find((f) => /^image\//i.test(f.type));
+    if (first) loadImage(first);
+  }, [loadImage]);
   return (
     <div className="space-y-6">
       {!image ? (

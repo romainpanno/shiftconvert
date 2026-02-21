@@ -1,9 +1,10 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { Upload, Download, X } from 'lucide-react';
 import { FFmpeg } from '@ffmpeg/ffmpeg';
 import { fetchFile } from '@ffmpeg/util';
 import { formatSize } from '../../utils/formatSize';
 import { useLanguage } from '../../i18n';
+import { consumePendingFiles } from '../../stores/pendingFiles';
 
 export function VideoCompress() {
   const { t } = useLanguage();
@@ -76,6 +77,12 @@ export function VideoCompress() {
 
   const qualityInfo = getQualityLabel();
 
+
+  useEffect(() => {
+    const pending = consumePendingFiles();
+    const first = pending.find((f) => /^video\//i.test(f.type));
+    if (first) loadVideo(first);
+  }, [loadVideo]);
   return (
     <div className="space-y-6">
       {!video ? (

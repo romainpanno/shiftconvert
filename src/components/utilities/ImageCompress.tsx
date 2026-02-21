@@ -1,9 +1,10 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { Upload, Download, X, Gauge, Sparkles, FileDown } from 'lucide-react';
 import { FFmpeg } from '@ffmpeg/ffmpeg';
 import { fetchFile } from '@ffmpeg/util';
 import { formatSize } from '../../utils/formatSize';
 import { useLanguage } from '../../i18n';
+import { consumePendingFiles } from '../../stores/pendingFiles';
 
 // Check if a GIF file is animated by looking for multiple frames
 async function isAnimatedGif(file: File): Promise<boolean> {
@@ -199,6 +200,11 @@ export function ImageCompress() {
 
   const qualityInfo = getQualityLabel();
 
+
+  useEffect(() => {
+    const pending = consumePendingFiles();
+    if (pending.length > 0) addFiles(pending.filter((f) => /^image\//i.test(f.type)));
+  }, [addFiles]);
   return (
     <div className="space-y-6">
       {/* Dropzone */}

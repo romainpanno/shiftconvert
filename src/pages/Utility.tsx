@@ -20,6 +20,8 @@ import { CreateZip } from '../components/utilities/CreateZip';
 import { ExtractZip } from '../components/utilities/ExtractZip';
 import { QrCodeGenerator } from '../components/utilities/QrCodeGenerator';
 import { PdfTools } from '../components/utilities/PdfTools';
+import { VideoMerge } from '../components/utilities/VideoMerge';
+import { AudioMerge } from '../components/utilities/AudioMerge';
 
 const utilityComponents: Record<string, React.ComponentType> = {
   'font-metadata': FontMetadataEditor,
@@ -38,6 +40,8 @@ const utilityComponents: Record<string, React.ComponentType> = {
   'extract-zip': ExtractZip,
   'qr-code': QrCodeGenerator,
   'pdf-tools': PdfTools,
+  'video-merge': VideoMerge,
+  'audio-merge': AudioMerge,
 };
 
 export function Utility() {

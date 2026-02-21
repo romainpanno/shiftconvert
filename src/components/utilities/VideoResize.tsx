@@ -1,8 +1,9 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { Upload, Download, X, Link, Unlink, RotateCcw, Monitor, Smartphone, Tablet } from 'lucide-react';
 import { FFmpeg } from '@ffmpeg/ffmpeg';
 import { fetchFile } from '@ffmpeg/util';
 import { useLanguage } from '../../i18n';
+import { consumePendingFiles } from '../../stores/pendingFiles';
 import { ProgressTracker, STEPS_VIDEO } from '../ui/ProgressTracker';
 
 interface VideoInfo {
@@ -248,6 +249,12 @@ export function VideoResize() {
   const scaleInfo = getScaleInfo();
   const hasChanges = videoInfo && (width !== videoInfo.width || height !== videoInfo.height);
 
+
+  useEffect(() => {
+    const pending = consumePendingFiles();
+    const first = pending.find((f) => /^video\//i.test(f.type));
+    if (first) loadVideo(first);
+  }, [loadVideo]);
   return (
     <div className="space-y-6">
       {!video ? (

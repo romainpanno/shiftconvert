@@ -5,6 +5,7 @@ import { ProgressTracker, STEPS_IMAGE, STEPS_IMAGE_FFMPEG } from '../ui/Progress
 import { FFmpeg } from '@ffmpeg/ffmpeg';
 import { fetchFile } from '@ffmpeg/util';
 import { useLanguage } from '../../i18n';
+import { consumePendingFiles } from '../../stores/pendingFiles';
 
 type FitMode = 'scale' | 'cover' | 'contain' | 'fill' | 'fit-width' | 'fit-height';
 
@@ -436,6 +437,12 @@ export function ImageResize() {
 
   const targetPreview = getTargetPreviewDimensions();
 
+
+  useEffect(() => {
+    const pending = consumePendingFiles();
+    const first = pending.find((f) => /^image\//i.test(f.type));
+    if (first) loadImage(first);
+  }, [loadImage]);
   return (
     <div className="space-y-6">
       {!image ? (

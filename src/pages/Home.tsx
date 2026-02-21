@@ -4,6 +4,7 @@ import { Image, FileText, Music, Video, Type, Shield, Zap, Lock, Wrench, Search,
 import { categories } from '../utils/categories';
 import { utilities } from '../utils/utilities';
 import { useLanguage } from '../i18n';
+import { SmartDropzone } from '../components/dropzone/SmartDropzone';
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Image,
@@ -144,7 +145,7 @@ export function Home() {
     <div className="py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-6xl mx-auto">
         {/* Hero */}
-        <div className="text-center mb-12">
+        <div className="text-center mb-8">
           <h1 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-4">
             {t('home.title')}
             <span className="block text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-primary-400">
@@ -154,9 +155,22 @@ export function Home() {
           <p className="text-lg text-gray-600 max-w-2xl mx-auto mb-8">
             {t('home.description')}
           </p>
+        </div>
 
-          {/* Search bar */}
-          <div className="max-w-xl mx-auto relative">
+        {/* Smart dropzone */}
+        <div className="max-w-3xl mx-auto mb-10">
+          <SmartDropzone />
+        </div>
+
+        {/* Divider */}
+        <div className="flex items-center gap-4 max-w-3xl mx-auto mb-10">
+          <div className="flex-1 h-px bg-gray-200" />
+          <span className="text-sm text-gray-400 font-medium">{t('home.orSearch')}</span>
+          <div className="flex-1 h-px bg-gray-200" />
+        </div>
+
+        {/* Search bar */}
+        <div className="max-w-xl mx-auto relative mb-12">
             <form onSubmit={handleSearchSubmit}>
               <div className={`relative transition-all ${isSearchFocused ? 'scale-105' : ''}`}>
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -229,7 +243,6 @@ export function Home() {
               ))}
             </div>
           </div>
-        </div>
 
         {/* Features */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">

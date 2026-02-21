@@ -1,8 +1,9 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { Upload, Download, X, RotateCw, RotateCcw, FlipHorizontal, FlipVertical, RefreshCcw } from 'lucide-react';
 import { FFmpeg } from '@ffmpeg/ffmpeg';
 import { fetchFile } from '@ffmpeg/util';
 import { useLanguage } from '../../i18n';
+import { consumePendingFiles } from '../../stores/pendingFiles';
 
 // Check if a GIF file is animated
 async function isAnimatedGif(file: File): Promise<boolean> {
@@ -185,6 +186,12 @@ export function ImageRotate() {
 
   const hasChanges = rotation !== 0 || flipH || flipV;
 
+
+  useEffect(() => {
+    const pending = consumePendingFiles();
+    const first = pending.find((f) => /^image\//i.test(f.type));
+    if (first) loadImage(first);
+  }, [loadImage]);
   return (
     <div className="space-y-6">
       {!image ? (

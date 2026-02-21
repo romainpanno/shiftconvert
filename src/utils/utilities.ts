@@ -91,6 +91,14 @@ export const utilities: UtilityInfo[] = [
     color: 'from-purple-500 to-violet-500',
     category: 'video',
   },
+  {
+    id: 'video-merge',
+    label: 'Fusionner Vidéos',
+    description: 'Assembler plusieurs vidéos en une seule',
+    icon: 'Merge',
+    color: 'from-purple-500 to-violet-500',
+    category: 'video',
+  },
   // Audio
   {
     id: 'audio-trim',
@@ -105,6 +113,14 @@ export const utilities: UtilityInfo[] = [
     label: 'Normaliser Audio',
     description: 'Ajuster le volume automatiquement',
     icon: 'Volume2',
+    color: 'from-green-500 to-emerald-500',
+    category: 'audio',
+  },
+  {
+    id: 'audio-merge',
+    label: 'Fusionner Audio',
+    description: 'Assembler plusieurs fichiers audio en un seul',
+    icon: 'Merge',
     color: 'from-green-500 to-emerald-500',
     category: 'audio',
   },
