@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef, useEffect, useLayoutEffect } from 'react';
 import {
-  Upload, Play, Pause, Download, X, ZoomIn, ZoomOut, Film, Music, Volume2, Trash2,
+  Upload, Play, Pause, Download, X, ZoomIn, ZoomOut, Film, Music, Volume2, Trash2, Monitor,
 } from 'lucide-react';
 import { FFmpeg } from '@ffmpeg/ffmpeg';
 import { fetchFile } from '@ffmpeg/util';
@@ -96,6 +96,15 @@ const RATIO_PRESETS = [
 
 export function VideoEditor() {
   const { t } = useLanguage();
+
+  // Mobile detection
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768);
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 767px)');
+    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, []);
 
   // State
   const [clips, setClips] = useState<MediaClip[]>([]);
@@ -921,7 +930,7 @@ export function VideoEditor() {
           if (clip.type === 'image') {
             parts.push(
               `[${i}:v]` + makeScaleFilter('') +
-              `,trim=duration=${clip.displayDuration.toFixed(3)},setpts=PTS-STARTPTS${vLabel}`
+              `,fps=30,format=yuv420p,trim=duration=${clip.displayDuration.toFixed(3)},setpts=PTS-STARTPTS${vLabel}`
             );
             parts.push(
               `aevalsrc=0:channel_layout=stereo:sample_rate=44100:duration=${clip.displayDuration.toFixed(3)}[a${i}]`
@@ -929,11 +938,11 @@ export function VideoEditor() {
           } else {
             parts.push(
               `[${i}:v]trim=start=${clip.trimStart.toFixed(3)}:end=${clip.trimEnd.toFixed(3)},` +
-              `setpts=PTS-STARTPTS,` + makeScaleFilter(vLabel)
+              `setpts=PTS-STARTPTS,` + makeScaleFilter('') + `,fps=30,format=yuv420p${vLabel}`
             );
             if (useVideoAudio && !clip.muteVideoAudio) {
               parts.push(
-                `[${i}:a]atrim=start=${clip.trimStart.toFixed(3)}:end=${clip.trimEnd.toFixed(3)},asetpts=PTS-STARTPTS[a${i}]`
+                `[${i}:a]atrim=start=${clip.trimStart.toFixed(3)}:end=${clip.trimEnd.toFixed(3)},asetpts=PTS-STARTPTS,aresample=44100[a${i}]`
               );
             } else {
               parts.push(
@@ -945,8 +954,10 @@ export function VideoEditor() {
           aLabels.push(`[a${i}]`);
         }
 
+        // concat expects inputs interleaved per segment: [v0][a0][v1][a1]...
+        const interleavedLabels = vLabels.flatMap((v, i) => [v, aLabels[i]]).join('');
         parts.push(
-          `${vLabels.join('')}${aLabels.join('')}concat=n=${sortedClips.length}:v=1:a=1[outv_base][outa_base]`
+          `${interleavedLabels}concat=n=${sortedClips.length}:v=1:a=1[outv_base][outa_base]`
         );
 
         let aLabel = '[outa_base]';
@@ -957,7 +968,7 @@ export function VideoEditor() {
             const a = sortedAudio[i];
             const delayMs = Math.round(a.timelineStart * 1000);
             parts.push(
-              `[${offset + i}:a]atrim=start=${a.trimStart.toFixed(3)}:end=${a.trimEnd.toFixed(3)},asetpts=PTS-STARTPTS[at${i}]`
+              `[${offset + i}:a]atrim=start=${a.trimStart.toFixed(3)}:end=${a.trimEnd.toFixed(3)},asetpts=PTS-STARTPTS,aresample=44100[at${i}]`
             );
             parts.push(`[at${i}]adelay=${delayMs}|${delayMs}[ad${i}]`);
             delayed.push(`[ad${i}]`);
@@ -969,7 +980,7 @@ export function VideoEditor() {
         return { fc: parts.join(';'), aLabel };
       };
 
-      const outputArgs = ['-c:v', 'libx264', '-preset', 'fast', '-crf', '18', '-c:a', 'aac', '-shortest', 'output.mp4'];
+      const outputArgs = ['-c:v', 'libx264', '-preset', 'ultrafast', '-crf', '23', '-c:a', 'aac', '-b:a', '128k', '-shortest', 'output.mp4'];
 
       if (hasOnlySimpleVideos && sortedClips.length === 1) {
         // Single video, just copy
@@ -1006,6 +1017,20 @@ export function VideoEditor() {
   };
 
   // ── Render ─────────────────────────────────────────────────────────────────
+
+  if (isMobile) {
+    return (
+      <div className="flex flex-col items-center justify-center text-center gap-4 py-16 px-6">
+        <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-500 to-violet-500 flex items-center justify-center">
+          <Monitor className="w-8 h-8 text-white" />
+        </div>
+        <div>
+          <h2 className="text-lg font-bold text-gray-900">{t('videoEditor.desktopOnly')}</h2>
+          <p className="text-sm text-gray-500 mt-1 max-w-xs">{t('videoEditor.desktopOnlyDesc')}</p>
+        </div>
+      </div>
+    );
+  }
 
   const timelineWidth = Math.max(800, totalDuration * zoomPxPerSec + 100);
   const hasClips = clips.length > 0 || audioClips.length > 0;
@@ -1172,7 +1197,7 @@ export function VideoEditor() {
 
             {/* Output format */}
             <div className="card shrink-0 space-y-2">
-              <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Format de sortie</h4>
+              <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">{t('videoEditor.outputFormat')}</h4>
               <div className="grid grid-cols-3 gap-1">
                 {RATIO_PRESETS.map((p) => (
                   <button
@@ -1195,7 +1220,7 @@ export function VideoEditor() {
                   }`}
                   onClick={() => setRatioPreset('custom')}
                 >
-                  Custom
+                  {t('videoEditor.custom')}
                 </button>
               </div>
               {ratioPreset === 'custom' && (
@@ -1229,16 +1254,16 @@ export function VideoEditor() {
 
               {/* Fit mode */}
               <div className="pt-1 border-t border-gray-100 space-y-1.5">
-                <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide">Mise à l'échelle</p>
+                <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide">{t('videoEditor.scaleMode')}</p>
                 <div className="flex gap-1">
                   {([
-                    { id: 'fit',     label: 'Fit',     desc: 'Barres noires' },
-                    { id: 'fill',    label: 'Fill',    desc: 'Recadré' },
-                    { id: 'stretch', label: 'Stretch', desc: 'Déformé' },
+                    { id: 'fit',     label: 'Fit',     descKey: 'videoEditor.fitDesc' as const },
+                    { id: 'fill',    label: 'Fill',    descKey: 'videoEditor.fillDesc' as const },
+                    { id: 'stretch', label: 'Stretch', descKey: 'videoEditor.stretchDesc' as const },
                   ] as const).map((m) => (
                     <button
                       key={m.id}
-                      title={m.desc}
+                      title={t(m.descKey)}
                       className={`flex-1 text-xs py-1 rounded border transition-colors ${
                         fitMode === m.id
                           ? 'bg-primary-100 border-primary-400 text-primary-700 font-semibold'
@@ -1251,9 +1276,9 @@ export function VideoEditor() {
                   ))}
                 </div>
                 <p className="text-[10px] text-gray-400">
-                  {fitMode === 'fit' ? 'Contenu dans le cadre, barres si nécessaire' :
-                   fitMode === 'fill' ? 'Remplit le cadre, bords rognés' :
-                   'Étire pour remplir exactement'}
+                  {fitMode === 'fit' ? t('videoEditor.fitHint') :
+                   fitMode === 'fill' ? t('videoEditor.fillHint') :
+                   t('videoEditor.stretchHint')}
                 </p>
               </div>
             </div>
@@ -1411,14 +1436,14 @@ export function VideoEditor() {
             <button
               className="flex items-center gap-1 text-[11px] px-1.5 py-0.5 rounded bg-gray-50 hover:bg-red-50 hover:text-red-600 hover:border-red-200 text-gray-500 border border-gray-200 disabled:opacity-30 transition-colors"
               onClick={() => setVideoTrackCount((n) => { const next = Math.max(n - 1, 1); setClips((prev) => prev.map((c) => c.trackIndex >= next ? { ...c, trackIndex: next - 1 } : c)); return next; })}
-              disabled={videoTrackCount <= 1} title="Supprimer la dernière piste vidéo"
-            ><Trash2 className="w-3 h-3" /> Piste V</button>
+              disabled={videoTrackCount <= 1} title={t('videoEditor.removeVideoTrack')}
+            ><Trash2 className="w-3 h-3" /> {t('videoEditor.trackV')}</button>
             <span className="text-[10px] text-green-500 font-medium ml-1">{audioTrackCount}A</span>
             <button
               className="flex items-center gap-1 text-[11px] px-1.5 py-0.5 rounded bg-gray-50 hover:bg-red-50 hover:text-red-600 hover:border-red-200 text-gray-500 border border-gray-200 disabled:opacity-30 transition-colors"
               onClick={() => setAudioTrackCount((n) => { const next = Math.max(n - 1, 0); setAudioClips((prev) => prev.map((a) => a.trackIndex >= next ? { ...a, trackIndex: Math.max(0, next - 1) } : a)); return next; })}
-              disabled={audioTrackCount <= 0} title="Supprimer la dernière piste audio"
-            ><Trash2 className="w-3 h-3" /> Piste A</button>
+              disabled={audioTrackCount <= 0} title={t('videoEditor.removeAudioTrack')}
+            ><Trash2 className="w-3 h-3" /> {t('videoEditor.trackA')}</button>
             <span className="text-xs text-gray-400 ml-auto">{t('videoEditor.snapHint')}</span>
           </div>
 
@@ -1443,7 +1468,7 @@ export function VideoEditor() {
                 style={{ height: 22 }}
                 onClick={() => setVideoTrackCount((n) => Math.min(n + 1, 6))}
                 disabled={videoTrackCount >= 6}
-                title="Ajouter une piste vidéo"
+                title={t('videoEditor.addVideoTrack')}
               >
                 <span className="text-sm font-bold leading-none">+</span>
                 <Film className="w-2.5 h-2.5" />
@@ -1467,7 +1492,7 @@ export function VideoEditor() {
                 style={{ height: 22 }}
                 onClick={() => { setAudioTrackCount((n) => Math.min(n + 1, 6)); }}
                 disabled={audioTrackCount >= 6}
-                title="Ajouter une piste audio"
+                title={t('videoEditor.addAudioTrack')}
               >
                 <span className="text-sm font-bold leading-none">+</span>
                 <Music className="w-2.5 h-2.5" />

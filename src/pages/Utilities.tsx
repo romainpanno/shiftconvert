@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { ArrowLeft, Type, Crop, Maximize2, Minimize2, RotateCw, Scissors, Music, Volume2, FolderArchive, FolderOpen, QrCode } from 'lucide-react';
+import { ArrowLeft, Type, Crop, Maximize2, Minimize2, RotateCw, Scissors, Music, Volume2, FolderArchive, FolderOpen, QrCode, Monitor } from 'lucide-react';
 import { utilities } from '../utils/utilities';
 import { useLanguage } from '../i18n';
 
@@ -69,9 +69,17 @@ export function Utilities() {
                           <Icon className="w-5 h-5 text-white" />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <h3 className="font-medium text-gray-900 group-hover:text-primary-600 transition-colors">
-                            {t(`utility.${utility.id}`)}
-                          </h3>
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <h3 className="font-medium text-gray-900 group-hover:text-primary-600 transition-colors">
+                              {t(`utility.${utility.id}`)}
+                            </h3>
+                            {utility.desktopOnly && (
+                              <span className="inline-flex items-center gap-1 text-[10px] font-medium px-1.5 py-0.5 rounded bg-gray-100 text-gray-500 border border-gray-200 shrink-0">
+                                <Monitor className="w-2.5 h-2.5" />
+                                Desktop
+                              </span>
+                            )}
+                          </div>
                           <p className="text-sm text-gray-500 mt-0.5">
                             {t(`utility.${utility.id}.desc`)}
                           </p>

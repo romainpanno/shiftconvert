@@ -4,7 +4,8 @@ export interface UtilityInfo {
   description: string;
   icon: string;
   color: string;
-  category: 'fonts' | 'images' | 'video' | 'audio' | 'files';
+  category: 'fonts' | 'images' | 'video' | 'audio' | 'documents' | 'files';
+  desktopOnly?: boolean;
 }
 
 export const utilities: UtilityInfo[] = [
@@ -106,6 +107,7 @@ export const utilities: UtilityInfo[] = [
     icon: 'Film',
     color: 'from-purple-500 to-violet-500',
     category: 'video',
+    desktopOnly: true,
   },
   // Audio
   {
@@ -163,7 +165,7 @@ export const utilities: UtilityInfo[] = [
     description: 'Fusionner, diviser, réorganiser, numéroter vos PDFs',
     icon: 'FileText',
     color: 'from-red-500 to-rose-500',
-    category: 'files',
+    category: 'documents',
   },
 ];
 

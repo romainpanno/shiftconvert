@@ -2,10 +2,11 @@ import { useState, useCallback, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Upload, X, File as FileIcon, ArrowRight,
-  Image, FileText, Music, Video, Type,
+  Image, FileText, Music, Video, Type, Film, Archive,
   Crop, Maximize2, Minimize2, RotateCw,
   Scissors, Volume2, FolderArchive, FolderOpen, QrCode, Merge,
 } from 'lucide-react';
+import { utilities } from '../../utils/utilities';
 import { useConversionStore } from '../../stores/conversionStore';
 import { setPendingFiles } from '../../stores/pendingFiles';
 import { getConverterConfig } from '../../converters';
@@ -15,15 +16,38 @@ import { formatSize } from '../../utils/formatSize';
 import type { UtilityInfo } from '../../utils/utilities';
 
 // Extension → category mapping
+// Covers everything ffmpeg/converters/utilities can handle
 const extensionToCategory: Record<string, string> = {
-  png: 'images', jpg: 'images', jpeg: 'images', webp: 'images',
-  gif: 'images', bmp: 'images', heic: 'images',
+  // Images
+  png: 'images', jpg: 'images', jpeg: 'images', jpe: 'images', jfif: 'images',
+  webp: 'images', gif: 'images', bmp: 'images', heic: 'images', heif: 'images',
+  tiff: 'images', tif: 'images', avif: 'images', svg: 'images', ico: 'images',
+
+  // Video (everything ffmpeg handles)
   mp4: 'video', webm: 'video', avi: 'video', mov: 'video', mkv: 'video',
-  mp3: 'audio', wav: 'audio', ogg: 'audio', flac: 'audio',
-  m4a: 'audio', aac: 'audio', wma: 'audio',
+  flv: 'video', wmv: 'video', m4v: 'video', f4v: 'video',
+  '3gp': 'video', '3gpp': 'video', '3g2': 'video',
+  mpeg: 'video', mpg: 'video', mpe: 'video', m2v: 'video',
+  ts: 'video', mts: 'video', m2ts: 'video',
+  ogv: 'video', vob: 'video', divx: 'video', rmvb: 'video', rm: 'video',
+
+  // Audio (everything ffmpeg handles)
+  mp3: 'audio', wav: 'audio', ogg: 'audio', oga: 'audio', flac: 'audio',
+  m4a: 'audio', aac: 'audio', wma: 'audio', opus: 'audio',
+  aiff: 'audio', aif: 'audio', aifc: 'audio',
+  au: 'audio', ra: 'audio', amr: 'audio', ac3: 'audio',
+  ape: 'audio', mid: 'audio', midi: 'audio',
+
+  // Documents
   pdf: 'documents', doc: 'documents', docx: 'documents', txt: 'documents',
-  csv: 'documents', xlsx: 'documents', xls: 'documents',
+  csv: 'documents', xlsx: 'documents', xls: 'documents', rtf: 'documents',
+
+  // Fonts
   ttf: 'fonts', otf: 'fonts', woff: 'fonts', woff2: 'fonts',
+
+  // Archives
+  zip: 'files', rar: 'files', '7z': 'files', tar: 'files',
+  gz: 'files', bz2: 'files', xz: 'files', zst: 'files',
 };
 
 const categoryColors: Record<string, string> = {
@@ -32,6 +56,7 @@ const categoryColors: Record<string, string> = {
   audio: 'from-green-500 to-emerald-500',
   documents: 'from-blue-500 to-cyan-500',
   fonts: 'from-orange-500 to-amber-500',
+  files: 'from-slate-500 to-zinc-500',
 };
 
 const categoryIconMap: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -40,12 +65,13 @@ const categoryIconMap: Record<string, React.ComponentType<{ className?: string }
   audio: Music,
   video: Video,
   fonts: Type,
+  files: Archive,
 };
 
 const utilityIconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Crop, Maximize2, Minimize2, RotateCw, Scissors,
   Music, Volume2, FolderArchive, FolderOpen, QrCode, FileText, Type,
-  Merge,
+  Merge, Film,
 };
 
 // Utilities that only accept a single file at a time
@@ -107,12 +133,20 @@ export function SmartDropzone() {
       );
       outputFormats = outputFormats.filter((f) => !normalizedInputs.has(f));
 
+      // Always append create-zip for non-archive categories (any file can be zipped)
+      const categoryUtils = getUtilitiesByCategory(category);
+      const createZip = utilities.find((u) => u.id === 'create-zip');
+      const utilityTools =
+        category !== 'files' && createZip
+          ? [...categoryUtils, createZip]
+          : categoryUtils;
+
       return {
         category,
         extensions: extsArray,
         files,
         outputFormats,
-        utilityTools: getUtilitiesByCategory(category),
+        utilityTools,
       };
     });
   }, [droppedFiles]);
@@ -211,7 +245,7 @@ export function SmartDropzone() {
         <p className="text-xl font-semibold text-gray-800 mb-2">{t('smartdropzone.dropHere')}</p>
         <p className="text-gray-500 text-sm mb-4">{t('smartdropzone.orClick')}</p>
         <div className="flex flex-wrap justify-center gap-2">
-          {(['images', 'video', 'audio', 'documents', 'fonts'] as const).map((cat) => {
+          {(['images', 'video', 'audio', 'documents', 'fonts', 'files'] as const).map((cat) => {
             const CatIcon = categoryIconMap[cat];
             return (
               <span
