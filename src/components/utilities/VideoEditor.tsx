@@ -926,12 +926,13 @@ export function VideoEditor() {
               `setpts=PTS-STARTPTS,` + makeScaleFilter(label)
             );
 
-            // Detect if the video has an audio stream via the HTMLVideoElement API
+            // Detect if the video has an audio stream via the HTMLVideoElement API.
+            // audioTracks is typed as {} in some TS DOM lib versions, so we use any.
             const vidEl = hiddenVideoEls.current.get(clip.id);
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const audioTracks = (vidEl as any)?.audioTracks;
             const videoHasAudioStream = vidEl
-              ? ('audioTracks' in vidEl && vidEl.audioTracks != null
-                  ? vidEl.audioTracks.length > 0
-                  : true) // assume true when API is unavailable
+              ? (audioTracks != null ? (audioTracks.length as number) > 0 : true)
               : false;
 
             if (!clip.muteVideoAudio && videoHasAudioStream) {
