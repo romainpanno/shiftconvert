@@ -99,6 +99,14 @@ export const utilities: UtilityInfo[] = [
     color: 'from-purple-500 to-violet-500',
     category: 'video',
   },
+  {
+    id: 'video-editor',
+    label: 'Éditeur Vidéo',
+    description: 'Assembler clips, images et audio sur une timeline',
+    icon: 'Film',
+    color: 'from-purple-500 to-violet-500',
+    category: 'video',
+  },
   // Audio
   {
     id: 'audio-trim',

@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
-import { Upload, Download, X, RotateCw, FileText, Combine, Layers, Type, GripVertical, Check, RotateCcw, Undo2, ImageIcon } from 'lucide-react';
+import { Upload, Download, X, RotateCw, FileText, Combine, Layers, Type, GripVertical, Check, RotateCcw, Undo2, ImageIcon, ChevronDown, ChevronUp } from 'lucide-react';
 import { jsPDF } from 'jspdf';
 import { PDFDocument, degrees } from 'pdf-lib';
 import * as pdfjsLib from 'pdfjs-dist';
@@ -60,6 +60,12 @@ export function PdfTools() {
   const [dropImageTargetId, setDropImageTargetId] = useState<string | null>(null);
   const [dropImagePosition, setDropImagePosition] = useState<'before' | 'after' | null>(null);
 
+  // Per-file expanded page pickers (merge tool)
+  const [expandedPdfIds, setExpandedPdfIds] = useState<Set<string>>(new Set());
+  const [perFileRangeInput, setPerFileRangeInput] = useState<Record<string, string>>({});
+  // Track which files are currently loading thumbnails
+  const [loadingThumbnailIds, setLoadingThumbnailIds] = useState<Set<string>>(new Set());
+
   // Drag state - simplified, no visual reordering during drag
   const [draggedFileId, setDraggedFileId] = useState<string | null>(null);
   const [dropTargetId, setDropTargetId] = useState<string | null>(null);
@@ -100,6 +106,40 @@ export function PdfTools() {
       return { ...f, selectedPages: allPages, pageOrder: [...f.initialPageOrder] };
     }));
   }, [saveToHistory]);
+
+  // Toggle the per-file page picker in merge view; lazy-load thumbnails
+  const toggleExpandPdf = useCallback(async (pdfId: string) => {
+    setExpandedPdfIds(prev => {
+      const next = new Set(prev);
+      if (next.has(pdfId)) {
+        next.delete(pdfId);
+      } else {
+        next.add(pdfId);
+        // Kick off thumbnail loading if not already loaded
+        const pdf = pdfFiles.find(f => f.id === pdfId);
+        if (pdf && pdf.thumbnails.length === 0) {
+          setLoadingThumbnailIds(ids => { const s = new Set(ids); s.add(pdfId); return s; });
+          generateThumbnails(pdf.file, pdf.pageCount).then(thumbs => {
+            setPdfFiles(prev => prev.map(f => f.id === pdfId ? { ...f, thumbnails: thumbs } : f));
+            setLoadingThumbnailIds(ids => { const s = new Set(ids); s.delete(pdfId); return s; });
+          });
+        }
+      }
+      return next;
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pdfFiles]);
+
+  // Apply a range string to a specific file's selectedPages (used in merge picker)
+  const applyRangeToFile = useCallback((pdfId: string) => {
+    const input = perFileRangeInput[pdfId] ?? '';
+    saveToHistory();
+    setPdfFiles(prev => prev.map(f => {
+      if (f.id !== pdfId) return f;
+      const newSel = parseRange(input, f.pageCount);
+      return newSel.size > 0 ? { ...f, selectedPages: newSel } : f;
+    }));
+  }, [perFileRangeInput, saveToHistory]);
 
   // Generate thumbnails for a PDF
   const generateThumbnails = async (file: File, pageCount: number): Promise<PageThumbnail[]> => {
@@ -234,6 +274,8 @@ export function PdfTools() {
   const removePdf = (id: string) => {
     saveToHistory();
     setPdfFiles(prev => prev.filter(f => f.id !== id));
+    setExpandedPdfIds(prev => { const s = new Set(prev); s.delete(id); return s; });
+    setPerFileRangeInput(prev => { const { [id]: _, ...rest } = prev; return rest; });
   };
 
   // Parse range string like "1-5, 8, 10-12"
@@ -423,7 +465,7 @@ export function PdfTools() {
     URL.revokeObjectURL(url);
   };
 
-  // Merge PDFs
+  // Merge PDFs – respects per-file selectedPages
   const mergePdfs = async () => {
     if (pdfFiles.length < 2) return;
     setIsProcessing(true);
@@ -432,12 +474,17 @@ export function PdfTools() {
       for (const pdfFile of pdfFiles) {
         const buffer = await pdfFile.file.arrayBuffer();
         const pdf = await PDFDocument.load(buffer);
-        const pages = await mergedPdf.copyPages(pdf, pdf.getPageIndices());
+        // Use selected pages (1-indexed) sorted asc, or all pages if none explicitly deselected
+        const pageIndices = pdfFile.selectedPages.size > 0
+          ? Array.from(pdfFile.selectedPages).sort((a, b) => a - b).map(p => p - 1)
+          : pdf.getPageIndices();
+        const pages = await mergedPdf.copyPages(pdf, pageIndices);
         pages.forEach(page => mergedPdf.addPage(page));
       }
       const pdfBytes = await mergedPdf.save();
       const blob = new Blob([pdfBytes as BlobPart], { type: 'application/pdf' });
-      downloadBlob(blob, 'merged.pdf');
+      const baseName = pdfFiles[0].name.replace(/\.pdf$/i, '');
+      downloadBlob(blob, `${baseName}_merged.pdf`);
     } catch (e) {
       console.error('Merge error:', e);
       alert(t('common.error'));
@@ -720,7 +767,7 @@ export function PdfTools() {
           {tools.map(t => (
             <button
               key={t.id}
-              onClick={() => { setTool(t.id); setPdfFiles([]); setImageFiles([]); setRangeInput(''); setHistory([]); setInitialFileOrder([]); }}
+              onClick={() => { setTool(t.id); setPdfFiles([]); setImageFiles([]); setRangeInput(''); setHistory([]); setInitialFileOrder([]); setExpandedPdfIds(new Set()); setPerFileRangeInput({}); }}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                 tool === t.id ? 'bg-primary-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
@@ -876,79 +923,172 @@ export function PdfTools() {
         </div>
       )}
 
-      {/* Merge - File list with drop indicator */}
+      {/* Merge - File list with per-file page picker */}
       {tool === 'merge' && pdfFiles.length > 0 && (
         <div className="space-y-2">
           <div className="flex items-center justify-between mb-2">
             <p className="text-sm text-gray-500">{t('pdfTools.dragToReorder')}</p>
             <div className="flex gap-2">
               {history.length > 0 && (
-                <button
-                  onClick={undo}
-                  className="flex items-center gap-1 px-2 py-1 text-xs text-gray-600 bg-gray-100 rounded hover:bg-gray-200 transition-colors"
-                  title={t('pdfTools.undo')}
-                >
-                  <Undo2 className="w-3 h-3" />
-                  {t('pdfTools.undo')}
+                <button onClick={undo} className="flex items-center gap-1 px-2 py-1 text-xs text-gray-600 bg-gray-100 rounded hover:bg-gray-200 transition-colors">
+                  <Undo2 className="w-3 h-3" />{t('pdfTools.undo')}
                 </button>
               )}
-              <button
-                onClick={resetFiles}
-                className="flex items-center gap-1 px-2 py-1 text-xs text-gray-600 bg-gray-100 rounded hover:bg-gray-200 transition-colors"
-                title={t('pdfTools.reset')}
-              >
-                <RotateCcw className="w-3 h-3" />
-                {t('pdfTools.reset')}
+              <button onClick={resetFiles} className="flex items-center gap-1 px-2 py-1 text-xs text-gray-600 bg-gray-100 rounded hover:bg-gray-200 transition-colors">
+                <RotateCcw className="w-3 h-3" />{t('pdfTools.reset')}
               </button>
             </div>
           </div>
 
-          <div
-            className="space-y-0"
-            onDragOver={(e) => e.preventDefault()}
-            onDrop={handleFileDrop}
-            onDragLeave={handleFileDragLeave}
-          >
-            {pdfFiles.map((pdf) => (
-              <div key={pdf.id}>
-                {/* Drop indicator before */}
-                {dropTargetId === pdf.id && dropPosition === 'before' && draggedFileId !== pdf.id && (
-                  <div className="h-1 bg-primary-500 rounded-full mx-2 my-1 animate-pulse" />
-                )}
+          <div className="space-y-0" onDragOver={(e) => e.preventDefault()} onDrop={handleFileDrop} onDragLeave={handleFileDragLeave}>
+            {pdfFiles.map((pdf) => {
+              const isExpanded = expandedPdfIds.has(pdf.id);
+              const isLoadingThumb = loadingThumbnailIds.has(pdf.id);
+              const allSelected = pdf.selectedPages.size === pdf.pageCount;
+              const noneSelected = pdf.selectedPages.size === 0;
+              const selectionLabel = allSelected
+                ? `${pdf.pageCount} p.`
+                : noneSelected
+                ? 'Aucune page'
+                : `${pdf.selectedPages.size}/${pdf.pageCount} p.`;
 
-                <div
-                  draggable
-                  onDragStart={(e) => handleFileDragStart(e, pdf.id)}
-                  onDragOver={(e) => handleFileDragOver(e, pdf.id)}
-                  onDragEnd={resetDragState}
-                  className={`
-                    card p-3 flex items-center gap-3 cursor-grab active:cursor-grabbing my-2
-                    transition-all duration-150
-                    ${draggedFileId === pdf.id ? 'opacity-40 scale-[0.98]' : 'hover:shadow-md'}
-                  `}
-                >
-                  <GripVertical className="w-5 h-5 text-gray-400 flex-shrink-0" />
-                  <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <FileText className="w-5 h-5 text-red-600" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium text-gray-900 truncate">{pdf.name}</p>
-                    <p className="text-xs text-gray-500">{formatSize(pdf.size)} • {pdf.pageCount} pages</p>
-                  </div>
-                  <button
-                    onClick={(e) => { e.stopPropagation(); removePdf(pdf.id); }}
-                    className="p-1.5 text-gray-400 hover:text-red-500 transition-colors"
+              return (
+                <div key={pdf.id}>
+                  {dropTargetId === pdf.id && dropPosition === 'before' && draggedFileId !== pdf.id && (
+                    <div className="h-1 bg-primary-500 rounded-full mx-2 my-1 animate-pulse" />
+                  )}
+
+                  <div
+                    className={`card p-0 overflow-hidden my-2 transition-all duration-150 ${draggedFileId === pdf.id ? 'opacity-40 scale-[0.98]' : 'hover:shadow-md'}`}
                   >
-                    <X className="w-4 h-4" />
-                  </button>
-                </div>
+                    {/* ── File row ── */}
+                    <div
+                      draggable
+                      onDragStart={(e) => handleFileDragStart(e, pdf.id)}
+                      onDragOver={(e) => handleFileDragOver(e, pdf.id)}
+                      onDragEnd={resetDragState}
+                      className="flex items-center gap-3 p-3 cursor-grab active:cursor-grabbing"
+                    >
+                      <GripVertical className="w-5 h-5 text-gray-400 flex-shrink-0" />
+                      <div className="w-9 h-9 bg-red-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <FileText className="w-4 h-4 text-red-600" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-gray-900 truncate text-sm">{pdf.name}</p>
+                        <div className="flex items-center gap-2 mt-0.5">
+                          <span className="text-xs text-gray-400">{formatSize(pdf.size)}</span>
+                          <span className={`text-xs font-medium px-1.5 py-0.5 rounded-full ${allSelected ? 'bg-gray-100 text-gray-500' : 'bg-primary-100 text-primary-700'}`}>
+                            {selectionLabel}
+                          </span>
+                        </div>
+                      </div>
+                      {/* Toggle page picker */}
+                      <button
+                        onClick={(e) => { e.stopPropagation(); toggleExpandPdf(pdf.id); }}
+                        className={`p-1.5 rounded-lg transition-colors ${isExpanded ? 'bg-primary-100 text-primary-600' : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'}`}
+                        title={isExpanded ? 'Masquer les pages' : 'Choisir les pages'}
+                      >
+                        {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                      </button>
+                      <button onClick={(e) => { e.stopPropagation(); removePdf(pdf.id); }} className="p-1.5 text-gray-400 hover:text-red-500 transition-colors">
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
 
-                {/* Drop indicator after */}
-                {dropTargetId === pdf.id && dropPosition === 'after' && draggedFileId !== pdf.id && (
-                  <div className="h-1 bg-primary-500 rounded-full mx-2 my-1 animate-pulse" />
-                )}
-              </div>
-            ))}
+                    {/* ── Page picker (expandable) ── */}
+                    {isExpanded && (
+                      <div className="border-t border-gray-100 px-4 py-3 space-y-3 bg-gray-50/60">
+
+                        {/* Quick actions + range input */}
+                        <div className="flex flex-wrap items-center gap-2">
+                          <button
+                            onClick={() => selectAll(pdf.id)}
+                            className={`text-xs px-2.5 py-1 rounded-lg border transition-colors ${allSelected ? 'bg-primary-500 text-white border-primary-500' : 'bg-white text-gray-600 border-gray-200 hover:border-primary-300'}`}
+                          >
+                            Tout sélectionner
+                          </button>
+                          <button
+                            onClick={() => selectNone(pdf.id)}
+                            className={`text-xs px-2.5 py-1 rounded-lg border transition-colors ${noneSelected ? 'bg-gray-500 text-white border-gray-500' : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300'}`}
+                          >
+                            Aucune
+                          </button>
+                          <div className="flex flex-1 min-w-0 items-center gap-1">
+                            <input
+                              type="text"
+                              value={perFileRangeInput[pdf.id] ?? ''}
+                              onChange={(e) => setPerFileRangeInput(prev => ({ ...prev, [pdf.id]: e.target.value }))}
+                              onKeyDown={(e) => e.key === 'Enter' && applyRangeToFile(pdf.id)}
+                              placeholder="ex : 1-5, 8, 10-12"
+                              className="flex-1 min-w-0 text-xs px-2.5 py-1 border border-gray-200 rounded-lg focus:outline-none focus:border-primary-400 bg-white"
+                            />
+                            <button
+                              onClick={() => applyRangeToFile(pdf.id)}
+                              className="text-xs px-2.5 py-1 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors whitespace-nowrap"
+                            >
+                              Appliquer
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Thumbnails or number chips */}
+                        {pdf.thumbnails.length > 0 ? (
+                          <div className="grid grid-cols-6 sm:grid-cols-8 md:grid-cols-10 lg:grid-cols-12 gap-1.5">
+                            {pdf.thumbnails.map((thumb) => {
+                              const selected = pdf.selectedPages.has(thumb.pageNum);
+                              return (
+                                <button
+                                  key={thumb.pageNum}
+                                  onClick={() => togglePage(pdf.id, thumb.pageNum)}
+                                  className={`relative aspect-[3/4] rounded-md overflow-hidden border-2 transition-all ${selected ? 'border-primary-500 ring-1 ring-primary-300' : 'border-gray-200 opacity-40 hover:opacity-70 hover:border-gray-300'}`}
+                                >
+                                  <img src={thumb.dataUrl} alt={`p.${thumb.pageNum}`} className="w-full h-full object-cover" />
+                                  {selected && (
+                                    <div className="absolute top-0.5 right-0.5 w-3.5 h-3.5 bg-primary-500 rounded-full flex items-center justify-center shadow">
+                                      <Check className="w-2 h-2 text-white" />
+                                    </div>
+                                  )}
+                                  <div className="absolute bottom-0 left-0 right-0 bg-black/60 text-white text-[8px] text-center leading-[14px]">
+                                    {thumb.pageNum}
+                                  </div>
+                                </button>
+                              );
+                            })}
+                          </div>
+                        ) : (
+                          <div>
+                            <div className="flex flex-wrap gap-1.5">
+                              {Array.from({ length: pdf.pageCount }, (_, i) => i + 1).map((pageNum) => {
+                                const selected = pdf.selectedPages.has(pageNum);
+                                return (
+                                  <button
+                                    key={pageNum}
+                                    onClick={() => togglePage(pdf.id, pageNum)}
+                                    className={`w-8 h-8 text-xs font-medium rounded-lg border transition-all ${selected ? 'bg-primary-500 border-primary-600 text-white shadow-sm' : 'bg-white border-gray-200 text-gray-500 hover:border-primary-300 hover:text-primary-600'}`}
+                                  >
+                                    {pageNum}
+                                  </button>
+                                );
+                              })}
+                            </div>
+                            {isLoadingThumb && (
+                              <p className="text-[11px] text-gray-400 mt-2 flex items-center gap-1.5">
+                                <span className="inline-block w-3 h-3 border-2 border-gray-300 border-t-primary-500 rounded-full animate-spin" />
+                                Chargement des aperçus…
+                              </p>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  {dropTargetId === pdf.id && dropPosition === 'after' && draggedFileId !== pdf.id && (
+                    <div className="h-1 bg-primary-500 rounded-full mx-2 my-1 animate-pulse" />
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>
       )}

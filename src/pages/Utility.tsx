@@ -22,6 +22,7 @@ import { QrCodeGenerator } from '../components/utilities/QrCodeGenerator';
 import { PdfTools } from '../components/utilities/PdfTools';
 import { VideoMerge } from '../components/utilities/VideoMerge';
 import { AudioMerge } from '../components/utilities/AudioMerge';
+import { VideoEditor } from '../components/utilities/VideoEditor';
 
 const utilityComponents: Record<string, React.ComponentType> = {
   'font-metadata': FontMetadataEditor,
@@ -42,6 +43,7 @@ const utilityComponents: Record<string, React.ComponentType> = {
   'pdf-tools': PdfTools,
   'video-merge': VideoMerge,
   'audio-merge': AudioMerge,
+  'video-editor': VideoEditor,
 };
 
 export function Utility() {
@@ -57,6 +59,35 @@ export function Utility() {
         <Link to="/utilities" className="text-primary-600 hover:underline">
           {t('utilities.backToUtilities')}
         </Link>
+      </div>
+    );
+  }
+
+  const isFullscreen = utilityId === 'video-editor';
+
+  if (isFullscreen) {
+    return (
+      <div
+        className="flex flex-col px-4 sm:px-6 overflow-hidden"
+        style={{ height: 'calc(100dvh - 64px)' }}
+      >
+        {/* Compact header */}
+        <div className="flex items-center gap-3 py-2 shrink-0 border-b border-gray-100 mb-3">
+          <Link
+            to="/utilities"
+            className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900 shrink-0"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span className="hidden sm:inline">{t('utilities.backToUtilities')}</span>
+          </Link>
+          <div className="w-px h-4 bg-gray-200 shrink-0" />
+          <h1 className="text-base font-bold text-gray-900 truncate">{t(`utility.${utility.id}`)}</h1>
+          <p className="text-sm text-gray-400 truncate hidden md:block">{t(`utility.${utility.id}.desc`)}</p>
+        </div>
+        {/* Editor fills remaining space */}
+        <div className="flex-1 min-h-0 flex flex-col">
+          <UtilityComponent />
+        </div>
       </div>
     );
   }
