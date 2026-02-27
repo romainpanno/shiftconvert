@@ -9,7 +9,10 @@ console.log("Analytics import:", Analytics);
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <Analytics debug={true} />
+    <Analytics beforeSend={(event) => {
+      console.log("Envoi d'un événement Analytics...", event);
+      return event;
+    }} />
     <SpeedInsights />
     <App />
   </StrictMode>,

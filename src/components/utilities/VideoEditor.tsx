@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef, useEffect, useLayoutEffect } from 'react';
 import {
-  Upload, Play, Pause, Download, X, ZoomIn, ZoomOut, Film, Music, Volume2,
+  Upload, Play, Pause, Download, X, ZoomIn, ZoomOut, Film, Music, Volume2, Trash2,
 } from 'lucide-react';
 import { FFmpeg } from '@ffmpeg/ffmpeg';
 import { fetchFile } from '@ffmpeg/util';
@@ -144,7 +144,14 @@ export function VideoEditor() {
   // Canvas
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const hiddenVideoEls = useRef<Map<string, HTMLVideoElement>>(new Map());
+  const hiddenAudioEls = useRef<Map<string, HTMLAudioElement>>(new Map());
   const imageEls = useRef<Map<string, HTMLImageElement>>(new Map());
+
+  // Stable refs to avoid stale closures in event handlers
+  const drawFrameRef = useRef<(sec: number) => void>(() => {});
+  const playheadRef = useRef(0);
+  const totalDurationRef = useRef(5);
+  const handlePlayPauseRef = useRef<() => void>(() => {});
 
   // FFmpeg
   const ffmpegRef = useRef<FFmpeg | null>(null);
@@ -166,10 +173,13 @@ export function VideoEditor() {
 
   const selectedClip = clips.find((c) => c.id === selectedClipId) ?? null;
 
+  // Keep stable refs current every render
+  playheadRef.current = playhead;
+  totalDurationRef.current = totalDuration;
+
   // ── Hidden video element management ───────────────────────────────────────
 
   useEffect(() => {
-    // Create / update hidden video elements for video clips
     for (const clip of clips) {
       if (clip.type === 'video') {
         if (!hiddenVideoEls.current.has(clip.id)) {
@@ -178,6 +188,10 @@ export function VideoEditor() {
           vid.preload = 'auto';
           vid.muted = true;
           vid.playsInline = true;
+          // After a seek completes, redraw so other-track frames appear immediately
+          vid.onseeked = () => {
+            if (!isPlayingRef.current) drawFrameRef.current(playheadRef.current);
+          };
           hiddenVideoEls.current.set(clip.id, vid);
         }
       }
@@ -185,13 +199,16 @@ export function VideoEditor() {
         if (!imageEls.current.has(clip.id)) {
           const img = new Image();
           img.src = clip.objectUrl;
+          img.onload = () => {
+            if (!isPlayingRef.current) drawFrameRef.current(playheadRef.current);
+          };
           imageEls.current.set(clip.id, img);
         }
       }
     }
-    // Cleanup removed clips
     for (const [id, vid] of hiddenVideoEls.current) {
       if (!clips.find((c) => c.id === id)) {
+        vid.onseeked = null;
         vid.src = '';
         hiddenVideoEls.current.delete(id);
       }
@@ -202,6 +219,29 @@ export function VideoEditor() {
       }
     }
   }, [clips]);
+
+  // ── Hidden audio element management ───────────────────────────────────────
+
+  useEffect(() => {
+    for (const clip of audioClips) {
+      if (!hiddenAudioEls.current.has(clip.id)) {
+        const aud = document.createElement('audio');
+        aud.src = clip.objectUrl;
+        aud.preload = 'auto';
+        hiddenAudioEls.current.set(clip.id, aud);
+      }
+      // Keep volume in sync
+      const aud = hiddenAudioEls.current.get(clip.id);
+      if (aud) aud.volume = clip.volume;
+    }
+    for (const [id, aud] of hiddenAudioEls.current) {
+      if (!audioClips.find((a) => a.id === id)) {
+        aud.pause();
+        aud.src = '';
+        hiddenAudioEls.current.delete(id);
+      }
+    }
+  }, [audioClips]);
 
   // ── Canvas drawing ─────────────────────────────────────────────────────────
 
@@ -265,6 +305,9 @@ export function VideoEditor() {
     }
   }, [clips]);
 
+  // Keep drawFrameRef current on every render so event handlers see the latest version
+  drawFrameRef.current = drawFrame;
+
   // ── Seek hidden video elements to match playhead ───────────────────────────
 
   const seekHiddenVideos = useCallback((sec: number) => {
@@ -285,6 +328,39 @@ export function VideoEditor() {
     }
   }, [clips]);
 
+  // ── Seek audio elements to match playhead (used when paused) ──────────────
+
+  const seekHiddenAudios = useCallback((sec: number) => {
+    for (const clip of audioClips) {
+      const aud = hiddenAudioEls.current.get(clip.id);
+      if (!aud) continue;
+      if (!aud.paused) aud.pause();
+      const inClip = sec >= clip.timelineStart && sec < clip.timelineStart + clip.displayDuration;
+      if (inClip) {
+        const sourceTime = clip.trimStart + (sec - clip.timelineStart);
+        aud.currentTime = sourceTime;
+      }
+    }
+  }, [audioClips]);
+
+  // ── Start / stop audio clips during active playback (no re-seek) ──────────
+
+  const syncAudioPlayback = useCallback((sec: number) => {
+    for (const clip of audioClips) {
+      const aud = hiddenAudioEls.current.get(clip.id);
+      if (!aud) continue;
+      const inClip = sec >= clip.timelineStart && sec < clip.timelineStart + clip.displayDuration;
+      if (inClip && aud.paused) {
+        // Clip just entered playback range — seek to correct position and play
+        const sourceTime = clip.trimStart + (sec - clip.timelineStart);
+        aud.currentTime = sourceTime;
+        aud.play().catch(() => {});
+      } else if (!inClip && !aud.paused) {
+        aud.pause();
+      }
+    }
+  }, [audioClips]);
+
   // ── RAF loop ───────────────────────────────────────────────────────────────
 
   const rafLoop = useCallback(() => {
@@ -293,23 +369,27 @@ export function VideoEditor() {
     const newPlayhead = Math.min(playStartPlayheadRef.current + elapsed, totalDuration);
     setPlayhead(newPlayhead);
     seekHiddenVideos(newPlayhead);
+    syncAudioPlayback(newPlayhead);
     drawFrame(newPlayhead);
     if (newPlayhead >= totalDuration) {
       setIsPlaying(false);
       isPlayingRef.current = false;
+      // Pause all audio on end
+      for (const aud of hiddenAudioEls.current.values()) aud.pause();
       return;
     }
     rafRef.current = requestAnimationFrame(rafLoop);
-  }, [totalDuration, seekHiddenVideos, drawFrame]);
+  }, [totalDuration, seekHiddenVideos, syncAudioPlayback, drawFrame]);
 
   // Static redraw when paused
   useLayoutEffect(() => {
     if (!isPlaying) {
       seekHiddenVideos(playhead);
+      seekHiddenAudios(playhead);
       // Give the video element a moment to seek before drawing
       setTimeout(() => drawFrame(playhead), 80);
     }
-  }, [playhead, isPlaying, drawFrame, seekHiddenVideos]);
+  }, [playhead, isPlaying, drawFrame, seekHiddenVideos, seekHiddenAudios]);
 
   // ── Play / Pause ───────────────────────────────────────────────────────────
 
@@ -318,28 +398,44 @@ export function VideoEditor() {
       setIsPlaying(false);
       isPlayingRef.current = false;
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
-      // pause hidden video elements
-      for (const vid of hiddenVideoEls.current.values()) {
-        vid.pause();
-      }
+      // Pause all hidden video elements
+      for (const vid of hiddenVideoEls.current.values()) vid.pause();
+      // Pause all hidden audio elements
+      for (const aud of hiddenAudioEls.current.values()) aud.pause();
     } else {
+      const startPh = playhead >= totalDuration ? 0 : playhead;
       if (playhead >= totalDuration) setPlayhead(0);
       setIsPlaying(true);
       isPlayingRef.current = true;
       playStartTimeRef.current = performance.now();
-      playStartPlayheadRef.current = playhead >= totalDuration ? 0 : playhead;
-      // play hidden video elements that are currently active
+      playStartPlayheadRef.current = startPh;
+
+      // Play video clips that are active at start position
       for (const clip of clips) {
         if (clip.type !== 'video') continue;
         const vid = hiddenVideoEls.current.get(clip.id);
         if (!vid) continue;
-        const ph = playStartPlayheadRef.current;
-        const inClip = ph >= clip.timelineStart && ph < clip.timelineStart + clip.displayDuration;
+        const inClip = startPh >= clip.timelineStart && startPh < clip.timelineStart + clip.displayDuration;
         if (inClip) vid.play().catch(() => {});
       }
+
+      // Seek & play audio clips that are active at start position
+      for (const clip of audioClips) {
+        const aud = hiddenAudioEls.current.get(clip.id);
+        if (!aud) continue;
+        const inClip = startPh >= clip.timelineStart && startPh < clip.timelineStart + clip.displayDuration;
+        if (inClip) {
+          aud.currentTime = clip.trimStart + (startPh - clip.timelineStart);
+          aud.play().catch(() => {});
+        }
+      }
+
       rafRef.current = requestAnimationFrame(rafLoop);
     }
-  }, [isPlaying, playhead, totalDuration, clips, rafLoop]);
+  }, [isPlaying, playhead, totalDuration, clips, audioClips, rafLoop]);
+
+  // Keep handlePlayPauseRef current so keyboard shortcut handler always calls the latest version
+  handlePlayPauseRef.current = handlePlayPause;
 
   // cleanup RAF on unmount + block page scroll
   useEffect(() => {
@@ -348,10 +444,11 @@ export function VideoEditor() {
       document.body.style.overflow = '';
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
       for (const vid of hiddenVideoEls.current.values()) vid.src = '';
+      for (const aud of hiddenAudioEls.current.values()) { aud.pause(); aud.src = ''; }
     };
   }, []);
 
-  // Native wheel on timeline: prevent page scroll, handle zoom
+  // Native wheel on timeline: Ctrl+scroll=zoom, plain scroll=pan
   useEffect(() => {
     const el = timelineRef.current;
     if (!el) return;
@@ -359,15 +456,52 @@ export function VideoEditor() {
       e.preventDefault();
       const isHorizontal = Math.abs(e.deltaX) > Math.abs(e.deltaY);
       if (isHorizontal) {
-        // Trackpad horizontal swipe → pan the timeline
+        // Trackpad horizontal swipe → pan
         el.scrollLeft += e.deltaX;
+      } else if (e.ctrlKey || e.metaKey) {
+        // Ctrl/Cmd + vertical scroll → zoom
+        // Dynamic min: dezoom until all content is visible
+        const containerWidth = el.offsetWidth;
+        const dur = totalDurationRef.current;
+        const minZoom = dur > 0 ? containerWidth / dur : 20;
+        setZoomPxPerSec((z) => Math.max(minZoom, Math.min(400, z * (e.deltaY < 0 ? 1.15 : 0.87))));
       } else {
-        // Vertical scroll → zoom in/out
-        setZoomPxPerSec((z) => Math.max(20, Math.min(400, z * (e.deltaY < 0 ? 1.1 : 0.9))));
+        // Plain vertical scroll → pan horizontally
+        el.scrollLeft += e.deltaY;
       }
     };
     el.addEventListener('wheel', onWheel, { passive: false });
     return () => el.removeEventListener('wheel', onWheel);
+  }, []);
+
+  // Keyboard shortcuts: Space=play/pause, arrows=navigate, Home/End
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      // Ignore when user is typing inside an input / textarea / select
+      const tag = (e.target as HTMLElement).tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+
+      if (e.code === 'Space') {
+        e.preventDefault();
+        handlePlayPauseRef.current();
+      } else if (e.code === 'ArrowLeft') {
+        e.preventDefault();
+        const step = e.shiftKey ? 5 : 0.1;
+        setPlayhead((p) => Math.max(0, p - step));
+      } else if (e.code === 'ArrowRight') {
+        e.preventDefault();
+        const step = e.shiftKey ? 5 : 0.1;
+        setPlayhead((p) => Math.min(totalDurationRef.current, p + step));
+      } else if (e.code === 'Home') {
+        e.preventDefault();
+        setPlayhead(0);
+      } else if (e.code === 'End') {
+        e.preventDefault();
+        setPlayhead(totalDurationRef.current);
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
   }, []);
 
   // Redraw when output dimensions or fit mode change
@@ -1282,20 +1416,24 @@ export function VideoEditor() {
           {/* ── Toolbar: zoom + track remove ── */}
           <div className="flex items-center gap-2 px-3 py-1.5 border-b border-gray-100 shrink-0">
             <button className="p-1 rounded hover:bg-gray-100 text-gray-600" onClick={() => setZoomPxPerSec((z) => Math.min(400, z * 1.25))} title={t('videoEditor.zoomIn')}><ZoomIn className="w-4 h-4" /></button>
-            <button className="p-1 rounded hover:bg-gray-100 text-gray-600" onClick={() => setZoomPxPerSec((z) => Math.max(20, z * 0.8))} title={t('videoEditor.zoomOut')}><ZoomOut className="w-4 h-4" /></button>
+            <button className="p-1 rounded hover:bg-gray-100 text-gray-600" onClick={() => {
+              const containerWidth = timelineRef.current?.offsetWidth ?? 800;
+              const minZoom = totalDuration > 0 ? containerWidth / totalDuration : 20;
+              setZoomPxPerSec((z) => Math.max(minZoom, z * 0.8));
+            }} title={t('videoEditor.zoomOut')}><ZoomOut className="w-4 h-4" /></button>
             <div className="w-px h-4 bg-gray-200 mx-1" />
             <span className="text-[10px] text-purple-400 font-medium">{videoTrackCount}V</span>
             <button
-              className="text-[11px] px-1.5 py-0.5 rounded bg-gray-50 hover:bg-gray-100 text-gray-500 border border-gray-200 disabled:opacity-30"
+              className="flex items-center gap-1 text-[11px] px-1.5 py-0.5 rounded bg-gray-50 hover:bg-red-50 hover:text-red-600 hover:border-red-200 text-gray-500 border border-gray-200 disabled:opacity-30 transition-colors"
               onClick={() => setVideoTrackCount((n) => { const next = Math.max(n - 1, 1); setClips((prev) => prev.map((c) => c.trackIndex >= next ? { ...c, trackIndex: next - 1 } : c)); return next; })}
               disabled={videoTrackCount <= 1} title="Supprimer la dernière piste vidéo"
-            >−V</button>
+            ><Trash2 className="w-3 h-3" /> Piste V</button>
             <span className="text-[10px] text-green-500 font-medium ml-1">{audioTrackCount}A</span>
             <button
-              className="text-[11px] px-1.5 py-0.5 rounded bg-gray-50 hover:bg-gray-100 text-gray-500 border border-gray-200 disabled:opacity-30"
+              className="flex items-center gap-1 text-[11px] px-1.5 py-0.5 rounded bg-gray-50 hover:bg-red-50 hover:text-red-600 hover:border-red-200 text-gray-500 border border-gray-200 disabled:opacity-30 transition-colors"
               onClick={() => setAudioTrackCount((n) => { const next = Math.max(n - 1, 0); setAudioClips((prev) => prev.map((a) => a.trackIndex >= next ? { ...a, trackIndex: Math.max(0, next - 1) } : a)); return next; })}
               disabled={audioTrackCount <= 0} title="Supprimer la dernière piste audio"
-            >−A</button>
+            ><Trash2 className="w-3 h-3" /> Piste A</button>
             <span className="text-xs text-gray-400 ml-auto">{t('videoEditor.snapHint')}</span>
           </div>
 
