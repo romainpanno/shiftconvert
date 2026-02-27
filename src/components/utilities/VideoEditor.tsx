@@ -896,112 +896,95 @@ export function VideoEditor() {
         && !hasAudioTrack
         && sortedClips.every((c) => !c.muteVideoAudio && c.trimStart === 0 && c.trimEnd === c.sourceDuration);
 
+      // Build input args (with -loop 1 for images)
+      const inputArgsWithLoop: string[] = [];
+      for (let i = 0; i < sortedClips.length; i++) {
+        if (sortedClips[i].type === 'image') {
+          inputArgsWithLoop.push('-loop', '1', '-i', inputNames[i]);
+        } else {
+          inputArgsWithLoop.push('-i', inputNames[i]);
+        }
+      }
+      for (const name of audioInputNames) inputArgsWithLoop.push('-i', name);
+
+      // Build filter_complex. useVideoAudio=true tries to use [i:a] from video clips;
+      // if that fails (clip has no audio stream), we retry with useVideoAudio=false.
+      const buildFilter = (useVideoAudio: boolean): { fc: string; aLabel: string } => {
+        const parts: string[] = [];
+        const vLabels: string[] = [];
+        const aLabels: string[] = [];
+
+        for (let i = 0; i < sortedClips.length; i++) {
+          const clip = sortedClips[i];
+          const vLabel = `[v${i}]`;
+
+          if (clip.type === 'image') {
+            parts.push(
+              `[${i}:v]` + makeScaleFilter('') +
+              `,trim=duration=${clip.displayDuration.toFixed(3)},setpts=PTS-STARTPTS${vLabel}`
+            );
+            parts.push(
+              `aevalsrc=0:channel_layout=stereo:sample_rate=44100:duration=${clip.displayDuration.toFixed(3)}[a${i}]`
+            );
+          } else {
+            parts.push(
+              `[${i}:v]trim=start=${clip.trimStart.toFixed(3)}:end=${clip.trimEnd.toFixed(3)},` +
+              `setpts=PTS-STARTPTS,` + makeScaleFilter(vLabel)
+            );
+            if (useVideoAudio && !clip.muteVideoAudio) {
+              parts.push(
+                `[${i}:a]atrim=start=${clip.trimStart.toFixed(3)}:end=${clip.trimEnd.toFixed(3)},asetpts=PTS-STARTPTS[a${i}]`
+              );
+            } else {
+              parts.push(
+                `aevalsrc=0:channel_layout=stereo:sample_rate=44100:duration=${clip.displayDuration.toFixed(3)}[a${i}]`
+              );
+            }
+          }
+          vLabels.push(vLabel);
+          aLabels.push(`[a${i}]`);
+        }
+
+        parts.push(
+          `${vLabels.join('')}${aLabels.join('')}concat=n=${sortedClips.length}:v=1:a=1[outv_base][outa_base]`
+        );
+
+        let aLabel = '[outa_base]';
+        if (hasAudioTrack) {
+          const offset = sortedClips.length;
+          const delayed: string[] = ['[outa_base]'];
+          for (let i = 0; i < sortedAudio.length; i++) {
+            const a = sortedAudio[i];
+            const delayMs = Math.round(a.timelineStart * 1000);
+            parts.push(
+              `[${offset + i}:a]atrim=start=${a.trimStart.toFixed(3)}:end=${a.trimEnd.toFixed(3)},asetpts=PTS-STARTPTS[at${i}]`
+            );
+            parts.push(`[at${i}]adelay=${delayMs}|${delayMs}[ad${i}]`);
+            delayed.push(`[ad${i}]`);
+          }
+          parts.push(`${delayed.join('')}amix=inputs=${delayed.length}:duration=first[outa_mix]`);
+          aLabel = '[outa_mix]';
+        }
+
+        return { fc: parts.join(';'), aLabel };
+      };
+
+      const outputArgs = ['-c:v', 'libx264', '-preset', 'fast', '-crf', '18', '-c:a', 'aac', '-shortest', 'output.mp4'];
+
       if (hasOnlySimpleVideos && sortedClips.length === 1) {
         // Single video, just copy
         await ff.exec(['-i', inputNames[0], '-c', 'copy', 'output.mp4']);
       } else {
-        // General case: build filter_complex
-        const filterParts: string[] = [];
-        const vOutLabels: string[] = [];
-        const aOutLabels: string[] = [];
-
-        // Process each video/image clip
-        for (let i = 0; i < sortedClips.length; i++) {
-          const clip = sortedClips[i];
-          const label = `[v${i}]`;
-
-          if (clip.type === 'image') {
-            filterParts.push(
-              `[${i}:v]` + makeScaleFilter('') +
-              `,trim=duration=${clip.displayDuration.toFixed(3)},setpts=PTS-STARTPTS${label}`
-            );
-            filterParts.push(
-              `aevalsrc=0:channel_layout=stereo:sample_rate=44100:duration=${clip.displayDuration.toFixed(3)}[a${i}]`
-            );
-            aOutLabels.push(`[a${i}]`);
-          } else {
-            // Video clip
-            filterParts.push(
-              `[${i}:v]trim=start=${clip.trimStart.toFixed(3)}:end=${clip.trimEnd.toFixed(3)},` +
-              `setpts=PTS-STARTPTS,` + makeScaleFilter(label)
-            );
-
-            // Detect if the video has an audio stream via the HTMLVideoElement API.
-            // audioTracks is typed as {} in some TS DOM lib versions, so we use any.
-            const vidEl = hiddenVideoEls.current.get(clip.id);
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const audioTracks = (vidEl as any)?.audioTracks;
-            const videoHasAudioStream = vidEl
-              ? (audioTracks != null ? (audioTracks.length as number) > 0 : true)
-              : false;
-
-            if (!clip.muteVideoAudio && videoHasAudioStream) {
-              filterParts.push(
-                `[${i}:a]atrim=start=${clip.trimStart.toFixed(3)}:end=${clip.trimEnd.toFixed(3)},asetpts=PTS-STARTPTS[a${i}]`
-              );
-            } else {
-              filterParts.push(
-                `aevalsrc=0:channel_layout=stereo:sample_rate=44100:duration=${clip.displayDuration.toFixed(3)}[a${i}]`
-              );
-            }
-            aOutLabels.push(`[a${i}]`);
-          }
-          vOutLabels.push(label);
+        // First attempt: use video audio streams
+        const { fc, aLabel } = buildFilter(true);
+        try {
+          await ff.exec([...inputArgsWithLoop, '-filter_complex', fc, '-map', '[outv_base]', '-map', aLabel, ...outputArgs]);
+        } catch {
+          // A video clip likely has no audio stream — retry with silence for all video clips
+          try { await ff.deleteFile('output.mp4'); } catch {}
+          const { fc: fcFallback, aLabel: aLabelFallback } = buildFilter(false);
+          await ff.exec([...inputArgsWithLoop, '-filter_complex', fcFallback, '-map', '[outv_base]', '-map', aLabelFallback, ...outputArgs]);
         }
-
-        // Concat video + base audio
-        const n = sortedClips.length;
-        filterParts.push(
-          `${vOutLabels.join('')}${aOutLabels.join('')}concat=n=${n}:v=1:a=1[outv_base][outa_base]`
-        );
-
-        let finalALabel = '[outa_base]';
-
-        // Mix in extra audio track clips
-        if (hasAudioTrack) {
-          const audioOffset = sortedClips.length;
-          const delayedLabels: string[] = ['[outa_base]'];
-
-          for (let i = 0; i < sortedAudio.length; i++) {
-            const a = sortedAudio[i];
-            const inputIdx = audioOffset + i;
-            const delayMs = Math.round(a.timelineStart * 1000);
-            filterParts.push(
-              `[${inputIdx}:a]atrim=start=${a.trimStart.toFixed(3)}:end=${a.trimEnd.toFixed(3)},asetpts=PTS-STARTPTS[at${i}]`
-            );
-            filterParts.push(`[at${i}]adelay=${delayMs}|${delayMs}[ad${i}]`);
-            delayedLabels.push(`[ad${i}]`);
-          }
-
-          filterParts.push(
-            `${delayedLabels.join('')}amix=inputs=${delayedLabels.length}:duration=first[outa_mix]`
-          );
-          finalALabel = '[outa_mix]';
-        }
-
-        // Build input args (with -loop 1 for images)
-        const inputArgsWithLoop: string[] = [];
-        for (let i = 0; i < sortedClips.length; i++) {
-          if (sortedClips[i].type === 'image') {
-            inputArgsWithLoop.push('-loop', '1', '-i', inputNames[i]);
-          } else {
-            inputArgsWithLoop.push('-i', inputNames[i]);
-          }
-        }
-        for (const name of audioInputNames) inputArgsWithLoop.push('-i', name);
-
-        await ff.exec([
-          ...inputArgsWithLoop,
-          '-filter_complex', filterParts.join(';'),
-          '-map', '[outv_base]',
-          '-map', finalALabel,
-          '-c:v', 'libx264',
-          '-preset', 'fast',
-          '-crf', '18',
-          '-c:a', 'aac',
-          '-shortest',
-          'output.mp4',
-        ]);
       }
 
       const data = await ff.readFile('output.mp4');
