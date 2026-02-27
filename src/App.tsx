@@ -7,6 +7,7 @@ import { Utilities } from './pages/Utilities';
 import { Utility } from './pages/Utility';
 import { About } from './pages/About';
 import { LanguageProvider } from './i18n';
+import { SpeedInsights } from '@vercel/speed-insights/react';
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
           </Route>
         </Routes>
       </BrowserRouter>
+      <SpeedInsights />
     </LanguageProvider>
   );
 }
