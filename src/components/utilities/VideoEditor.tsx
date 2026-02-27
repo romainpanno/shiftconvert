@@ -188,9 +188,9 @@ export function VideoEditor() {
           vid.preload = 'auto';
           vid.muted = true;
           vid.playsInline = true;
-          // After a seek completes, redraw so other-track frames appear immediately
+          // After a seek completes, always redraw — covers paused AND playback transitions
           vid.onseeked = () => {
-            if (!isPlayingRef.current) drawFrameRef.current(playheadRef.current);
+            drawFrameRef.current(playheadRef.current);
           };
           hiddenVideoEls.current.set(clip.id, vid);
         }
@@ -321,8 +321,11 @@ export function VideoEditor() {
         if (Math.abs(vid.currentTime - sourceTime) > 0.1) {
           vid.currentTime = sourceTime;
         }
+        // During playback, start the video element if it just came into range
+        if (isPlayingRef.current && vid.paused) {
+          vid.play().catch(() => {});
+        }
       } else {
-        // pause it
         if (!vid.paused) vid.pause();
       }
     }
@@ -837,6 +840,10 @@ export function VideoEditor() {
     setExportProgress(0);
     setOutputUrl(null);
 
+    // Declared outside try so finally can always clean them up
+    const inputNames: string[] = [];
+    const audioInputNames: string[] = [];
+
     try {
       if (!ffmpegRef.current) {
         ffmpegRef.current = new FFmpeg();
@@ -849,12 +856,14 @@ export function VideoEditor() {
       const ff = ffmpegRef.current;
       ff.on('progress', ({ progress: p }) => setExportProgress(Math.round(p * 100)));
 
+      // Delete any output left over from a previous failed export
+      try { await ff.deleteFile('output.mp4'); } catch {}
+
       // Sort clips by timeline position
       const sortedClips = [...clips].sort((a, b) => a.timelineStart - b.timelineStart);
       const sortedAudio = [...audioClips].sort((a, b) => a.timelineStart - b.timelineStart);
 
       // Write all input files
-      const inputNames: string[] = [];
       for (let i = 0; i < sortedClips.length; i++) {
         const clip = sortedClips[i];
         const ext = clip.file.name.split('.').pop() || (clip.type === 'video' ? 'mp4' : 'png');
@@ -864,7 +873,6 @@ export function VideoEditor() {
       }
 
       // Write audio inputs
-      const audioInputNames: string[] = [];
       for (let i = 0; i < sortedAudio.length; i++) {
         const a = sortedAudio[i];
         const ext = a.file.name.split('.').pop() || 'mp3';
@@ -890,11 +898,7 @@ export function VideoEditor() {
 
       if (hasOnlySimpleVideos && sortedClips.length === 1) {
         // Single video, just copy
-        await ff.exec([
-          '-i', inputNames[0],
-          '-c', 'copy',
-          'output.mp4',
-        ]);
+        await ff.exec(['-i', inputNames[0], '-c', 'copy', 'output.mp4']);
       } else {
         // General case: build filter_complex
         const filterParts: string[] = [];
@@ -907,75 +911,74 @@ export function VideoEditor() {
           const label = `[v${i}]`;
 
           if (clip.type === 'image') {
-            // Loop image and trim to displayDuration
             filterParts.push(
               `[${i}:v]` + makeScaleFilter('') +
               `,trim=duration=${clip.displayDuration.toFixed(3)},setpts=PTS-STARTPTS${label}`
             );
-            // Silent audio for image
             filterParts.push(
               `aevalsrc=0:channel_layout=stereo:sample_rate=44100:duration=${clip.displayDuration.toFixed(3)}[a${i}]`
             );
             aOutLabels.push(`[a${i}]`);
           } else {
             // Video clip
-            const trimFilter =
+            filterParts.push(
               `[${i}:v]trim=start=${clip.trimStart.toFixed(3)}:end=${clip.trimEnd.toFixed(3)},` +
-              `setpts=PTS-STARTPTS,` + makeScaleFilter(label);
-            filterParts.push(trimFilter);
+              `setpts=PTS-STARTPTS,` + makeScaleFilter(label)
+            );
 
-            if (!clip.muteVideoAudio) {
+            // Detect if the video has an audio stream via the HTMLVideoElement API
+            const vidEl = hiddenVideoEls.current.get(clip.id);
+            const videoHasAudioStream = vidEl
+              ? ('audioTracks' in vidEl && vidEl.audioTracks != null
+                  ? vidEl.audioTracks.length > 0
+                  : true) // assume true when API is unavailable
+              : false;
+
+            if (!clip.muteVideoAudio && videoHasAudioStream) {
               filterParts.push(
                 `[${i}:a]atrim=start=${clip.trimStart.toFixed(3)}:end=${clip.trimEnd.toFixed(3)},asetpts=PTS-STARTPTS[a${i}]`
               );
-              aOutLabels.push(`[a${i}]`);
             } else {
               filterParts.push(
                 `aevalsrc=0:channel_layout=stereo:sample_rate=44100:duration=${clip.displayDuration.toFixed(3)}[a${i}]`
               );
-              aOutLabels.push(`[a${i}]`);
             }
+            aOutLabels.push(`[a${i}]`);
           }
           vOutLabels.push(label);
         }
 
         // Concat video + base audio
         const n = sortedClips.length;
-        const concatInputs = vOutLabels.join('') + aOutLabels.join('');
-        filterParts.push(`${concatInputs}concat=n=${n}:v=1:a=1[outv_base][outa_base]`);
+        filterParts.push(
+          `${vOutLabels.join('')}${aOutLabels.join('')}concat=n=${n}:v=1:a=1[outv_base][outa_base]`
+        );
 
         let finalALabel = '[outa_base]';
 
         // Mix in extra audio track clips
         if (hasAudioTrack) {
-          const audioOffset = sortedClips.length; // input index offset
+          const audioOffset = sortedClips.length;
           const delayedLabels: string[] = ['[outa_base]'];
 
           for (let i = 0; i < sortedAudio.length; i++) {
             const a = sortedAudio[i];
             const inputIdx = audioOffset + i;
             const delayMs = Math.round(a.timelineStart * 1000);
-            const trimmed = `[${inputIdx}:a]atrim=start=${a.trimStart.toFixed(3)}:end=${a.trimEnd.toFixed(3)},asetpts=PTS-STARTPTS[at${i}]`;
-            filterParts.push(trimmed);
+            filterParts.push(
+              `[${inputIdx}:a]atrim=start=${a.trimStart.toFixed(3)}:end=${a.trimEnd.toFixed(3)},asetpts=PTS-STARTPTS[at${i}]`
+            );
             filterParts.push(`[at${i}]adelay=${delayMs}|${delayMs}[ad${i}]`);
             delayedLabels.push(`[ad${i}]`);
           }
 
-          const mixN = delayedLabels.length;
-          filterParts.push(`${delayedLabels.join('')}amix=inputs=${mixN}:duration=first[outa_mix]`);
+          filterParts.push(
+            `${delayedLabels.join('')}amix=inputs=${delayedLabels.length}:duration=first[outa_mix]`
+          );
           finalALabel = '[outa_mix]';
         }
 
-        // Build ffmpeg args
-        const inputArgs: string[] = [];
-        for (const name of inputNames) {
-          inputArgs.push('-i', name);
-        }
-        for (const name of audioInputNames) {
-          inputArgs.push('-i', name);
-        }
-
-        // For images, add loop flag
+        // Build input args (with -loop 1 for images)
         const inputArgsWithLoop: string[] = [];
         for (let i = 0; i < sortedClips.length; i++) {
           if (sortedClips[i].type === 'image') {
@@ -984,15 +987,11 @@ export function VideoEditor() {
             inputArgsWithLoop.push('-i', inputNames[i]);
           }
         }
-        for (const name of audioInputNames) {
-          inputArgsWithLoop.push('-i', name);
-        }
-
-        const filterComplex = filterParts.join(';');
+        for (const name of audioInputNames) inputArgsWithLoop.push('-i', name);
 
         await ff.exec([
           ...inputArgsWithLoop,
-          '-filter_complex', filterComplex,
+          '-filter_complex', filterParts.join(';'),
           '-map', '[outv_base]',
           '-map', finalALabel,
           '-c:v', 'libx264',
@@ -1008,15 +1007,17 @@ export function VideoEditor() {
       const blob = new Blob([data as unknown as BlobPart], { type: 'video/mp4' });
       setOutputUrl(URL.createObjectURL(blob));
 
-      // Cleanup FS
-      for (const name of inputNames) { try { await ff.deleteFile(name); } catch {} }
-      for (const name of audioInputNames) { try { await ff.deleteFile(name); } catch {} }
-      try { await ff.deleteFile('output.mp4'); } catch {}
-
     } catch (err) {
       console.error('Export error:', err);
     } finally {
       setIsExporting(false);
+      // Always clean up FS files, even if export failed
+      if (ffmpegRef.current) {
+        const ff = ffmpegRef.current;
+        for (const name of inputNames) { try { await ff.deleteFile(name); } catch {} }
+        for (const name of audioInputNames) { try { await ff.deleteFile(name); } catch {} }
+        try { await ff.deleteFile('output.mp4'); } catch {}
+      }
     }
   };
 
