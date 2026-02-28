@@ -165,8 +165,8 @@ export function Header() {
 
       {/* Mobile menu panel */}
       <div
-        className={`sm:hidden fixed top-16 left-0 right-0 z-30 bg-white border-b border-gray-200 shadow-lg transform transition-transform duration-200 ease-out ${
-          mobileMenuOpen ? 'translate-y-0' : '-translate-y-full'
+        className={`sm:hidden fixed top-0 left-0 right-0 z-30 bg-white border-b border-gray-200 shadow-lg transform transition-transform duration-200 ease-out ${
+          mobileMenuOpen ? 'translate-y-16' : '-translate-y-full'
         }`}
       >
         <nav className="max-w-6xl mx-auto px-4 py-4 space-y-1">
