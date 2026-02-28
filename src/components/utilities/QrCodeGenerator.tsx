@@ -334,13 +334,13 @@ export function QrCodeGenerator() {
       {/* Content input */}
       <div className="card">
         <div className="flex items-center justify-between mb-2">
-          <label className="block text-sm font-medium text-gray-700">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
             {t('qrCode.content')}
           </label>
           {hasCustomSettings && (
             <button
               onClick={resetSettings}
-              className="flex items-center gap-1 px-2 py-1 text-xs text-gray-600 bg-gray-100 rounded hover:bg-gray-200 transition-colors"
+              className="flex items-center gap-1 px-2 py-1 text-xs text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
               title={t('common.reset')}
             >
               <RotateCcw className="w-3 h-3" />
@@ -351,7 +351,7 @@ export function QrCodeGenerator() {
         <textarea
           value={settings.text}
           onChange={(e) => updateSetting('text', e.target.value)}
-          className="w-full px-3 py-2 border border-gray-200 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-primary-500"
+          className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-primary-500"
           rows={3}
           placeholder={t('qrCode.enterText')}
         />
@@ -360,7 +360,7 @@ export function QrCodeGenerator() {
             <button
               key={p.placeholder}
               onClick={() => updateSetting('text', p.placeholder)}
-              className="text-xs px-2 py-1 bg-gray-100 hover:bg-gray-200 rounded transition-colors"
+              className="text-xs px-2 py-1 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded transition-colors"
             >
               {p.label}
             </button>
@@ -370,7 +370,7 @@ export function QrCodeGenerator() {
 
       {/* Color presets */}
       <div className="card">
-        <label className="block text-sm font-medium text-gray-700 mb-3">
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
           {t('qrCode.colorThemes')}
         </label>
         <div className="flex flex-wrap gap-2">
@@ -385,14 +385,14 @@ export function QrCodeGenerator() {
               className={`flex items-center gap-2 px-3 py-2 rounded-lg border transition-colors ${
                 settings.darkColor === preset.dark && settings.lightColor === preset.light
                   ? 'border-primary-500 bg-primary-50'
-                  : 'border-gray-200 hover:border-gray-300'
+                  : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
               }`}
             >
               <div
                 className="w-4 h-4 rounded-full border border-gray-300"
                 style={{ background: preset.dark }}
               />
-              <span className="text-sm">{t(preset.nameKey)}</span>
+              <span className="text-sm text-gray-700 dark:text-gray-300">{t(preset.nameKey)}</span>
             </button>
           ))}
         </div>
@@ -400,58 +400,58 @@ export function QrCodeGenerator() {
 
       {/* Custom colors */}
       <div className="card">
-        <label className="block text-sm font-medium text-gray-700 mb-3">
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
           {t('qrCode.customColors')}
         </label>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div>
-            <label className="block text-xs text-gray-500 mb-1">{t('qrCode.modules')}</label>
+            <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">{t('qrCode.modules')}</label>
             <div className="flex items-center gap-2">
               <input
                 type="color"
                 value={settings.darkColor}
                 onChange={(e) => updateSetting('darkColor', e.target.value)}
-                className="w-10 h-10 rounded cursor-pointer border border-gray-200"
+                className="w-10 h-10 rounded cursor-pointer border border-gray-200 dark:border-gray-600"
               />
               <input
                 type="text"
                 value={settings.darkColor}
                 onChange={(e) => updateSetting('darkColor', e.target.value)}
-                className="flex-1 px-2 py-1.5 text-sm border border-gray-200 rounded-lg"
+                className="flex-1 px-2 py-1.5 text-sm border border-gray-200 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 rounded-lg"
               />
             </div>
           </div>
           <div>
-            <label className="block text-xs text-gray-500 mb-1">{t('qrCode.background')}</label>
+            <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">{t('qrCode.background')}</label>
             <div className="flex items-center gap-2">
               <input
                 type="color"
                 value={settings.lightColor}
                 onChange={(e) => updateSetting('lightColor', e.target.value)}
-                className="w-10 h-10 rounded cursor-pointer border border-gray-200"
+                className="w-10 h-10 rounded cursor-pointer border border-gray-200 dark:border-gray-600"
               />
               <input
                 type="text"
                 value={settings.lightColor}
                 onChange={(e) => updateSetting('lightColor', e.target.value)}
-                className="flex-1 px-2 py-1.5 text-sm border border-gray-200 rounded-lg"
+                className="flex-1 px-2 py-1.5 text-sm border border-gray-200 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 rounded-lg"
               />
             </div>
           </div>
           <div>
-            <label className="block text-xs text-gray-500 mb-1">{t('qrCode.eyes')}</label>
+            <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">{t('qrCode.eyes')}</label>
             <div className="flex items-center gap-2">
               <input
                 type="color"
                 value={settings.eyeColor}
                 onChange={(e) => updateSetting('eyeColor', e.target.value)}
-                className="w-10 h-10 rounded cursor-pointer border border-gray-200"
+                className="w-10 h-10 rounded cursor-pointer border border-gray-200 dark:border-gray-600"
               />
               <input
                 type="text"
                 value={settings.eyeColor}
                 onChange={(e) => updateSetting('eyeColor', e.target.value)}
-                className="flex-1 px-2 py-1.5 text-sm border border-gray-200 rounded-lg"
+                className="flex-1 px-2 py-1.5 text-sm border border-gray-200 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 rounded-lg"
               />
             </div>
           </div>
@@ -462,7 +462,7 @@ export function QrCodeGenerator() {
       <div className="card">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-3">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
               {t('qrCode.moduleStyle')}
             </label>
             <div className="flex flex-wrap gap-2">
@@ -473,7 +473,7 @@ export function QrCodeGenerator() {
                   className={`px-3 py-1.5 text-sm rounded-lg transition-colors ${
                     settings.dotStyle === style.value
                       ? 'bg-primary-500 text-white'
-                      : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+                      : 'bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300'
                   }`}
                 >
                   {t(style.labelKey)}
@@ -482,7 +482,7 @@ export function QrCodeGenerator() {
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-3">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
               {t('qrCode.eyeStyle')}
             </label>
             <div className="flex flex-wrap gap-2">
@@ -493,7 +493,7 @@ export function QrCodeGenerator() {
                   className={`px-3 py-1.5 text-sm rounded-lg transition-colors ${
                     settings.eyeStyle === style.value
                       ? 'bg-primary-500 text-white'
-                      : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+                      : 'bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300'
                   }`}
                 >
                   {t(style.labelKey)}
@@ -508,11 +508,11 @@ export function QrCodeGenerator() {
       <div className="card">
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div>
-            <label className="block text-xs text-gray-500 mb-1">
+            <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">
               {t('qrCode.size')} ({settings.size}px)
             </label>
             <div className="relative h-6 flex items-center">
-              <div className="absolute inset-x-0 h-1.5 bg-gray-200 rounded-full" />
+              <div className="absolute inset-x-0 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full" />
               <div
                 className="absolute h-1.5 bg-primary-500 rounded-full transition-all"
                 style={{ width: `${((settings.size - 150) / 350) * 100}%` }}
@@ -527,17 +527,17 @@ export function QrCodeGenerator() {
                 className="absolute inset-x-0 w-full h-6 opacity-0 cursor-pointer z-10"
               />
               <div
-                className="absolute w-2.5 h-5 bg-white border-2 border-primary-500 rounded-md shadow-md pointer-events-none transition-all"
+                className="absolute w-2.5 h-5 bg-white dark:bg-gray-200 border-2 border-primary-500 rounded-md shadow-md pointer-events-none transition-all"
                 style={{ left: `calc(${((settings.size - 150) / 350) * 100}% - 5px)` }}
               />
             </div>
           </div>
           <div>
-            <label className="block text-xs text-gray-500 mb-1">
+            <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">
               {t('qrCode.margin')} ({settings.margin})
             </label>
             <div className="relative h-6 flex items-center">
-              <div className="absolute inset-x-0 h-1.5 bg-gray-200 rounded-full" />
+              <div className="absolute inset-x-0 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full" />
               <div
                 className="absolute h-1.5 bg-primary-500 rounded-full transition-all"
                 style={{ width: `${(settings.margin / 6) * 100}%` }}
@@ -552,19 +552,19 @@ export function QrCodeGenerator() {
                 className="absolute inset-x-0 w-full h-6 opacity-0 cursor-pointer z-10"
               />
               <div
-                className="absolute w-2.5 h-5 bg-white border-2 border-primary-500 rounded-md shadow-md pointer-events-none transition-all"
+                className="absolute w-2.5 h-5 bg-white dark:bg-gray-200 border-2 border-primary-500 rounded-md shadow-md pointer-events-none transition-all"
                 style={{ left: `calc(${(settings.margin / 6) * 100}% - 5px)` }}
               />
             </div>
           </div>
           <div>
-            <label className="block text-xs text-gray-500 mb-1">
+            <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">
               {t('qrCode.errorCorrection')}
             </label>
             <select
               value={settings.errorCorrection}
               onChange={(e) => updateSetting('errorCorrection', e.target.value as 'L' | 'M' | 'Q' | 'H')}
-              className="w-full px-3 py-1.5 text-sm border border-gray-200 rounded-lg"
+              className="w-full px-3 py-1.5 text-sm border border-gray-200 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 rounded-lg"
             >
               <option value="L">{t('qrCode.error.low')}</option>
               <option value="M">{t('qrCode.error.medium')}</option>
@@ -577,7 +577,7 @@ export function QrCodeGenerator() {
 
       {/* Logo upload */}
       <div className="card">
-        <label className="block text-sm font-medium text-gray-700 mb-3">
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
           {t('qrCode.logo')}
         </label>
         {settings.logo ? (
@@ -585,14 +585,14 @@ export function QrCodeGenerator() {
             <img
               src={settings.logo}
               alt="Logo"
-              className="w-16 h-16 object-contain rounded-lg border border-gray-200"
+              className="w-16 h-16 object-contain rounded-lg border border-gray-200 dark:border-gray-600"
             />
             <div className="flex-1">
-              <label className="block text-xs text-gray-500 mb-1">
+              <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">
                 {t('qrCode.logoSize')} ({settings.logoSize}%)
               </label>
               <div className="relative h-6 flex items-center">
-                <div className="absolute inset-x-0 h-1.5 bg-gray-200 rounded-full" />
+                <div className="absolute inset-x-0 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full" />
                 <div
                   className="absolute h-1.5 bg-primary-500 rounded-full transition-all"
                   style={{ width: `${((settings.logoSize - 10) / 25) * 100}%` }}
@@ -607,7 +607,7 @@ export function QrCodeGenerator() {
                   className="absolute inset-x-0 w-full h-6 opacity-0 cursor-pointer z-10"
                 />
                 <div
-                  className="absolute w-2.5 h-5 bg-white border-2 border-primary-500 rounded-md shadow-md pointer-events-none transition-all"
+                  className="absolute w-2.5 h-5 bg-white dark:bg-gray-200 border-2 border-primary-500 rounded-md shadow-md pointer-events-none transition-all"
                   style={{ left: `calc(${((settings.logoSize - 10) / 25) * 100}% - 5px)` }}
                 />
               </div>
@@ -622,10 +622,10 @@ export function QrCodeGenerator() {
         ) : (
           <button
             onClick={() => logoInputRef.current?.click()}
-            className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+            className="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors"
           >
             <Image className="w-4 h-4" />
-            <span className="text-sm">{t('qrCode.addLogo')}</span>
+            <span className="text-sm text-gray-700 dark:text-gray-300">{t('qrCode.addLogo')}</span>
           </button>
         )}
         <input
@@ -635,7 +635,7 @@ export function QrCodeGenerator() {
           onChange={handleLogoUpload}
           className="hidden"
         />
-        <p className="text-xs text-gray-500 mt-2">
+        <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
           {t('qrCode.logoTip')}
         </p>
       </div>
@@ -649,8 +649,8 @@ export function QrCodeGenerator() {
             style={{ maxWidth: '100%', height: 'auto' }}
           />
         ) : (
-          <div className="w-64 h-64 bg-gray-100 rounded-lg flex items-center justify-center">
-            <QrCode className="w-16 h-16 text-gray-300" />
+          <div className="w-64 h-64 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center">
+            <QrCode className="w-16 h-16 text-gray-300 dark:text-gray-500" />
           </div>
         )}
       </div>

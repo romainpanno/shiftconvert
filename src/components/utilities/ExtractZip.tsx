@@ -80,8 +80,8 @@ export function ExtractZip() {
             <input type="file" className="hidden" accept=".zip,.rar,.7z"
               onChange={(e) => { const f = e.target.files?.[0]; if (f) loadArchive(f); e.target.value = ''; }} />
             <Upload className="w-10 h-10 text-gray-400 mb-3" />
-            <p className="text-base font-medium text-gray-700 mb-1">{t('dropzone.dragHere')}</p>
-            <p className="text-sm text-gray-500">ZIP</p>
+            <p className="text-base font-medium text-gray-700 dark:text-gray-300 mb-1">{t('dropzone.dragHere')}</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">ZIP</p>
           </label>
         </div>
       ) : (
@@ -91,8 +91,8 @@ export function ExtractZip() {
               <div className="flex items-center gap-3">
                 <FolderOpen className="w-8 h-8 text-primary-500" />
                 <div>
-                  <p className="font-medium text-gray-900">{archive.name}</p>
-                  <p className="text-sm text-gray-500">{files.length} {t('zip.files')} - {formatSize(archive.size)}</p>
+                  <p className="font-medium text-gray-900 dark:text-gray-100">{archive.name}</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">{files.length} {t('zip.files')} - {formatSize(archive.size)}</p>
                 </div>
               </div>
               <button onClick={reset} className="text-gray-400 hover:text-red-500"><X className="w-5 h-5" /></button>
@@ -101,10 +101,10 @@ export function ExtractZip() {
 
           {isProcessing && (
             <div className="card">
-              <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+              <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
                 <div className="h-full bg-primary-500 transition-all" style={{ width: `${progress}%` }} />
               </div>
-              <p className="text-sm text-center text-gray-600 mt-2">{t('zip.extracting')} {progress}%</p>
+              <p className="text-sm text-center text-gray-600 dark:text-gray-400 mt-2">{t('zip.extracting')} {progress}%</p>
             </div>
           )}
 
@@ -113,10 +113,10 @@ export function ExtractZip() {
               <div className="card max-h-[300px] overflow-y-auto">
                 <div className="space-y-1">
                   {files.map((file, i) => (
-                    <div key={i} className="flex items-center gap-3 py-2 px-2 hover:bg-gray-50 rounded">
+                    <div key={i} className="flex items-center gap-3 py-2 px-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded">
                       <FileIcon className="w-4 h-4 text-gray-400 flex-shrink-0" />
-                      <span className="text-sm text-gray-700 truncate flex-1">{file.name}</span>
-                      <span className="text-xs text-gray-400">{formatSize(file.size)}</span>
+                      <span className="text-sm text-gray-700 dark:text-gray-300 truncate flex-1">{file.name}</span>
+                      <span className="text-xs text-gray-400 dark:text-gray-500">{formatSize(file.size)}</span>
                       <button onClick={() => downloadFile(file)} className="btn btn-primary text-xs py-1 px-2">
                         <Download className="w-3 h-3" />
                       </button>

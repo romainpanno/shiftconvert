@@ -173,18 +173,18 @@ export function ConvertFonts() {
         <div className="mb-8">
           <Link
             to="/"
-            className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 mb-4"
+            className="inline-flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 mb-4"
           >
             <ArrowLeft className="w-4 h-4" />
             {t('convert.back')}
           </Link>
-          <h1 className="text-3xl font-bold text-gray-900">{t('convert.title')} {t('category.fonts')}</h1>
-          <p className="text-gray-600 mt-1">{t('category.fonts.desc')}</p>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">{t('convert.title')} {t('category.fonts')}</h1>
+          <p className="text-gray-600 dark:text-gray-400 mt-1">{t('category.fonts.desc')}</p>
         </div>
 
         {/* Format selector */}
         <div className="card mb-6">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
             {t('convert.outputFormat')}
           </label>
           <div className="flex flex-wrap gap-2">
@@ -195,7 +195,7 @@ export function ConvertFonts() {
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                   selectedFormat === format
                     ? 'bg-primary-600 text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
                 }`}
               >
                 {format.toUpperCase()}
@@ -231,20 +231,20 @@ export function ConvertFonts() {
                 e.target.value = '';
               }}
             />
-            <Upload className="w-10 h-10 text-gray-400 mb-3" />
-            <p className="text-base font-medium text-gray-700 mb-1">
+            <Upload className="w-10 h-10 text-gray-400 dark:text-gray-500 mb-3" />
+            <p className="text-base font-medium text-gray-700 dark:text-gray-300 mb-1">
               {t('dropzone.dragHere')}
             </p>
-            <p className="text-sm text-gray-500">TTF, OTF, WOFF</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">TTF, OTF, WOFF</p>
           </label>
         </div>
 
         {/* Tip for metadata editor */}
-        <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-xl">
+        <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-xl">
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              <Type className="w-5 h-5 text-blue-600 flex-shrink-0" />
-              <span className="text-sm text-blue-800">
+              <Type className="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0" />
+              <span className="text-sm text-blue-800 dark:text-blue-300">
                 {t('convert.onlyEditMetadata')}
               </span>
             </div>
@@ -307,7 +307,7 @@ export function ConvertFonts() {
 
             <button
               onClick={clearFiles}
-              className="btn btn-secondary flex items-center gap-2 text-red-600"
+              className="btn btn-secondary flex items-center gap-2 text-red-600 dark:text-red-400"
             >
               <Trash2 className="w-4 h-4" />
               {t('convert.clearAll')}
@@ -368,25 +368,25 @@ function FontFileCard({
   return (
     <div className="card p-4">
       <div className="flex items-center gap-3">
-        <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center text-orange-600 font-bold text-xs">
+        <div className="w-10 h-10 bg-orange-100 dark:bg-orange-900/30 rounded-lg flex items-center justify-center text-orange-600 dark:text-orange-400 font-bold text-xs">
           {file.name.split('.').pop()?.toUpperCase()}
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium text-gray-900 truncate">{file.name}</p>
-          <p className="text-xs text-gray-500">{formatSize(file.size)}</p>
+          <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{file.name}</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400">{formatSize(file.size)}</p>
         </div>
 
         {file.status === 'converting' && (
           <div className="flex items-center gap-2">
             <div className="w-20">
-              <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+              <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
                 <div
                   className="h-full bg-primary-500 transition-all duration-300"
                   style={{ width: `${file.progress}%` }}
                 />
               </div>
             </div>
-            <span className="text-xs text-gray-500">{Math.round(file.progress)}%</span>
+            <span className="text-xs text-gray-500 dark:text-gray-400">{Math.round(file.progress)}%</span>
           </div>
         )}
 
@@ -402,13 +402,13 @@ function FontFileCard({
         )}
 
         {file.status === 'error' && (
-          <span className="text-sm text-red-600">{file.error}</span>
+          <span className="text-sm text-red-600 dark:text-red-400">{file.error}</span>
         )}
 
         {file.metadata && file.status !== 'done' && (
           <button
             onClick={() => setIsExpanded(!isExpanded)}
-            className="text-gray-500 hover:text-gray-700 p-1"
+            className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 p-1"
             title="Éditer les métadonnées"
           >
             {isExpanded ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
@@ -417,7 +417,7 @@ function FontFileCard({
 
         <button
           onClick={onRemove}
-          className="text-gray-400 hover:text-red-500 p-1"
+          className="text-gray-400 hover:text-red-500 dark:hover:text-red-400 p-1"
           title="Supprimer"
         >
           <X className="w-4 h-4" />
@@ -426,23 +426,23 @@ function FontFileCard({
 
       {/* Metadata editor - organized by category */}
       {isExpanded && file.editedMetadata && file.status !== 'done' && (
-        <div className="mt-4 pt-4 border-t border-gray-100">
+        <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
           {Object.keys(categoryLabels).map((category) => {
             const categoryFields = metadataFields.filter((f) => f.category === category);
             return (
               <div key={category} className="mb-4">
-                <h4 className="text-sm font-medium text-gray-700 mb-2 border-b border-gray-100 pb-1">
+                <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 border-b border-gray-100 dark:border-gray-700 pb-1">
                   {categoryLabels[category]}
                 </h4>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                   {categoryFields.map(({ key, label }) => (
                     <div key={key}>
-                      <label className="block text-xs text-gray-500 mb-1">{label}</label>
+                      <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">{label}</label>
                       <input
                         type="text"
                         value={file.editedMetadata?.[key] || ''}
                         onChange={(e) => onUpdateMetadata(key, e.target.value)}
-                        className="w-full px-3 py-1.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                        className="w-full px-3 py-1.5 text-sm border border-gray-200 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                         placeholder={label}
                       />
                     </div>

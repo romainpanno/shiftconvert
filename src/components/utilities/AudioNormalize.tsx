@@ -103,8 +103,8 @@ export function AudioNormalize() {
           <input type="file" className="hidden" multiple accept="audio/*"
             onChange={(e) => { if (e.target.files) addFiles(Array.from(e.target.files)); e.target.value = ''; }} />
           <Upload className="w-10 h-10 text-gray-400 mb-3" />
-          <p className="text-base font-medium text-gray-700 mb-1">{t('dropzone.dragHere')}</p>
-          <p className="text-sm text-gray-500">MP3, WAV, OGG, FLAC</p>
+          <p className="text-base font-medium text-gray-700 dark:text-gray-300 mb-1">{t('dropzone.dragHere')}</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">MP3, WAV, OGG, FLAC</p>
         </label>
       </div>
 
@@ -112,14 +112,14 @@ export function AudioNormalize() {
         <>
           <div className="card">
             <div className="flex items-center justify-between mb-3">
-              <label className="text-sm font-medium text-gray-700 flex items-center gap-1.5">
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-1.5">
                 <Volume2 className="w-4 h-4" />
                 {t('audioNormalize.targetLevel')}
               </label>
               <span className="text-sm font-bold text-primary-600">{targetDb} LUFS</span>
             </div>
             <div className="relative h-8 flex items-center">
-              <div className="absolute inset-x-0 h-2 bg-gray-200 rounded-full" />
+              <div className="absolute inset-x-0 h-2 bg-gray-200 dark:bg-gray-700 rounded-full" />
               <div
                 className="absolute h-2 bg-primary-500 rounded-full transition-all"
                 style={{ width: `${((targetDb + 24) / 15) * 100}%` }}
@@ -133,11 +133,11 @@ export function AudioNormalize() {
                 className="absolute inset-x-0 w-full h-8 opacity-0 cursor-pointer z-10"
               />
               <div
-                className="absolute w-3 h-6 bg-white border-2 border-primary-500 rounded-md shadow-md pointer-events-none transition-all"
+                className="absolute w-3 h-6 bg-white dark:bg-gray-200 border-2 border-primary-500 rounded-md shadow-md pointer-events-none transition-all"
                 style={{ left: `calc(${((targetDb + 24) / 15) * 100}% - 6px)` }}
               />
             </div>
-            <div className="flex justify-between text-xs text-gray-500 mt-2">
+            <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-2">
               <span>-24 ({t('audioNormalize.quiet')})</span>
               <span>-14 ({t('audioNormalize.standard')})</span>
               <span>-9 ({t('audioNormalize.loud')})</span>
@@ -149,8 +149,8 @@ export function AudioNormalize() {
               <div key={i} className="card p-3 flex items-center gap-3">
                 <Volume2 className="w-8 h-8 text-gray-400" />
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-900 truncate">{item.file.name}</p>
-                  <p className="text-xs text-gray-500">{formatSize(item.file.size)}</p>
+                  <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{item.file.name}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">{formatSize(item.file.size)}</p>
                 </div>
                 <audio src={item.url} className="w-32 h-8" controls />
                 <button onClick={() => removeFile(i)} className="text-gray-400 hover:text-red-500"><X className="w-4 h-4" /></button>
@@ -160,8 +160,8 @@ export function AudioNormalize() {
 
           {isProcessing && (
             <div className="card">
-              <p className="text-sm text-gray-600 mb-2">{currentFile}</p>
-              <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">{currentFile}</p>
+              <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
                 <div className="h-full bg-primary-500 transition-all" style={{ width: `${progress}%` }} />
               </div>
             </div>

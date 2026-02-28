@@ -8,6 +8,7 @@ import { Utilities } from './pages/Utilities';
 import { Utility } from './pages/Utility';
 import { About } from './pages/About';
 import { LanguageProvider } from './i18n';
+import { useIsDark } from './stores/themeStore';
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -17,10 +18,19 @@ function ScrollToTop() {
   return null;
 }
 
+function ThemeApplier() {
+  const isDark = useIsDark();
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', isDark);
+  }, [isDark]);
+  return null;
+}
+
 function App() {
   return (
     <LanguageProvider>
       <BrowserRouter>
+        <ThemeApplier />
         <ScrollToTop />
         <Routes>
           <Route path="/" element={<Layout />}>

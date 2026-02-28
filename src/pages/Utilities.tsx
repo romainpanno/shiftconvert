@@ -35,13 +35,13 @@ export function Utilities() {
         <div className="mb-8">
           <Link
             to="/"
-            className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 mb-4"
+            className="inline-flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 mb-4"
           >
             <ArrowLeft className="w-4 h-4" />
             {t('utilities.back')}
           </Link>
-          <h1 className="text-3xl font-bold text-gray-900">{t('utilities.title')}</h1>
-          <p className="text-gray-600 mt-1">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">{t('utilities.title')}</h1>
+          <p className="text-gray-600 dark:text-gray-400 mt-1">
             {t('utilities.subtitle')}
           </p>
         </div>
@@ -50,7 +50,7 @@ export function Utilities() {
         <div className="space-y-8">
           {Object.entries(groupedUtilities).map(([category, utils]) => (
             <div key={category}>
-              <h2 className="text-lg font-semibold text-gray-800 mb-4">
+              <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">
                 {t(`utilities.category.${category}`)}
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -70,17 +70,17 @@ export function Utilities() {
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 flex-wrap">
-                            <h3 className="font-medium text-gray-900 group-hover:text-primary-600 transition-colors">
+                            <h3 className="font-medium text-gray-900 dark:text-gray-100 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
                               {t(`utility.${utility.id}`)}
                             </h3>
                             {utility.desktopOnly && (
-                              <span className="inline-flex items-center gap-1 text-[10px] font-medium px-1.5 py-0.5 rounded bg-gray-100 text-gray-500 border border-gray-200 shrink-0">
+                              <span className="inline-flex items-center gap-1 text-[10px] font-medium px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-gray-600 shrink-0">
                                 <Monitor className="w-2.5 h-2.5" />
                                 Desktop
                               </span>
                             )}
                           </div>
-                          <p className="text-sm text-gray-500 mt-0.5">
+                          <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
                             {t(`utility.${utility.id}.desc`)}
                           </p>
                         </div>

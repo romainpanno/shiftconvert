@@ -456,10 +456,10 @@ export function ImageCrop() {
               }}
             />
             <Upload className="w-10 h-10 text-gray-400 mb-3" />
-            <p className="text-base font-medium text-gray-700 mb-1">
+            <p className="text-base font-medium text-gray-700 dark:text-gray-300 mb-1">
               {t('dropzone.dragHere')}
             </p>
-            <p className="text-sm text-gray-500">PNG, JPG, WebP, GIF</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">PNG, JPG, WebP, GIF</p>
           </label>
         </div>
       ) : (
@@ -468,7 +468,7 @@ export function ImageCrop() {
           <div className="card">
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div>
-                <label className="block text-xs text-gray-500 mb-2">{t('crop.aspectRatio')}</label>
+                <label className="block text-xs text-gray-500 dark:text-gray-400 mb-2">{t('crop.aspectRatio')}</label>
                 <div className="flex flex-wrap gap-1">
                   {aspectRatios.map((ar) => (
                     <button
@@ -477,7 +477,7 @@ export function ImageCrop() {
                       className={`px-3 py-1.5 text-xs rounded-lg transition-colors ${
                         aspectRatio === ar.value
                           ? 'bg-primary-500 text-white'
-                          : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+                          : 'bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300'
                       }`}
                     >
                       {ar.label}
@@ -498,9 +498,9 @@ export function ImageCrop() {
           {/* Interactive crop area */}
           <div className="card">
             <div className="flex items-center justify-between mb-4">
-              <div className="text-sm text-gray-600">
+              <div className="text-sm text-gray-600 dark:text-gray-400">
                 {t('crop.selection')}: {pixels.width} × {pixels.height}px
-                <span className="text-gray-400 ml-2">
+                <span className="text-gray-400 dark:text-gray-500 ml-2">
                   ({t('crop.position')}: {pixels.x}, {pixels.y})
                 </span>
               </div>
@@ -515,7 +515,7 @@ export function ImageCrop() {
               </button>
             </div>
 
-            <div className="text-xs text-gray-500 mb-3">
+            <div className="text-xs text-gray-500 dark:text-gray-400 mb-3">
               {t('crop.dragInstructions')}
             </div>
 

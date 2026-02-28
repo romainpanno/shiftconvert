@@ -68,7 +68,7 @@ export function ColorPicker({ value, onChange, label }: ColorPickerProps) {
   return (
     <div className="relative" ref={pickerRef}>
       {label && (
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
           {label}
         </label>
       )}
@@ -78,7 +78,7 @@ export function ColorPicker({ value, onChange, label }: ColorPickerProps) {
         <button
           type="button"
           onClick={() => setIsOpen(!isOpen)}
-          className="relative w-10 h-10 rounded-xl border-2 border-gray-200 shadow-sm overflow-hidden hover:scale-105 transition-transform focus:outline-none focus:ring-2 focus:ring-primary-500"
+          className="relative w-10 h-10 rounded-xl border-2 border-gray-200 dark:border-gray-600 shadow-sm overflow-hidden hover:scale-105 transition-transform focus:outline-none focus:ring-2 focus:ring-primary-500"
           style={{ backgroundColor: value }}
         >
           <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent" />
@@ -94,7 +94,7 @@ export function ColorPicker({ value, onChange, label }: ColorPickerProps) {
               className={`w-7 h-7 rounded-lg border-2 transition-all hover:scale-110 ${
                 value.toLowerCase() === c.color.toLowerCase()
                   ? 'border-primary-500 ring-2 ring-primary-200 scale-110'
-                  : 'border-gray-200 hover:border-gray-300'
+                  : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
               }`}
               style={{ backgroundColor: c.color }}
               title={c.name}
@@ -109,7 +109,7 @@ export function ColorPicker({ value, onChange, label }: ColorPickerProps) {
 
       {/* Expanded picker */}
       {isOpen && (
-        <div className="absolute z-50 top-full left-0 mt-2 p-4 bg-white rounded-2xl shadow-2xl border border-gray-100 min-w-[320px]">
+        <div className="absolute z-50 top-full left-0 mt-2 p-4 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-100 dark:border-gray-700 min-w-[320px]">
           {/* Color grid */}
           <div className="space-y-1 mb-4">
             {presetColors.map((row, rowIndex) => (
@@ -135,19 +135,19 @@ export function ColorPicker({ value, onChange, label }: ColorPickerProps) {
           </div>
 
           {/* Hex input */}
-          <div className="flex items-center gap-2 pt-3 border-t border-gray-100">
+          <div className="flex items-center gap-2 pt-3 border-t border-gray-100 dark:border-gray-700">
             <div
-              className="w-10 h-10 rounded-lg border-2 border-gray-200 shadow-inner"
+              className="w-10 h-10 rounded-lg border-2 border-gray-200 dark:border-gray-600 shadow-inner"
               style={{ backgroundColor: value }}
             />
             <div className="flex-1">
-              <label className="block text-xs text-gray-500 mb-1">Code HEX</label>
+              <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">Code HEX</label>
               <input
                 type="text"
                 value={hexInput}
                 onChange={(e) => handleHexChange(e.target.value)}
                 onBlur={handleHexBlur}
-                className="w-full px-3 py-1.5 text-sm font-mono border border-gray-200 rounded-lg focus:outline-none focus:border-primary-500"
+                className="w-full px-3 py-1.5 text-sm font-mono border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-lg focus:outline-none focus:border-primary-500"
                 placeholder="#000000"
               />
             </div>

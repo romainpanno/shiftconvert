@@ -306,10 +306,10 @@ export function VideoTrim() {
               }}
             />
             <Upload className="w-10 h-10 text-gray-400 mb-3" />
-            <p className="text-base font-medium text-gray-700 mb-1">
+            <p className="text-base font-medium text-gray-700 dark:text-gray-300 mb-1">
               {t('dropzone.dragHere')}
             </p>
-            <p className="text-sm text-gray-500">MP4, WebM, MOV</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">MP4, WebM, MOV</p>
           </label>
         </div>
       ) : (
@@ -317,7 +317,7 @@ export function VideoTrim() {
           {/* Video preview */}
           <div className="card">
             <div className="flex items-center justify-between mb-4">
-              <span className="text-sm text-gray-600">{video.name}</span>
+              <span className="text-sm text-gray-600 dark:text-gray-400">{video.name}</span>
               <button
                 onClick={() => {
                   if (videoUrl) URL.revokeObjectURL(videoUrl);
@@ -346,7 +346,7 @@ export function VideoTrim() {
             <div className="flex items-center justify-center gap-2 mb-4">
               <button
                 onClick={() => seekTo(startTime)}
-                className="p-2 rounded-lg hover:bg-gray-100"
+                className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
                 title="Aller au début"
               >
                 <SkipBack className="w-5 h-5" />
@@ -359,7 +359,7 @@ export function VideoTrim() {
               </button>
               <button
                 onClick={() => seekTo(endTime)}
-                className="p-2 rounded-lg hover:bg-gray-100"
+                className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
                 title="Aller à la fin"
               >
                 <SkipForward className="w-5 h-5" />
@@ -367,7 +367,7 @@ export function VideoTrim() {
             </div>
 
             {/* Current time display */}
-            <div className="text-center text-sm text-gray-600 mb-2">
+            <div className="text-center text-sm text-gray-600 dark:text-gray-400 mb-2">
               {formatTime(currentTime)} / {formatTime(duration)}
             </div>
           </div>
@@ -375,25 +375,25 @@ export function VideoTrim() {
           {/* Timeline */}
           <div className="card">
             <div className="flex items-center justify-between mb-3">
-              <span className="text-sm font-medium text-gray-700">Timeline</span>
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Timeline</span>
               <div className="flex items-center gap-3">
                 {hasSelection && (
                   <button
                     onClick={resetSelection}
-                    className="flex items-center gap-1 px-2 py-1 text-xs text-gray-600 bg-gray-100 rounded hover:bg-gray-200 transition-colors"
+                    className="flex items-center gap-1 px-2 py-1 text-xs text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
                     title={t('common.reset')}
                   >
                     <RotateCcw className="w-3 h-3" />
                     {t('common.reset')}
                   </button>
                 )}
-                <span className="text-sm text-gray-500">
+                <span className="text-sm text-gray-500 dark:text-gray-400">
                   {t('videoTrim.duration')}: {formatTime(endTime - startTime)}
                 </span>
               </div>
             </div>
 
-            <div className="text-xs text-gray-500 mb-3">
+            <div className="text-xs text-gray-500 dark:text-gray-400 mb-3">
               {t('crop.dragInstructions')}
             </div>
 
@@ -467,9 +467,9 @@ export function VideoTrim() {
             </div>
 
             {/* Time labels */}
-            <div className="flex justify-between mt-2 text-xs text-gray-500">
+            <div className="flex justify-between mt-2 text-xs text-gray-500 dark:text-gray-400">
               <span>{formatTime(0)}</span>
-              <span className="text-green-600 font-medium">
+              <span className="text-green-600 dark:text-green-400 font-medium">
                 {formatTime(startTime)} - {formatTime(endTime)}
               </span>
               <span>{formatTime(duration)}</span>
@@ -478,10 +478,10 @@ export function VideoTrim() {
 
           {/* Fine-tune controls */}
           <div className="card">
-            <h4 className="text-sm font-medium text-gray-700 mb-3">{t('resize.dimensions')}</h4>
+            <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">{t('resize.dimensions')}</h4>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs text-gray-500 mb-1">{t('videoTrim.start')}</label>
+                <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">{t('videoTrim.start')}</label>
                 <div className="flex items-center gap-2">
                   <input
                     type="number"
@@ -490,14 +490,14 @@ export function VideoTrim() {
                       const val = parseFloat(e.target.value) || 0;
                       setStartTime(Math.max(0, Math.min(val, endTime - 0.5)));
                     }}
-                    className="flex-1 px-3 py-2 text-sm border border-gray-200 rounded-lg min-h-[44px]"
+                    className="flex-1 px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 rounded-lg min-h-[44px]"
                     step="0.1"
                     min="0"
                     max={endTime - 0.5}
                   />
                   <button
                     onClick={() => setStartTime(currentTime)}
-                    className="px-3 py-2 text-xs bg-gray-100 hover:bg-gray-200 rounded-lg min-h-[44px] whitespace-nowrap"
+                    className="px-3 py-2 text-xs bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg min-h-[44px] whitespace-nowrap"
                     title="Utiliser la position actuelle"
                   >
                     Ici
@@ -505,7 +505,7 @@ export function VideoTrim() {
                 </div>
               </div>
               <div>
-                <label className="block text-xs text-gray-500 mb-1">{t('videoTrim.end')}</label>
+                <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">{t('videoTrim.end')}</label>
                 <div className="flex items-center gap-2">
                   <input
                     type="number"
@@ -514,14 +514,14 @@ export function VideoTrim() {
                       const val = parseFloat(e.target.value) || 0;
                       setEndTime(Math.max(startTime + 0.5, Math.min(val, duration)));
                     }}
-                    className="flex-1 px-3 py-2 text-sm border border-gray-200 rounded-lg min-h-[44px]"
+                    className="flex-1 px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 rounded-lg min-h-[44px]"
                     step="0.1"
                     min={startTime + 0.5}
                     max={duration}
                   />
                   <button
                     onClick={() => setEndTime(currentTime)}
-                    className="px-3 py-2 text-xs bg-gray-100 hover:bg-gray-200 rounded-lg min-h-[44px] whitespace-nowrap"
+                    className="px-3 py-2 text-xs bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg min-h-[44px] whitespace-nowrap"
                     title="Utiliser la position actuelle"
                   >
                     Ici
@@ -534,13 +534,13 @@ export function VideoTrim() {
           {/* Progress */}
           {isProcessing && (
             <div className="card">
-              <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+              <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
                 <div
                   className="h-full bg-primary-500 transition-all"
                   style={{ width: `${progress}%` }}
                 />
               </div>
-              <p className="text-sm text-center text-gray-600 mt-2">{progress}%</p>
+              <p className="text-sm text-center text-gray-600 dark:text-gray-400 mt-2">{progress}%</p>
             </div>
           )}
 

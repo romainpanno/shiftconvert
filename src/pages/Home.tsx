@@ -146,13 +146,13 @@ export function Home() {
       <div className="max-w-6xl mx-auto">
         {/* Hero */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-4">
+          <h1 className="text-4xl sm:text-5xl font-bold text-gray-900 dark:text-gray-100 mb-4">
             {t('home.title')}
             <span className="block text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-primary-400">
               {t('home.subtitle')}
             </span>
           </h1>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto mb-8">
+          <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto mb-8">
             {t('home.description')}
           </p>
         </div>
@@ -164,16 +164,16 @@ export function Home() {
 
         {/* Divider */}
         <div className="flex items-center gap-4 max-w-3xl mx-auto mb-10">
-          <div className="flex-1 h-px bg-gray-200" />
-          <span className="text-sm text-gray-400 font-medium">{t('home.orSearch')}</span>
-          <div className="flex-1 h-px bg-gray-200" />
+          <div className="flex-1 h-px bg-gray-200 dark:bg-gray-700" />
+          <span className="text-sm text-gray-400 dark:text-gray-500 font-medium">{t('home.orSearch')}</span>
+          <div className="flex-1 h-px bg-gray-200 dark:bg-gray-700" />
         </div>
 
         {/* Search bar */}
         <div className="max-w-xl mx-auto relative mb-12">
             <form onSubmit={handleSearchSubmit}>
               <div className={`relative transition-all ${isSearchFocused ? 'scale-105' : ''}`}>
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-gray-500" />
                 <input
                   type="text"
                   value={searchQuery}
@@ -181,14 +181,14 @@ export function Home() {
                   onFocus={() => setIsSearchFocused(true)}
                   onBlur={() => setTimeout(() => setIsSearchFocused(false), 200)}
                   placeholder={t('home.searchPlaceholder')}
-                  className="w-full pl-12 pr-4 py-4 text-lg border-2 border-gray-200 rounded-2xl focus:outline-none focus:border-primary-500 focus:ring-4 focus:ring-primary-100 transition-all shadow-sm"
+                  className="w-full pl-12 pr-4 py-4 text-lg border-2 border-gray-200 dark:border-gray-700 rounded-2xl focus:outline-none focus:border-primary-500 focus:ring-4 focus:ring-primary-100 dark:focus:ring-primary-900/30 transition-all shadow-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500"
                 />
               </div>
             </form>
 
             {/* Search results dropdown */}
             {searchQuery && searchResults.length > 0 && isSearchFocused && (
-              <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-xl border border-gray-200 overflow-hidden z-50">
+              <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 overflow-hidden z-50">
                 {searchResults.map((result, index) => {
                   const Icon = result.icon
                     ? (result.type === 'utility' ? utilityIconMap[result.icon] : iconMap[result.icon])
@@ -199,27 +199,27 @@ export function Home() {
                       key={`${result.type}-${result.title}-${index}`}
                       to={result.url}
                       onClick={() => setSearchQuery('')}
-                      className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors"
+                      className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                     >
                       {Icon && (
                         <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
                           result.color
                             ? `bg-gradient-to-br ${result.color}`
-                            : 'bg-gray-100'
+                            : 'bg-gray-100 dark:bg-gray-700'
                         }`}>
-                          <Icon className={`w-5 h-5 ${result.color ? 'text-white' : 'text-gray-600'}`} />
+                          <Icon className={`w-5 h-5 ${result.color ? 'text-white' : 'text-gray-600 dark:text-gray-300'}`} />
                         </div>
                       )}
                       <div className="flex-1 text-left">
-                        <p className="font-medium text-gray-900">{result.title}</p>
-                        <p className="text-sm text-gray-500">{result.description}</p>
+                        <p className="font-medium text-gray-900 dark:text-gray-100">{result.title}</p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">{result.description}</p>
                       </div>
                       <span className={`text-xs px-2 py-1 rounded-full ${
                         result.type === 'category'
-                          ? 'bg-blue-100 text-blue-700'
+                          ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
                           : result.type === 'utility'
-                          ? 'bg-purple-100 text-purple-700'
-                          : 'bg-gray-100 text-gray-700'
+                          ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300'
+                          : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
                       }`}>
                         {result.type === 'category' ? t('home.searchResult.conversion') : result.type === 'utility' ? t('home.searchResult.tool') : t('home.searchResult.format')}
                       </span>
@@ -231,12 +231,12 @@ export function Home() {
 
             {/* Popular searches */}
             <div className="flex flex-wrap justify-center gap-2 mt-4">
-              <span className="text-sm text-gray-500">{t('home.popular')}</span>
+              <span className="text-sm text-gray-500 dark:text-gray-400">{t('home.popular')}</span>
               {popularTools.map((tool) => (
                 <Link
                   key={tool.label}
                   to={tool.url}
-                  className="text-sm px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded-full text-gray-700 transition-colors"
+                  className="text-sm px-3 py-1 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-full text-gray-700 dark:text-gray-300 transition-colors"
                 >
                   {tool.label}
                 </Link>
@@ -264,7 +264,7 @@ export function Home() {
         </div>
 
         {/* Categories */}
-        <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6 text-center">
           {t('home.whatToConvert')}
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
@@ -343,11 +343,11 @@ function FeatureCard({
 }) {
   return (
     <div className="card text-center">
-      <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center mx-auto mb-4 text-primary-600">
+      <div className="w-12 h-12 bg-primary-100 dark:bg-primary-900/30 rounded-lg flex items-center justify-center mx-auto mb-4 text-primary-600 dark:text-primary-400">
         {icon}
       </div>
-      <h3 className="font-semibold text-gray-900 mb-1">{title}</h3>
-      <p className="text-sm text-gray-600">{description}</p>
+      <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-1">{title}</h3>
+      <p className="text-sm text-gray-600 dark:text-gray-400">{description}</p>
     </div>
   );
 }
@@ -366,10 +366,10 @@ function CategoryCard({ category }: { category: typeof categories[0] }) {
       >
         {Icon && <Icon className="w-6 h-6 text-white" />}
       </div>
-      <h3 className="font-semibold text-gray-900 mb-1 group-hover:text-primary-600 transition-colors">
+      <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-1 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
         {t(category.labelKey)}
       </h3>
-      <p className="text-sm text-gray-600">{t(category.descriptionKey)}</p>
+      <p className="text-sm text-gray-600 dark:text-gray-400">{t(category.descriptionKey)}</p>
     </Link>
   );
 }

@@ -222,8 +222,8 @@ export function SmartDropzone() {
         aria-label={t('smartdropzone.dropHere')}
         className={`relative border-2 border-dashed rounded-2xl p-8 sm:p-12 text-center transition-all cursor-pointer select-none ${
           isDragging
-            ? 'border-primary-500 bg-primary-50 scale-[1.01]'
-            : 'border-gray-300 hover:border-primary-400 hover:bg-gray-50'
+            ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20 scale-[1.01]'
+            : 'border-gray-300 dark:border-gray-600 hover:border-primary-400 hover:bg-gray-50 dark:hover:bg-gray-800/50'
         }`}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
@@ -235,15 +235,15 @@ export function SmartDropzone() {
         <input ref={fileInputRef} type="file" className="hidden" multiple onChange={handleFileSelect} />
         <div
           className={`w-16 h-16 rounded-2xl mx-auto mb-5 flex items-center justify-center transition-colors ${
-            isDragging ? 'bg-primary-100' : 'bg-gray-100'
+            isDragging ? 'bg-primary-100 dark:bg-primary-900/30' : 'bg-gray-100 dark:bg-gray-800'
           }`}
         >
           <Upload
-            className={`w-8 h-8 transition-colors ${isDragging ? 'text-primary-500' : 'text-gray-400'}`}
+            className={`w-8 h-8 transition-colors ${isDragging ? 'text-primary-500' : 'text-gray-400 dark:text-gray-500'}`}
           />
         </div>
-        <p className="text-xl font-semibold text-gray-800 mb-2">{t('smartdropzone.dropHere')}</p>
-        <p className="text-gray-500 text-sm mb-4">{t('smartdropzone.orClick')}</p>
+        <p className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-2">{t('smartdropzone.dropHere')}</p>
+        <p className="text-gray-500 dark:text-gray-400 text-sm mb-4">{t('smartdropzone.orClick')}</p>
         <div className="flex flex-wrap justify-center gap-2">
           {(['images', 'video', 'audio', 'documents', 'fonts', 'files'] as const).map((cat) => {
             const CatIcon = categoryIconMap[cat];
@@ -269,30 +269,30 @@ export function SmartDropzone() {
   });
 
   return (
-    <div className="rounded-2xl border border-gray-200 bg-white shadow-sm overflow-hidden">
+    <div className="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm overflow-hidden">
       {/* File header */}
-      <div className="flex items-start gap-3 p-4 bg-gray-50 border-b border-gray-100">
+      <div className="flex items-start gap-3 p-4 bg-gray-50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-700">
         <div className="flex-1 min-w-0 flex flex-wrap gap-3">
           {droppedFiles.slice(0, 3).map((file, i) => (
             <div key={i} className="flex items-center gap-2 min-w-0">
-              <FileIcon className="w-5 h-5 text-gray-400 flex-shrink-0" />
+              <FileIcon className="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0" />
               <div className="min-w-0">
-                <p className="text-sm font-medium text-gray-900 truncate max-w-[160px] sm:max-w-[240px]">
+                <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate max-w-[160px] sm:max-w-[240px]">
                   {file.name}
                 </p>
-                <p className="text-xs text-gray-500">{formatSize(file.size)}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">{formatSize(file.size)}</p>
               </div>
             </div>
           ))}
           {droppedFiles.length > 3 && (
-            <span className="text-sm text-gray-500 self-center">
+            <span className="text-sm text-gray-500 dark:text-gray-400 self-center">
               +{droppedFiles.length - 3} {t('smartdropzone.others')}
             </span>
           )}
         </div>
         <button
           onClick={handleClear}
-          className="flex-shrink-0 p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+          className="flex-shrink-0 p-1.5 rounded-lg text-gray-400 dark:text-gray-500 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
           title={t('smartdropzone.change')}
         >
           <X className="w-5 h-5" />
@@ -300,7 +300,7 @@ export function SmartDropzone() {
       </div>
 
       {suggestions.length > 0 ? (
-        <div className="divide-y divide-gray-100">
+        <div className="divide-y divide-gray-100 dark:divide-gray-700">
           {suggestions.map((suggestion) => {
             const CatIcon = categoryIconMap[suggestion.category];
             return (
@@ -312,13 +312,13 @@ export function SmartDropzone() {
                   >
                     {CatIcon && <CatIcon className="w-4 h-4 text-white" />}
                   </div>
-                  <span className="font-semibold text-gray-900">
+                  <span className="font-semibold text-gray-900 dark:text-gray-100">
                     {t(`category.${suggestion.category}`)}
                   </span>
-                  <span className="text-xs text-gray-400 ml-auto">
+                  <span className="text-xs text-gray-400 dark:text-gray-500 ml-auto">
                     {suggestion.extensions.map((e) => e.toUpperCase()).join(', ')}
                     {suggestion.files.length > 1 && (
-                      <span className="ml-1.5 bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded-full">
+                      <span className="ml-1.5 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 px-1.5 py-0.5 rounded-full">
                         ×{suggestion.files.length}
                       </span>
                     )}
@@ -328,7 +328,7 @@ export function SmartDropzone() {
                 {/* Conversion formats */}
                 {suggestion.outputFormats.length > 0 && (
                   <div className="mb-5">
-                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2.5">
+                    <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2.5">
                       {t('smartdropzone.convertTo')}
                     </p>
                     <div className="flex flex-wrap gap-2">
@@ -354,7 +354,7 @@ export function SmartDropzone() {
                 {/* Utility tools */}
                 {suggestion.utilityTools.length > 0 && (
                   <div>
-                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2.5">
+                    <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2.5">
                       {t('smartdropzone.tools')}
                     </p>
                     <div className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-4 gap-2">
@@ -373,7 +373,7 @@ export function SmartDropzone() {
                                 isSingleOnly ? [suggestion.files[0]] : suggestion.files
                               )
                             }
-                            className="relative flex flex-col items-center gap-2 p-3 rounded-xl bg-gray-50 hover:bg-gray-100 active:bg-gray-200 transition-all hover:-translate-y-0.5 text-center"
+                            className="relative flex flex-col items-center gap-2 p-3 rounded-xl bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 active:bg-gray-200 dark:active:bg-gray-600 transition-all hover:-translate-y-0.5 text-center"
                           >
                             {showSingleWarning && (
                               <span className="absolute -top-1.5 -right-1.5 bg-amber-400 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full leading-none whitespace-nowrap z-10">
@@ -385,7 +385,7 @@ export function SmartDropzone() {
                             >
                               {UtilIcon && <UtilIcon className="w-5 h-5 text-white" />}
                             </div>
-                            <span className="text-xs font-medium text-gray-700 leading-tight">
+                            <span className="text-xs font-medium text-gray-700 dark:text-gray-300 leading-tight">
                               {t(`utility.${util.id}`)}
                             </span>
                           </button>
@@ -400,13 +400,13 @@ export function SmartDropzone() {
         </div>
       ) : (
         <div className="p-8 text-center">
-          <p className="text-gray-500 font-medium">{t('smartdropzone.unsupported')}</p>
-          <p className="text-sm text-gray-400 mt-1">{t('smartdropzone.unsupportedDesc')}</p>
+          <p className="text-gray-500 dark:text-gray-400 font-medium">{t('smartdropzone.unsupported')}</p>
+          <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">{t('smartdropzone.unsupportedDesc')}</p>
         </div>
       )}
 
       {hasUnknown && suggestions.length > 0 && (
-        <div className="px-5 pb-4 text-xs text-amber-600 flex items-center gap-1.5">
+        <div className="px-5 pb-4 text-xs text-amber-600 dark:text-amber-400 flex items-center gap-1.5">
           <span>⚠</span>
           <span>{t('smartdropzone.someUnsupported')}</span>
         </div>

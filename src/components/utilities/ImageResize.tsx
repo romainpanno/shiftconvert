@@ -382,11 +382,11 @@ export function ImageResize() {
   ];
 
   const getScaleLabel = () => {
-    if (scalePercent < 50) return { text: t('resize.veryReduced'), color: 'text-red-600' };
-    if (scalePercent < 100) return { text: t('resize.reduction'), color: 'text-orange-600' };
-    if (scalePercent === 100) return { text: t('resize.originalSize'), color: 'text-gray-600' };
-    if (scalePercent <= 200) return { text: t('resize.enlargement'), color: 'text-blue-600' };
-    return { text: t('resize.veryEnlarged'), color: 'text-purple-600' };
+    if (scalePercent < 50) return { text: t('resize.veryReduced'), color: 'text-red-600 dark:text-red-400' };
+    if (scalePercent < 100) return { text: t('resize.reduction'), color: 'text-orange-600 dark:text-orange-400' };
+    if (scalePercent === 100) return { text: t('resize.originalSize'), color: 'text-gray-600 dark:text-gray-400' };
+    if (scalePercent <= 200) return { text: t('resize.enlargement'), color: 'text-blue-600 dark:text-blue-400' };
+    return { text: t('resize.veryEnlarged'), color: 'text-purple-600 dark:text-purple-400' };
   };
 
   const scaleInfo = getScaleLabel();
@@ -472,10 +472,10 @@ export function ImageResize() {
               }}
             />
             <Upload className="w-10 h-10 text-gray-400 mb-3" />
-            <p className="text-base font-medium text-gray-700 mb-1">
+            <p className="text-base font-medium text-gray-700 dark:text-gray-300 mb-1">
               {t('dropzone.dragHere')}
             </p>
-            <p className="text-sm text-gray-500">PNG, JPG, WebP, GIF</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">PNG, JPG, WebP, GIF</p>
           </label>
         </div>
       ) : (
@@ -483,7 +483,7 @@ export function ImageResize() {
           {/* Side by Side Comparison */}
           <div className="card">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-medium text-gray-700 flex items-center gap-2">
+              <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
                 <Maximize2 className="w-4 h-4" />
                 {t('resize.preview')}
               </h3>
@@ -508,7 +508,7 @@ export function ImageResize() {
             </div>
 
             {/* Visual comparison - real proportions */}
-            <div className="flex items-end justify-center gap-8 py-6 px-4 bg-gray-50 rounded-xl min-h-[200px]">
+            <div className="flex items-end justify-center gap-8 py-6 px-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl min-h-[200px]">
               {/* Original */}
               <div className="flex flex-col items-center">
                 <div
@@ -531,8 +531,8 @@ export function ImageResize() {
                   />
                 </div>
                 <div className="mt-3 text-center">
-                  <p className="text-xs text-gray-500">{t('resize.original')}</p>
-                  <p className="text-sm font-bold text-gray-700">{originalSize.width} × {originalSize.height}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">{t('resize.original')}</p>
+                  <p className="text-sm font-bold text-gray-700 dark:text-gray-300">{originalSize.width} × {originalSize.height}</p>
                 </div>
               </div>
 
@@ -540,9 +540,9 @@ export function ImageResize() {
               <div className="flex flex-col items-center gap-2 pb-8">
                 <ArrowRight className="w-6 h-6 text-gray-400" />
                 <div className={`px-2.5 py-1 rounded-full text-xs font-bold ${
-                  scalePercent > 100 ? 'bg-blue-100 text-blue-700' :
-                  scalePercent < 100 ? 'bg-green-100 text-green-700' :
-                  'bg-gray-100 text-gray-700'
+                  scalePercent > 100 ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400' :
+                  scalePercent < 100 ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' :
+                  'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
                 }`}>
                   {scalePercent}%
                 </div>
@@ -590,7 +590,7 @@ export function ImageResize() {
                       />
                     )
                   ) : (
-                    <div className="w-32 h-24 flex items-center justify-center text-gray-400 text-xs">
+                    <div className="w-32 h-24 flex items-center justify-center text-gray-400 dark:text-gray-500 text-xs">
                       {t('common.loading')}
                     </div>
                   )}
@@ -620,7 +620,7 @@ export function ImageResize() {
 
           {/* Fit Mode */}
           <div className="card">
-            <label className="block text-sm font-medium text-gray-700 mb-3">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
               {t('resize.mode')}
             </label>
             <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
@@ -631,7 +631,7 @@ export function ImageResize() {
                   className={`flex flex-col items-center gap-1 p-3 rounded-xl transition-all ${
                     fitMode === mode.id
                       ? 'bg-primary-500 text-white shadow-lg scale-105'
-                      : 'bg-gray-50 hover:bg-gray-100 text-gray-700 border border-gray-200'
+                      : 'bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-600'
                   }`}
                 >
                   {mode.icon}
@@ -642,7 +642,7 @@ export function ImageResize() {
 
             {/* Background color for contain mode */}
             {fitMode === 'contain' && (
-              <div className="mt-4 p-4 bg-gray-50 rounded-xl">
+              <div className="mt-4 p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl">
                 <ColorPicker
                   value={bgColor}
                   onChange={setBgColor}
@@ -656,7 +656,7 @@ export function ImageResize() {
           {fitMode === 'scale' && (
             <div className="card">
               <div className="flex items-center justify-between mb-4">
-                <label className="text-sm font-medium text-gray-700">{t('resize.scale')}</label>
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">{t('resize.scale')}</label>
                 <div className="flex items-center gap-3">
                   <span className={`text-sm font-medium ${scaleInfo.color}`}>
                     {scaleInfo.text}
@@ -665,17 +665,17 @@ export function ImageResize() {
                     type="number"
                     value={scalePercent}
                     onChange={(e) => updateScale(Math.max(10, Math.min(300, parseInt(e.target.value) || 100)))}
-                    className="w-16 px-2 py-1 text-sm font-bold text-center border-2 border-gray-200 rounded-lg focus:outline-none focus:border-primary-500"
+                    className="w-16 px-2 py-1 text-sm font-bold text-center border-2 border-gray-200 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 rounded-lg focus:outline-none focus:border-primary-500"
                     min={10}
                     max={300}
                   />
-                  <span className="text-sm text-gray-500">%</span>
+                  <span className="text-sm text-gray-500 dark:text-gray-400">%</span>
                 </div>
               </div>
 
               {/* Custom slider with bar thumb */}
               <div className="relative h-8 flex items-center">
-                <div className="absolute inset-x-0 h-2 bg-gray-200 rounded-full" />
+                <div className="absolute inset-x-0 h-2 bg-gray-200 dark:bg-gray-700 rounded-full" />
                 <div
                   className="absolute h-2 bg-primary-500 rounded-full transition-all"
                   style={{ width: `${((scalePercent - 10) / 290) * 100}%` }}
@@ -690,15 +690,15 @@ export function ImageResize() {
                   className="absolute inset-x-0 w-full h-8 opacity-0 cursor-pointer z-10"
                 />
                 <div
-                  className="absolute w-3 h-6 bg-white border-2 border-primary-500 rounded-md shadow-md pointer-events-none transition-all"
+                  className="absolute w-3 h-6 bg-white dark:bg-gray-200 border-2 border-primary-500 rounded-md shadow-md pointer-events-none transition-all"
                   style={{ left: `calc(${((scalePercent - 10) / 290) * 100}% - 6px)` }}
                 />
               </div>
 
               {/* Labels */}
-              <div className="flex justify-between text-xs text-gray-500 mt-2">
+              <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-2">
                 <span>10%</span>
-                <span className="text-gray-700 font-medium">100%</span>
+                <span className="text-gray-700 dark:text-gray-300 font-medium">100%</span>
                 <span>300%</span>
               </div>
 
@@ -711,7 +711,7 @@ export function ImageResize() {
                     className={`py-2 rounded-lg text-sm font-medium transition-all ${
                       scalePercent === percent
                         ? 'bg-primary-500 text-white shadow-md'
-                        : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+                        : 'bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300'
                     }`}
                   >
                     {percent}%
@@ -724,13 +724,13 @@ export function ImageResize() {
           {/* Dimensions */}
           <div className="card">
             <div className="flex items-center justify-between mb-4">
-              <label className="text-sm font-medium text-gray-700">{t('resize.dimensions')}</label>
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">{t('resize.dimensions')}</label>
               <button
                 onClick={() => setKeepRatio(!keepRatio)}
                 className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
                   keepRatio
                     ? 'bg-primary-500 text-white'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600'
                 }`}
               >
                 {keepRatio ? <Link className="w-4 h-4" /> : <Unlink className="w-4 h-4" />}
@@ -740,22 +740,22 @@ export function ImageResize() {
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs text-gray-500 mb-1">{t('resize.width')}</label>
+                <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">{t('resize.width')}</label>
                 <input
                   type="number"
                   value={newSize.width}
                   onChange={(e) => updateWidth(parseInt(e.target.value) || 1)}
-                  className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg text-center font-bold focus:outline-none focus:border-primary-500 transition-colors"
+                  className="w-full px-4 py-2.5 border-2 border-gray-200 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 rounded-lg text-center font-bold focus:outline-none focus:border-primary-500 transition-colors"
                   min={1}
                 />
               </div>
               <div>
-                <label className="block text-xs text-gray-500 mb-1">{t('resize.height')}</label>
+                <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">{t('resize.height')}</label>
                 <input
                   type="number"
                   value={newSize.height}
                   onChange={(e) => updateHeight(parseInt(e.target.value) || 1)}
-                  className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg text-center font-bold focus:outline-none focus:border-primary-500 transition-colors"
+                  className="w-full px-4 py-2.5 border-2 border-gray-200 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 rounded-lg text-center font-bold focus:outline-none focus:border-primary-500 transition-colors"
                   min={1}
                 />
               </div>
@@ -764,7 +764,7 @@ export function ImageResize() {
 
           {/* Common sizes - Enhanced */}
           <div className="card">
-            <label className="block text-sm font-medium text-gray-700 mb-3">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
               {t('resize.presets')}
             </label>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
@@ -790,8 +790,8 @@ export function ImageResize() {
 
           {/* Error message */}
           {error && (
-            <div className="card bg-red-50 border-red-200">
-              <div className="flex items-center gap-2 text-red-700">
+            <div className="card bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800">
+              <div className="flex items-center gap-2 text-red-700 dark:text-red-400">
                 <X className="w-5 h-5" />
                 <span className="font-medium">{error}</span>
               </div>

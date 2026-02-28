@@ -769,7 +769,7 @@ export function PdfTools() {
               key={t.id}
               onClick={() => { setTool(t.id); setPdfFiles([]); setImageFiles([]); setRangeInput(''); setHistory([]); setInitialFileOrder([]); setExpandedPdfIds(new Set()); setPerFileRangeInput({}); }}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                tool === t.id ? 'bg-primary-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                tool === t.id ? 'bg-primary-500 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
               }`}
             >
               {t.icon}
@@ -796,8 +796,8 @@ export function PdfTools() {
               onChange={handleImageFileInput}
             />
             <Upload className="w-10 h-10 text-gray-400 mb-3" />
-            <p className="text-base font-medium text-gray-700 mb-1">{t('dropzone.dragHere')}</p>
-            <p className="text-sm text-gray-500">PNG, JPG, WebP, GIF ({t('pdfTools.multipleFiles')})</p>
+            <p className="text-base font-medium text-gray-700 dark:text-gray-300 mb-1">{t('dropzone.dragHere')}</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">PNG, JPG, WebP, GIF ({t('pdfTools.multipleFiles')})</p>
           </label>
         ) : (
           <label
@@ -814,15 +814,15 @@ export function PdfTools() {
               onChange={handleFileInput}
             />
             <Upload className="w-10 h-10 text-gray-400 mb-3" />
-            <p className="text-base font-medium text-gray-700 mb-1">{t('dropzone.dragHere')}</p>
-            <p className="text-sm text-gray-500">PDF {tool === 'merge' && `(${t('pdfTools.multipleFiles')})`}</p>
+            <p className="text-base font-medium text-gray-700 dark:text-gray-300 mb-1">{t('dropzone.dragHere')}</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">PDF {tool === 'merge' && `(${t('pdfTools.multipleFiles')})`}</p>
           </label>
         )}
       </div>
 
       {isLoadingThumbnails && (
         <div className="card p-4 text-center">
-          <p className="text-gray-600">{t('pdfTools.loadingPreviews')}</p>
+          <p className="text-gray-600 dark:text-gray-400">{t('pdfTools.loadingPreviews')}</p>
         </div>
       )}
 
@@ -830,16 +830,16 @@ export function PdfTools() {
       {tool === 'imagesToPdf' && imageFiles.length > 0 && (
         <div className="card">
           {/* Header */}
-          <div className="flex items-center justify-between mb-4 pb-3 border-b border-gray-100">
+          <div className="flex items-center justify-between mb-4 pb-3 border-b border-gray-100 dark:border-gray-700">
             <div className="flex items-center gap-3">
               <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-red-500 to-rose-500 text-white">
                 <FileText className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="font-medium text-gray-900">
+                <h3 className="font-medium text-gray-900 dark:text-gray-100">
                   {imageFiles.length} {imageFiles.length > 1 ? 'images' : 'image'}
                 </h3>
-                <p className="text-xs text-gray-500 flex items-center gap-1">
+                <p className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1">
                   <GripVertical className="w-3 h-3" />
                   {t('pdfTools.dragToReorder')}
                 </p>
@@ -847,7 +847,7 @@ export function PdfTools() {
             </div>
             <button
               onClick={() => setImageFiles([])}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
             >
               <RotateCcw className="w-3.5 h-3.5" />
               {t('common.reset')}
@@ -866,7 +866,7 @@ export function PdfTools() {
                 onDragLeave={() => { setDropImageTargetId(null); setDropImagePosition(null); }}
                 className={`relative group cursor-grab active:cursor-grabbing rounded-xl overflow-hidden border-2 transition-all shadow-sm hover:shadow-md ${
                   draggedImageId === img.id ? 'opacity-50 border-primary-300 scale-95' :
-                  dropImageTargetId === img.id ? 'border-primary-500 ring-2 ring-primary-200' : 'border-gray-200 hover:border-primary-300'
+                  dropImageTargetId === img.id ? 'border-primary-500 ring-2 ring-primary-200' : 'border-gray-200 dark:border-gray-600 hover:border-primary-300'
                 }`}
               >
                 {/* Drop indicator */}
@@ -877,7 +877,7 @@ export function PdfTools() {
                   <div className="absolute right-0 top-0 bottom-0 w-1.5 bg-primary-500 z-10 rounded-r" />
                 )}
 
-                <div className="aspect-square bg-gradient-to-br from-gray-50 to-gray-100">
+                <div className="aspect-square bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-800">
                   <img
                     src={img.dataUrl}
                     alt={img.name}
@@ -903,8 +903,8 @@ export function PdfTools() {
                 </button>
 
                 {/* File name */}
-                <div className="absolute bottom-0 left-0 right-0 bg-white/95 py-1.5 px-2">
-                  <p className="text-gray-700 text-xs font-medium truncate">
+                <div className="absolute bottom-0 left-0 right-0 bg-white/95 dark:bg-gray-800/95 py-1.5 px-2">
+                  <p className="text-gray-700 dark:text-gray-300 text-xs font-medium truncate">
                     {img.name}
                   </p>
                 </div>
@@ -913,7 +913,7 @@ export function PdfTools() {
           </div>
 
           {/* Footer info */}
-          <div className="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between text-xs text-gray-500">
+          <div className="mt-4 pt-3 border-t border-gray-100 dark:border-gray-700 flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
             <span>{t('pdfTools.dragToReorderPages')}</span>
             <span className="flex items-center gap-1">
               <Check className="w-3.5 h-3.5 text-green-500" />
@@ -927,14 +927,14 @@ export function PdfTools() {
       {tool === 'merge' && pdfFiles.length > 0 && (
         <div className="space-y-2">
           <div className="flex items-center justify-between mb-2">
-            <p className="text-sm text-gray-500">{t('pdfTools.dragToReorder')}</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">{t('pdfTools.dragToReorder')}</p>
             <div className="flex gap-2">
               {history.length > 0 && (
-                <button onClick={undo} className="flex items-center gap-1 px-2 py-1 text-xs text-gray-600 bg-gray-100 rounded hover:bg-gray-200 transition-colors">
+                <button onClick={undo} className="flex items-center gap-1 px-2 py-1 text-xs text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
                   <Undo2 className="w-3 h-3" />{t('pdfTools.undo')}
                 </button>
               )}
-              <button onClick={resetFiles} className="flex items-center gap-1 px-2 py-1 text-xs text-gray-600 bg-gray-100 rounded hover:bg-gray-200 transition-colors">
+              <button onClick={resetFiles} className="flex items-center gap-1 px-2 py-1 text-xs text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
                 <RotateCcw className="w-3 h-3" />{t('pdfTools.reset')}
               </button>
             </div>
@@ -974,10 +974,10 @@ export function PdfTools() {
                         <FileText className="w-4 h-4 text-red-600" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="font-medium text-gray-900 truncate text-sm">{pdf.name}</p>
+                        <p className="font-medium text-gray-900 dark:text-gray-100 truncate text-sm">{pdf.name}</p>
                         <div className="flex items-center gap-2 mt-0.5">
-                          <span className="text-xs text-gray-400">{formatSize(pdf.size)}</span>
-                          <span className={`text-xs font-medium px-1.5 py-0.5 rounded-full ${allSelected ? 'bg-gray-100 text-gray-500' : 'bg-primary-100 text-primary-700'}`}>
+                          <span className="text-xs text-gray-400 dark:text-gray-500">{formatSize(pdf.size)}</span>
+                          <span className={`text-xs font-medium px-1.5 py-0.5 rounded-full ${allSelected ? 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400' : 'bg-primary-100 text-primary-700'}`}>
                             {selectionLabel}
                           </span>
                         </div>
@@ -985,7 +985,7 @@ export function PdfTools() {
                       {/* Toggle page picker */}
                       <button
                         onClick={(e) => { e.stopPropagation(); toggleExpandPdf(pdf.id); }}
-                        className={`p-1.5 rounded-lg transition-colors ${isExpanded ? 'bg-primary-100 text-primary-600' : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'}`}
+                        className={`p-1.5 rounded-lg transition-colors ${isExpanded ? 'bg-primary-100 text-primary-600' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'}`}
                         title={isExpanded ? 'Masquer les pages' : 'Choisir les pages'}
                       >
                         {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
@@ -997,19 +997,19 @@ export function PdfTools() {
 
                     {/* ── Page picker (expandable) ── */}
                     {isExpanded && (
-                      <div className="border-t border-gray-100 px-4 py-3 space-y-3 bg-gray-50/60">
+                      <div className="border-t border-gray-100 dark:border-gray-700 px-4 py-3 space-y-3 bg-gray-50/60 dark:bg-gray-800/60">
 
                         {/* Quick actions + range input */}
                         <div className="flex flex-wrap items-center gap-2">
                           <button
                             onClick={() => selectAll(pdf.id)}
-                            className={`text-xs px-2.5 py-1 rounded-lg border transition-colors ${allSelected ? 'bg-primary-500 text-white border-primary-500' : 'bg-white text-gray-600 border-gray-200 hover:border-primary-300'}`}
+                            className={`text-xs px-2.5 py-1 rounded-lg border transition-colors ${allSelected ? 'bg-primary-500 text-white border-primary-500' : 'bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-600 hover:border-primary-300'}`}
                           >
                             Tout sélectionner
                           </button>
                           <button
                             onClick={() => selectNone(pdf.id)}
-                            className={`text-xs px-2.5 py-1 rounded-lg border transition-colors ${noneSelected ? 'bg-gray-500 text-white border-gray-500' : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300'}`}
+                            className={`text-xs px-2.5 py-1 rounded-lg border transition-colors ${noneSelected ? 'bg-gray-500 text-white border-gray-500' : 'bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'}`}
                           >
                             Aucune
                           </button>
@@ -1020,7 +1020,7 @@ export function PdfTools() {
                               onChange={(e) => setPerFileRangeInput(prev => ({ ...prev, [pdf.id]: e.target.value }))}
                               onKeyDown={(e) => e.key === 'Enter' && applyRangeToFile(pdf.id)}
                               placeholder="ex : 1-5, 8, 10-12"
-                              className="flex-1 min-w-0 text-xs px-2.5 py-1 border border-gray-200 rounded-lg focus:outline-none focus:border-primary-400 bg-white"
+                              className="flex-1 min-w-0 text-xs px-2.5 py-1 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:border-primary-400 bg-white dark:bg-gray-800 dark:text-gray-100"
                             />
                             <button
                               onClick={() => applyRangeToFile(pdf.id)}
@@ -1040,7 +1040,7 @@ export function PdfTools() {
                                 <button
                                   key={thumb.pageNum}
                                   onClick={() => togglePage(pdf.id, thumb.pageNum)}
-                                  className={`relative aspect-[3/4] rounded-md overflow-hidden border-2 transition-all ${selected ? 'border-primary-500 ring-1 ring-primary-300' : 'border-gray-200 opacity-40 hover:opacity-70 hover:border-gray-300'}`}
+                                  className={`relative aspect-[3/4] rounded-md overflow-hidden border-2 transition-all ${selected ? 'border-primary-500 ring-1 ring-primary-300' : 'border-gray-200 dark:border-gray-600 opacity-40 hover:opacity-70 hover:border-gray-300 dark:hover:border-gray-500'}`}
                                 >
                                   <img src={thumb.dataUrl} alt={`p.${thumb.pageNum}`} className="w-full h-full object-cover" />
                                   {selected && (
@@ -1064,7 +1064,7 @@ export function PdfTools() {
                                   <button
                                     key={pageNum}
                                     onClick={() => togglePage(pdf.id, pageNum)}
-                                    className={`w-8 h-8 text-xs font-medium rounded-lg border transition-all ${selected ? 'bg-primary-500 border-primary-600 text-white shadow-sm' : 'bg-white border-gray-200 text-gray-500 hover:border-primary-300 hover:text-primary-600'}`}
+                                    className={`w-8 h-8 text-xs font-medium rounded-lg border transition-all ${selected ? 'bg-primary-500 border-primary-600 text-white shadow-sm' : 'bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:border-primary-300 hover:text-primary-600'}`}
                                   >
                                     {pageNum}
                                   </button>
@@ -1072,7 +1072,7 @@ export function PdfTools() {
                               })}
                             </div>
                             {isLoadingThumb && (
-                              <p className="text-[11px] text-gray-400 mt-2 flex items-center gap-1.5">
+                              <p className="text-[11px] text-gray-400 dark:text-gray-500 mt-2 flex items-center gap-1.5">
                                 <span className="inline-block w-3 h-3 border-2 border-gray-300 border-t-primary-500 rounded-full animate-spin" />
                                 Chargement des aperçus…
                               </p>
@@ -1100,8 +1100,8 @@ export function PdfTools() {
             <div className="flex items-center gap-3">
               <FileText className="w-5 h-5 text-red-600" />
               <div>
-                <p className="font-medium text-gray-900">{currentPdf.name}</p>
-                <p className="text-xs text-gray-500">{currentPdf.selectedPages.size} / {currentPdf.pageCount} pages</p>
+                <p className="font-medium text-gray-900 dark:text-gray-100">{currentPdf.name}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">{currentPdf.selectedPages.size} / {currentPdf.pageCount} pages</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -1129,14 +1129,14 @@ export function PdfTools() {
 
           {/* Range input */}
           <div className="mb-4">
-            <label className="block text-sm text-gray-600 mb-1">{t('pdfTools.pageRange')}</label>
+            <label className="block text-sm text-gray-600 dark:text-gray-400 mb-1">{t('pdfTools.pageRange')}</label>
             <div className="flex gap-2">
               <input
                 type="text"
                 value={rangeInput}
                 onChange={(e) => setRangeInput(e.target.value)}
                 placeholder="1-5, 8, 10-12"
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
               />
               <button
                 onClick={() => applyRange(currentPdf.id)}
@@ -1151,13 +1151,13 @@ export function PdfTools() {
           <div className="flex gap-2 mb-4">
             <button
               onClick={() => selectAll(currentPdf.id)}
-              className="px-3 py-1.5 text-xs bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition-colors"
+              className="px-3 py-1.5 text-xs bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
             >
               {t('pdfTools.selectAll')}
             </button>
             <button
               onClick={() => selectNone(currentPdf.id)}
-              className="px-3 py-1.5 text-xs bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition-colors"
+              className="px-3 py-1.5 text-xs bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
             >
               {t('pdfTools.selectNone')}
             </button>
@@ -1165,7 +1165,7 @@ export function PdfTools() {
 
           {/* Page thumbnails - Selection */}
           <div className="mb-6">
-            <p className="text-sm text-gray-600 mb-2">{t('pdfTools.clickToSelect')}</p>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">{t('pdfTools.clickToSelect')}</p>
             <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2">
               {currentPdf.thumbnails.map((thumb) => (
                 <button
@@ -1201,9 +1201,9 @@ export function PdfTools() {
           {/* Reorder selected pages */}
           {currentPdf.pageOrder.length > 0 && (
             <div>
-              <p className="text-sm text-gray-600 mb-2">{t('pdfTools.dragToReorderPages')}</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">{t('pdfTools.dragToReorderPages')}</p>
               <div
-                className="flex flex-wrap gap-2 p-3 bg-gray-50 rounded-lg min-h-[100px]"
+                className="flex flex-wrap gap-2 p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg min-h-[100px]"
                 onDragOver={(e) => e.preventDefault()}
                 onDrop={() => handlePageDrop(currentPdf.id)}
               >
@@ -1248,7 +1248,7 @@ export function PdfTools() {
                   );
                 })}
               </div>
-              <p className="text-xs text-gray-400 mt-2">
+              <p className="text-xs text-gray-400 dark:text-gray-500 mt-2">
                 {t('pdfTools.outputOrder')}: {currentPdf.pageOrder.join(' → ')}
               </p>
             </div>
@@ -1263,8 +1263,8 @@ export function PdfTools() {
             <div className="flex items-center gap-3">
               <FileText className="w-5 h-5 text-red-600" />
               <div>
-                <p className="font-medium text-gray-900">{currentPdf.name}</p>
-                <p className="text-xs text-gray-500">{currentPdf.selectedPages.size} pages {t('pdfTools.selected')}</p>
+                <p className="font-medium text-gray-900 dark:text-gray-100">{currentPdf.name}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">{currentPdf.selectedPages.size} pages {t('pdfTools.selected')}</p>
               </div>
             </div>
             <button onClick={() => removePdf(currentPdf.id)} className="p-1.5 text-gray-400 hover:text-red-500">
@@ -1274,7 +1274,7 @@ export function PdfTools() {
 
           {/* Rotation selector */}
           <div className="mb-4">
-            <p className="text-sm text-gray-600 mb-2">{t('pdfTools.rotationAngle')}</p>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">{t('pdfTools.rotationAngle')}</p>
             <div className="flex gap-2">
               {[90, 180, 270].map(angle => (
                 <button
@@ -1285,7 +1285,7 @@ export function PdfTools() {
                     transition-all duration-150
                     ${currentPdf.rotation === angle
                       ? 'bg-primary-500 text-white shadow-md'
-                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                      : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
                     }
                   `}
                 >
@@ -1303,20 +1303,20 @@ export function PdfTools() {
           <div className="flex gap-2 mb-4">
             <button
               onClick={() => selectAll(currentPdf.id)}
-              className="px-3 py-1.5 text-xs bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition-colors"
+              className="px-3 py-1.5 text-xs bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
             >
               {t('pdfTools.selectAll')}
             </button>
             <button
               onClick={() => selectNone(currentPdf.id)}
-              className="px-3 py-1.5 text-xs bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition-colors"
+              className="px-3 py-1.5 text-xs bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
             >
               {t('pdfTools.selectNone')}
             </button>
           </div>
 
           {/* Page thumbnails */}
-          <p className="text-sm text-gray-600 mb-2">{t('pdfTools.clickToSelect')}</p>
+          <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">{t('pdfTools.clickToSelect')}</p>
           <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2">
             {currentPdf.thumbnails.map((thumb) => (
               <button
@@ -1364,8 +1364,8 @@ export function PdfTools() {
                 <FileText className="w-5 h-5 text-red-600" />
               </div>
               <div>
-                <p className="font-medium text-gray-900">{currentPdf.name}</p>
-                <p className="text-xs text-gray-500">{formatSize(currentPdf.size)} • {currentPdf.pageCount} pages</p>
+                <p className="font-medium text-gray-900 dark:text-gray-100">{currentPdf.name}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">{formatSize(currentPdf.size)} • {currentPdf.pageCount} pages</p>
               </div>
             </div>
             <button onClick={() => removePdf(currentPdf.id)} className="p-1.5 text-gray-400 hover:text-red-500">
@@ -1374,7 +1374,7 @@ export function PdfTools() {
           </div>
 
           <div>
-            <p className="text-sm font-medium text-gray-700 mb-2">{t('pdfTools.position')}</p>
+            <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{t('pdfTools.position')}</p>
             <div className="grid grid-cols-2 gap-2">
               {(['bottom-center', 'bottom-right', 'top-center', 'top-right'] as const).map(pos => (
                 <button
@@ -1384,7 +1384,7 @@ export function PdfTools() {
                     px-3 py-2 text-sm rounded-lg transition-all duration-150
                     ${pageNumberPosition === pos
                       ? 'bg-primary-500 text-white shadow-md'
-                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                      : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
                     }
                   `}
                 >

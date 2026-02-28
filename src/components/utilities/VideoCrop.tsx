@@ -395,8 +395,8 @@ export function VideoCrop() {
               }}
             />
             <Upload className="w-10 h-10 text-gray-400 mb-3" />
-            <p className="text-base font-medium text-gray-700 mb-1">{t('dropzone.dragHere')}</p>
-            <p className="text-sm text-gray-500">MP4, WebM, MOV</p>
+            <p className="text-base font-medium text-gray-700 dark:text-gray-300 mb-1">{t('dropzone.dragHere')}</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">MP4, WebM, MOV</p>
           </label>
         </div>
       ) : (
@@ -405,9 +405,9 @@ export function VideoCrop() {
           <div className="card">
             <div className="flex items-center justify-between mb-4">
               <div>
-                <p className="text-sm font-medium text-gray-900">{video.name}</p>
+                <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{video.name}</p>
                 {videoInfo && (
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
                     {t('resize.original')}: {videoInfo.width} × {videoInfo.height}px
                   </p>
                 )}
@@ -574,11 +574,11 @@ export function VideoCrop() {
           {/* Aspect ratio presets */}
           <div className="card">
             <div className="flex items-center justify-between mb-3">
-              <label className="text-sm font-medium text-gray-700">{t('crop.aspectRatio')}</label>
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">{t('crop.aspectRatio')}</label>
               {hasCropToDo && (
                 <button
                   onClick={resetCrop}
-                  className="flex items-center gap-1 px-2 py-1 text-xs text-gray-600 bg-gray-100 rounded hover:bg-gray-200 transition-colors"
+                  className="flex items-center gap-1 px-2 py-1 text-xs text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
                 >
                   <RotateCcw className="w-3 h-3" />
                   {t('common.reset')}
@@ -596,7 +596,7 @@ export function VideoCrop() {
                     className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
                       isSelected
                         ? 'bg-primary-500 text-white shadow-md'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
                     }`}
                   >
                     <Icon className="w-4 h-4" />
@@ -611,10 +611,10 @@ export function VideoCrop() {
           {cropDims && videoInfo && (
             <div className="card">
               <div className="flex items-center justify-between text-sm">
-                <span className="text-gray-600">
+                <span className="text-gray-600 dark:text-gray-400">
                   {t('crop.result')}: {cropDims.width} × {cropDims.height}px
                 </span>
-                <span className="text-gray-500">
+                <span className="text-gray-500 dark:text-gray-400">
                   {Math.round((cropDims.width * cropDims.height) / (videoInfo.width * videoInfo.height) * 100)}% {t('crop.ofOriginal')}
                 </span>
               </div>
@@ -624,13 +624,13 @@ export function VideoCrop() {
           {/* Progress */}
           {isProcessing && (
             <div className="card">
-              <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+              <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
                 <div
                   className="h-full bg-primary-500 transition-all"
                   style={{ width: `${progress}%` }}
                 />
               </div>
-              <p className="text-sm text-center text-gray-600 mt-2">{progress}%</p>
+              <p className="text-sm text-center text-gray-600 dark:text-gray-400 mt-2">{progress}%</p>
             </div>
           )}
 

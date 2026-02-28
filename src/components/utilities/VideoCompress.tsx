@@ -94,8 +94,8 @@ export function VideoCompress() {
             <input type="file" className="hidden" accept="video/*"
               onChange={(e) => { const f = e.target.files?.[0]; if (f) loadVideo(f); e.target.value = ''; }} />
             <Upload className="w-10 h-10 text-gray-400 mb-3" />
-            <p className="text-base font-medium text-gray-700 mb-1">{t('dropzone.dragHere')}</p>
-            <p className="text-sm text-gray-500">MP4, WebM, MOV</p>
+            <p className="text-base font-medium text-gray-700 dark:text-gray-300 mb-1">{t('dropzone.dragHere')}</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">MP4, WebM, MOV</p>
           </label>
         </div>
       ) : (
@@ -103,8 +103,8 @@ export function VideoCompress() {
           <div className="card">
             <div className="flex items-center justify-between mb-4">
               <div>
-                <p className="text-sm font-medium text-gray-900">{video.name}</p>
-                <p className="text-xs text-gray-500">{t('common.size')}: {formatSize(video.size)}</p>
+                <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{video.name}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">{t('common.size')}: {formatSize(video.size)}</p>
               </div>
               <button onClick={() => { if (videoUrl) URL.revokeObjectURL(videoUrl); setVideo(null); setVideoUrl(null); }}
                 className="text-gray-400 hover:text-red-500"><X className="w-5 h-5" /></button>
@@ -114,16 +114,16 @@ export function VideoCompress() {
 
           <div className="card">
             <div className="flex items-center justify-between mb-3">
-              <label className="text-sm font-medium text-gray-700">{t('common.quality')}</label>
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">{t('common.quality')}</label>
               <div className="flex items-center gap-2">
                 <span className={`text-sm font-medium ${qualityInfo.color}`}>
                   {qualityInfo.text}
                 </span>
-                <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded">CRF: {quality}</span>
+                <span className="text-xs text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded">CRF: {quality}</span>
               </div>
             </div>
             <div className="relative h-8 flex items-center">
-              <div className="absolute inset-x-0 h-2 bg-gray-200 rounded-full" />
+              <div className="absolute inset-x-0 h-2 bg-gray-200 dark:bg-gray-700 rounded-full" />
               <div
                 className="absolute h-2 bg-primary-500 rounded-full transition-all"
                 style={{ width: `${((quality - 18) / 17) * 100}%` }}
@@ -137,11 +137,11 @@ export function VideoCompress() {
                 className="absolute inset-x-0 w-full h-8 opacity-0 cursor-pointer z-10"
               />
               <div
-                className="absolute w-3 h-6 bg-white border-2 border-primary-500 rounded-md shadow-md pointer-events-none transition-all"
+                className="absolute w-3 h-6 bg-white dark:bg-gray-200 border-2 border-primary-500 rounded-md shadow-md pointer-events-none transition-all"
                 style={{ left: `calc(${((quality - 18) / 17) * 100}% - 6px)` }}
               />
             </div>
-            <div className="flex justify-between text-xs text-gray-500 mt-2">
+            <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-2">
               <span>{t('videoCompress.highQuality')}</span>
               <span>{t('compress.strongCompression')}</span>
             </div>
@@ -149,10 +149,10 @@ export function VideoCompress() {
 
           {isProcessing && (
             <div className="card">
-              <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+              <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
                 <div className="h-full bg-primary-500 transition-all" style={{ width: `${progress}%` }} />
               </div>
-              <p className="text-sm text-center text-gray-600 mt-2">{progress}%</p>
+              <p className="text-sm text-center text-gray-600 dark:text-gray-400 mt-2">{progress}%</p>
             </div>
           )}
 

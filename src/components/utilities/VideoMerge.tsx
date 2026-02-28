@@ -157,7 +157,7 @@ export function VideoMerge() {
         className={`border-2 border-dashed rounded-2xl p-6 text-center transition-all cursor-pointer ${
           isDragging
             ? 'border-primary-500 bg-primary-50'
-            : 'border-gray-300 hover:border-primary-400 hover:bg-gray-50'
+            : 'border-gray-300 dark:border-gray-600 hover:border-primary-400 hover:bg-gray-50 dark:hover:bg-gray-800/50'
         }`}
         onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
         onDragLeave={(e) => { e.preventDefault(); setIsDragging(false); }}
@@ -174,24 +174,24 @@ export function VideoMerge() {
           onChange={handleFileSelect}
         />
         <Upload className="w-8 h-8 text-gray-400 mx-auto mb-3" />
-        <p className="font-medium text-gray-700">{t('merge.addVideos')}</p>
-        <p className="text-sm text-gray-500 mt-1">{t('merge.videoFormats')}</p>
+        <p className="font-medium text-gray-700 dark:text-gray-300">{t('merge.addVideos')}</p>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{t('merge.videoFormats')}</p>
       </div>
 
       {/* Video list */}
       {videos.length > 0 && (
         <div className="card space-y-2">
           <div className="flex items-center justify-between mb-3">
-            <h3 className="font-semibold text-gray-900">
+            <h3 className="font-semibold text-gray-900 dark:text-gray-100">
               {t('merge.order')} ({videos.length} {t('merge.files')})
             </h3>
-            <p className="text-xs text-gray-500">{t('merge.orderHint')}</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">{t('merge.orderHint')}</p>
           </div>
 
           {videos.map((video, index) => (
             <div
               key={video.id}
-              className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl"
+              className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800/50 rounded-xl"
             >
               {/* Order number */}
               <span className="w-6 h-6 rounded-full bg-primary-100 text-primary-700 text-xs font-bold flex items-center justify-center flex-shrink-0">
@@ -207,8 +207,8 @@ export function VideoMerge() {
 
               {/* Info */}
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-900 truncate">{video.file.name}</p>
-                <p className="text-xs text-gray-500">{formatSize(video.file.size)}</p>
+                <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{video.file.name}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">{formatSize(video.file.size)}</p>
               </div>
 
               {/* Reorder buttons */}
@@ -216,7 +216,7 @@ export function VideoMerge() {
                 <button
                   onClick={() => moveUp(index)}
                   disabled={index === 0}
-                  className="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-200 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                  className="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                   title={t('merge.moveUp')}
                 >
                   <ArrowUp className="w-4 h-4" />
@@ -224,7 +224,7 @@ export function VideoMerge() {
                 <button
                   onClick={() => moveDown(index)}
                   disabled={index === videos.length - 1}
-                  className="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-200 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                  className="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                   title={t('merge.moveDown')}
                 >
                   <ArrowDown className="w-4 h-4" />
@@ -265,20 +265,20 @@ export function VideoMerge() {
 
           {isProcessing && (
             <div className="flex-1 flex items-center gap-3 min-w-[200px]">
-              <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
+              <div className="flex-1 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
                 <div
                   className="h-full bg-primary-500 transition-all duration-300"
                   style={{ width: `${progress}%` }}
                 />
               </div>
-              <span className="text-sm text-gray-500 w-10">{progress}%</span>
+              <span className="text-sm text-gray-500 dark:text-gray-400 w-10">{progress}%</span>
             </div>
           )}
         </div>
       )}
 
       {videos.length === 1 && (
-        <p className="text-sm text-amber-600 flex items-center gap-1.5">
+        <p className="text-sm text-amber-600 dark:text-amber-400 flex items-center gap-1.5">
           <span>⚠</span>
           {t('merge.needMoreVideos')}
         </p>
@@ -286,15 +286,15 @@ export function VideoMerge() {
 
       {/* Result */}
       {outputUrl && (
-        <div className="card border-green-200 bg-green-50">
+        <div className="card border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/20">
           <div className="flex items-center justify-between gap-4 flex-wrap">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-green-100 flex items-center justify-center">
                 <Play className="w-5 h-5 text-green-600" />
               </div>
               <div>
-                <p className="font-semibold text-green-900">{t('merge.done')}</p>
-                <p className="text-sm text-green-700">{t('merge.videoDoneDesc')}</p>
+                <p className="font-semibold text-green-900 dark:text-green-300">{t('merge.done')}</p>
+                <p className="text-sm text-green-700 dark:text-green-400">{t('merge.videoDoneDesc')}</p>
               </div>
             </div>
             <a

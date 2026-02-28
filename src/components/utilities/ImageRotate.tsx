@@ -221,10 +221,10 @@ export function ImageRotate() {
               }}
             />
             <Upload className="w-10 h-10 text-gray-400 mb-3" />
-            <p className="text-base font-medium text-gray-700 mb-1">
+            <p className="text-base font-medium text-gray-700 dark:text-gray-300 mb-1">
               {t('dropzone.dragHere')}
             </p>
-            <p className="text-sm text-gray-500">PNG, JPG, WebP, GIF</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">PNG, JPG, WebP, GIF</p>
           </label>
         </div>
       ) : (
@@ -270,7 +270,7 @@ export function ImageRotate() {
                 </button>
               )}
             </div>
-            <p className="text-sm text-gray-500 mt-3">
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-3">
               {t('rotate.rotation')}: {rotation}° | {t('rotate.mirrorH')}: {flipH ? t('rotate.yes') : t('rotate.no')} | {t('rotate.mirrorV')}: {flipV ? t('rotate.yes') : t('rotate.no')}
             </p>
           </div>
@@ -289,7 +289,7 @@ export function ImageRotate() {
               </button>
             </div>
 
-            <div className="bg-gray-100 rounded-lg p-4 flex justify-center overflow-hidden">
+            <div className="bg-gray-100 dark:bg-gray-700 rounded-lg p-4 flex justify-center overflow-hidden">
               <img
                 ref={imageRef}
                 src={image}

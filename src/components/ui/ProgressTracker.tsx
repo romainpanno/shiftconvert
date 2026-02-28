@@ -135,10 +135,10 @@ export function ProgressTracker({
             <Loader2 className="w-4 h-4 text-primary-600 animate-spin" />
           </div>
           <div>
-            <p className="text-sm font-medium text-gray-900">
+            <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
               {steps[currentStepIndex]?.labelActive || 'Traitement...'}
             </p>
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-gray-500 dark:text-gray-400">
               Étape {currentStepIndex + 1} / {steps.length}
             </p>
           </div>
@@ -149,7 +149,7 @@ export function ProgressTracker({
             {overallProgress}%
           </div>
           {remainingTime && (
-            <div className="flex items-center gap-1 text-xs text-gray-500">
+            <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
               <Clock className="w-3 h-3" />
               {remainingTime} restant
             </div>
@@ -171,7 +171,7 @@ export function ProgressTracker({
                     ? 'bg-green-500'
                     : isCurrent
                     ? 'bg-gradient-to-r from-primary-500 to-primary-300'
-                    : 'bg-gray-200'
+                    : 'bg-gray-200 dark:bg-gray-700'
                 }`}
                 style={{
                   background: isCurrent
@@ -182,7 +182,7 @@ export function ProgressTracker({
               {index < steps.length - 1 && (
                 <div
                   className={`w-1.5 h-1.5 rounded-full mx-0.5 ${
-                    isCompleted ? 'bg-green-500' : 'bg-gray-300'
+                    isCompleted ? 'bg-green-500' : 'bg-gray-300 dark:bg-gray-600'
                   }`}
                 />
               )}
@@ -202,10 +202,10 @@ export function ProgressTracker({
               key={step.id}
               className={`flex items-center gap-1 ${
                 isCompleted
-                  ? 'text-green-600'
+                  ? 'text-green-600 dark:text-green-400'
                   : isCurrent
                   ? 'text-primary-600 font-medium'
-                  : 'text-gray-400'
+                  : 'text-gray-400 dark:text-gray-500'
               }`}
             >
               {isCompleted && <Check className="w-3 h-3" />}
@@ -216,7 +216,7 @@ export function ProgressTracker({
       </div>
 
       {/* Elapsed time */}
-      <div className="mt-3 pt-3 border-t border-gray-100 flex items-center justify-between text-xs text-gray-500">
+      <div className="mt-3 pt-3 border-t border-gray-100 dark:border-gray-700 flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
         <span>Temps écoulé: {formatTime(elapsedSeconds)}</span>
         {fileSizeMB && <span>{fileSizeMB.toFixed(1)} MB</span>}
       </div>

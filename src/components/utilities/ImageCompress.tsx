@@ -234,10 +234,10 @@ export function ImageCompress() {
             }}
           />
           <Upload className="w-10 h-10 text-gray-400 mb-3" />
-          <p className="text-base font-medium text-gray-700 mb-1">
+          <p className="text-base font-medium text-gray-700 dark:text-gray-300 mb-1">
             {t('dropzone.dragHere')}
           </p>
-          <p className="text-sm text-gray-500">PNG, JPG, WebP, GIF</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">PNG, JPG, WebP, GIF</p>
         </label>
       </div>
 
@@ -247,8 +247,8 @@ export function ImageCompress() {
           <div className="card">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
-                <Gauge className="w-5 h-5 text-gray-600" />
-                <label className="text-sm font-medium text-gray-700">
+                <Gauge className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
                   {t('compress.quality')}
                 </label>
               </div>
@@ -259,7 +259,7 @@ export function ImageCompress() {
 
             {/* Custom slider with bar thumb */}
             <div className="relative h-8 flex items-center mb-6">
-              <div className="absolute inset-x-0 h-2 bg-gray-200 rounded-full" />
+              <div className="absolute inset-x-0 h-2 bg-gray-200 dark:bg-gray-700 rounded-full" />
               <div
                 className={`absolute h-2 bg-gradient-to-r ${getQualityColor()} rounded-full transition-all`}
                 style={{ width: `${((quality - 10) / 90) * 100}%` }}
@@ -274,7 +274,7 @@ export function ImageCompress() {
                 className="absolute inset-x-0 w-full h-8 opacity-0 cursor-pointer z-10"
               />
               <div
-                className="absolute w-3 h-6 bg-white border-2 border-primary-500 rounded-md shadow-md pointer-events-none transition-all"
+                className="absolute w-3 h-6 bg-white dark:bg-gray-200 border-2 border-primary-500 rounded-md shadow-md pointer-events-none transition-all"
                 style={{ left: `calc(${((quality - 10) / 90) * 100}% - 6px)` }}
               />
               <div
@@ -287,7 +287,7 @@ export function ImageCompress() {
             </div>
 
             {/* Labels */}
-            <div className="flex justify-between text-xs text-gray-500 mt-2">
+            <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-2">
               <span className="flex flex-col items-start">
                 <span className="font-medium">{t('compress.smallSize')}</span>
                 <span>{t('compress.lessQuality')}</span>
@@ -307,11 +307,11 @@ export function ImageCompress() {
                   className={`flex flex-col items-center p-3 rounded-xl transition-all ${
                     quality === preset.value
                       ? 'bg-primary-500 text-white shadow-lg scale-105'
-                      : 'bg-gray-50 hover:bg-gray-100 text-gray-700 border border-gray-200'
+                      : 'bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-600'
                   }`}
                 >
                   <span className="text-sm font-medium">{preset.label}</span>
-                  <span className={`text-xs mt-0.5 ${quality === preset.value ? 'text-primary-100' : 'text-gray-500'}`}>
+                  <span className={`text-xs mt-0.5 ${quality === preset.value ? 'text-primary-100' : 'text-gray-500 dark:text-gray-400'}`}>
                     {preset.value}%
                   </span>
                 </button>
@@ -341,18 +341,18 @@ export function ImageCompress() {
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-900 truncate">
+                  <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
                     {item.file.name}
                   </p>
                   <div className="flex items-center gap-2 text-xs">
-                    <span className="text-gray-500">{formatSize(item.file.size)}</span>
+                    <span className="text-gray-500 dark:text-gray-400">{formatSize(item.file.size)}</span>
                     {item.compressed && (
                       <>
-                        <span className="text-gray-400">→</span>
-                        <span className="text-green-600 font-medium">
+                        <span className="text-gray-400 dark:text-gray-500">→</span>
+                        <span className="text-green-600 dark:text-green-400 font-medium">
                           {formatSize(item.compressed.size)}
                         </span>
-                        <span className="bg-green-100 text-green-700 px-1.5 py-0.5 rounded-full font-medium">
+                        <span className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 px-1.5 py-0.5 rounded-full font-medium">
                           -{Math.round((1 - item.compressed.size / item.file.size) * 100)}%
                         </span>
                       </>
@@ -380,16 +380,16 @@ export function ImageCompress() {
 
           {/* Stats */}
           {totalCompressed > 0 && (
-            <div className="card bg-gradient-to-r from-green-50 to-emerald-50 border-green-200">
+            <div className="card bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border-green-200 dark:border-green-800">
               <div className="flex items-center justify-center gap-4">
                 <div className="w-16 h-16 rounded-full bg-green-500 flex items-center justify-center">
                   <span className="text-white text-xl font-bold">{savings}%</span>
                 </div>
                 <div>
-                  <p className="text-green-800 font-medium text-lg">{t('compress.spaceSaved')}</p>
-                  <p className="text-green-600 text-sm">
+                  <p className="text-green-800 dark:text-green-300 font-medium text-lg">{t('compress.spaceSaved')}</p>
+                  <p className="text-green-600 dark:text-green-400 text-sm">
                     {formatSize(totalOriginal)} → {formatSize(totalCompressed)}
-                    <span className="ml-2 text-green-700 font-medium">
+                    <span className="ml-2 text-green-700 dark:text-green-400 font-medium">
                       (-{formatSize(totalOriginal - totalCompressed)})
                     </span>
                   </p>

@@ -71,38 +71,38 @@ export function CreateZip() {
           <input type="file" className="hidden" multiple
             onChange={(e) => { if (e.target.files) addFiles(Array.from(e.target.files)); e.target.value = ''; }} />
           <Upload className="w-10 h-10 text-gray-400 mb-3" />
-          <p className="text-base font-medium text-gray-700 mb-1">{t('dropzone.dragHere')}</p>
-          <p className="text-sm text-gray-500">{t('zip.allFileTypes')}</p>
+          <p className="text-base font-medium text-gray-700 dark:text-gray-300 mb-1">{t('dropzone.dragHere')}</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">{t('zip.allFileTypes')}</p>
         </label>
       </div>
 
       {files.length > 0 && (
         <>
           <div className="card">
-            <label className="block text-sm font-medium text-gray-700 mb-2">{t('zip.archiveName')}</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{t('zip.archiveName')}</label>
             <div className="flex items-center gap-2">
               <input
                 type="text"
                 value={zipName}
                 onChange={(e) => setZipName(e.target.value)}
-                className="flex-1 px-3 py-2 border border-gray-200 rounded-lg"
+                className="flex-1 px-3 py-2 border border-gray-200 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 rounded-lg"
                 placeholder="archive"
               />
-              <span className="text-gray-500">.zip</span>
+              <span className="text-gray-500 dark:text-gray-400">.zip</span>
             </div>
           </div>
 
           <div className="card">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
-                <FolderArchive className="w-5 h-5 text-gray-500" />
-                <span className="text-sm font-medium text-gray-900">{files.length} {t('zip.files')}</span>
+                <FolderArchive className="w-5 h-5 text-gray-500 dark:text-gray-400" />
+                <span className="text-sm font-medium text-gray-900 dark:text-gray-100">{files.length} {t('zip.files')}</span>
               </div>
               <div className="flex items-center gap-3">
-                <span className="text-sm text-gray-500">{formatSize(totalSize)}</span>
+                <span className="text-sm text-gray-500 dark:text-gray-400">{formatSize(totalSize)}</span>
                 <button
                   onClick={() => setFiles([])}
-                  className="flex items-center gap-1 px-2 py-1 text-xs text-red-600 bg-red-50 rounded hover:bg-red-100 transition-colors"
+                  className="flex items-center gap-1 px-2 py-1 text-xs text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 rounded hover:bg-red-100 dark:hover:bg-red-900/40 transition-colors"
                   title={t('convert.clearAll')}
                 >
                   <Trash2 className="w-3 h-3" />
@@ -112,9 +112,9 @@ export function CreateZip() {
             </div>
             <div className="space-y-1 max-h-[200px] overflow-y-auto">
               {files.map((file, i) => (
-                <div key={i} className="flex items-center justify-between py-1 px-2 hover:bg-gray-50 rounded">
-                  <span className="text-sm text-gray-700 truncate flex-1">{file.name}</span>
-                  <span className="text-xs text-gray-400 mx-2">{formatSize(file.size)}</span>
+                <div key={i} className="flex items-center justify-between py-1 px-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded">
+                  <span className="text-sm text-gray-700 dark:text-gray-300 truncate flex-1">{file.name}</span>
+                  <span className="text-xs text-gray-400 dark:text-gray-500 mx-2">{formatSize(file.size)}</span>
                   <button onClick={() => removeFile(i)} className="text-gray-400 hover:text-red-500">
                     <X className="w-3 h-3" />
                   </button>
@@ -125,10 +125,10 @@ export function CreateZip() {
 
           {isProcessing && (
             <div className="card">
-              <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+              <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
                 <div className="h-full bg-primary-500 transition-all" style={{ width: `${progress}%` }} />
               </div>
-              <p className="text-sm text-center text-gray-600 mt-2">{progress}%</p>
+              <p className="text-sm text-center text-gray-600 dark:text-gray-400 mt-2">{progress}%</p>
             </div>
           )}
 

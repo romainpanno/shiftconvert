@@ -155,7 +155,7 @@ export function AudioMerge() {
         className={`border-2 border-dashed rounded-2xl p-6 text-center transition-all cursor-pointer ${
           isDragging
             ? 'border-primary-500 bg-primary-50'
-            : 'border-gray-300 hover:border-primary-400 hover:bg-gray-50'
+            : 'border-gray-300 dark:border-gray-600 hover:border-primary-400 hover:bg-gray-50 dark:hover:bg-gray-800/50'
         }`}
         onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
         onDragLeave={(e) => { e.preventDefault(); setIsDragging(false); }}
@@ -172,22 +172,22 @@ export function AudioMerge() {
           onChange={handleFileSelect}
         />
         <Upload className="w-8 h-8 text-gray-400 mx-auto mb-3" />
-        <p className="font-medium text-gray-700">{t('merge.addAudios')}</p>
-        <p className="text-sm text-gray-500 mt-1">{t('merge.audioFormats')}</p>
+        <p className="font-medium text-gray-700 dark:text-gray-300">{t('merge.addAudios')}</p>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{t('merge.audioFormats')}</p>
       </div>
 
       {/* Audio list */}
       {audios.length > 0 && (
         <div className="card space-y-2">
           <div className="flex items-center justify-between mb-3">
-            <h3 className="font-semibold text-gray-900">
+            <h3 className="font-semibold text-gray-900 dark:text-gray-100">
               {t('merge.order')} ({audios.length} {t('merge.files')})
             </h3>
-            <p className="text-xs text-gray-500">{t('merge.orderHint')}</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">{t('merge.orderHint')}</p>
           </div>
 
           {audios.map((audio, index) => (
-            <div key={audio.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
+            <div key={audio.id} className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800/50 rounded-xl">
               <span className="w-6 h-6 rounded-full bg-green-100 text-green-700 text-xs font-bold flex items-center justify-center flex-shrink-0">
                 {index + 1}
               </span>
@@ -195,15 +195,15 @@ export function AudioMerge() {
                 <Music className="w-5 h-5 text-green-600" />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-900 truncate">{audio.file.name}</p>
-                <p className="text-xs text-gray-500">{formatSize(audio.file.size)}</p>
+                <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{audio.file.name}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">{formatSize(audio.file.size)}</p>
               </div>
               <audio src={audio.url} controls className="hidden sm:block h-8 max-w-[140px]" />
               <div className="flex gap-1 flex-shrink-0">
                 <button
                   onClick={() => moveUp(index)}
                   disabled={index === 0}
-                  className="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-200 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                  className="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                   title={t('merge.moveUp')}
                 >
                   <ArrowUp className="w-4 h-4" />
@@ -211,7 +211,7 @@ export function AudioMerge() {
                 <button
                   onClick={() => moveDown(index)}
                   disabled={index === audios.length - 1}
-                  className="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-200 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                  className="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                   title={t('merge.moveDown')}
                 >
                   <ArrowDown className="w-4 h-4" />
@@ -232,7 +232,7 @@ export function AudioMerge() {
       {audios.length >= 2 && (
         <div className="flex flex-wrap items-center gap-4">
           <div>
-            <p className="text-sm font-medium text-gray-700 mb-2">{t('merge.outputFormat')}</p>
+            <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{t('merge.outputFormat')}</p>
             <div className="flex gap-2">
               {(['mp3', 'wav', 'ogg'] as const).map((fmt) => (
                 <button
@@ -241,7 +241,7 @@ export function AudioMerge() {
                   className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
                     outputFormat === fmt
                       ? 'bg-primary-600 text-white'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
                   }`}
                 >
                   {fmt.toUpperCase()}
@@ -272,18 +272,18 @@ export function AudioMerge() {
 
       {isProcessing && (
         <div className="flex items-center gap-3">
-          <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
+          <div className="flex-1 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
             <div
               className="h-full bg-primary-500 transition-all duration-300"
               style={{ width: `${progress}%` }}
             />
           </div>
-          <span className="text-sm text-gray-500 w-10">{progress}%</span>
+          <span className="text-sm text-gray-500 dark:text-gray-400 w-10">{progress}%</span>
         </div>
       )}
 
       {audios.length === 1 && (
-        <p className="text-sm text-amber-600 flex items-center gap-1.5">
+        <p className="text-sm text-amber-600 dark:text-amber-400 flex items-center gap-1.5">
           <span>⚠</span>
           {t('merge.needMoreAudios')}
         </p>
@@ -291,15 +291,15 @@ export function AudioMerge() {
 
       {/* Result */}
       {outputUrl && (
-        <div className="card border-green-200 bg-green-50">
+        <div className="card border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/20">
           <div className="flex items-center justify-between gap-4 flex-wrap">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-green-100 flex items-center justify-center">
                 <Music className="w-5 h-5 text-green-600" />
               </div>
               <div>
-                <p className="font-semibold text-green-900">{t('merge.done')}</p>
-                <p className="text-sm text-green-700">{t('merge.audioDoneDesc')}</p>
+                <p className="font-semibold text-green-900 dark:text-green-300">{t('merge.done')}</p>
+                <p className="text-sm text-green-700 dark:text-green-400">{t('merge.audioDoneDesc')}</p>
               </div>
             </div>
             <a

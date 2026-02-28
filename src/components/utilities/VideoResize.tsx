@@ -240,10 +240,10 @@ export function VideoResize() {
     const newPixels = width * height;
     const percent = Math.round((newPixels / originalPixels) * 100);
 
-    if (percent > 100) return { text: t('resize.enlargement'), percent, color: 'text-blue-600' };
-    if (percent === 100) return { text: t('resize.noChange'), percent, color: 'text-gray-500' };
-    if (percent > 50) return { text: t('resize.reduction'), percent, color: 'text-green-600' };
-    return { text: t('resize.strongReduction'), percent, color: 'text-orange-600' };
+    if (percent > 100) return { text: t('resize.enlargement'), percent, color: 'text-blue-600 dark:text-blue-400' };
+    if (percent === 100) return { text: t('resize.noChange'), percent, color: 'text-gray-500 dark:text-gray-400' };
+    if (percent > 50) return { text: t('resize.reduction'), percent, color: 'text-green-600 dark:text-green-400' };
+    return { text: t('resize.strongReduction'), percent, color: 'text-orange-600 dark:text-orange-400' };
   };
 
   const scaleInfo = getScaleInfo();
@@ -276,8 +276,8 @@ export function VideoResize() {
               }}
             />
             <Upload className="w-10 h-10 text-gray-400 mb-3" />
-            <p className="text-base font-medium text-gray-700 mb-1">{t('dropzone.dragHere')}</p>
-            <p className="text-sm text-gray-500">MP4, WebM, MOV</p>
+            <p className="text-base font-medium text-gray-700 dark:text-gray-300 mb-1">{t('dropzone.dragHere')}</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">MP4, WebM, MOV</p>
           </label>
         </div>
       ) : (
@@ -286,9 +286,9 @@ export function VideoResize() {
           <div className="card">
             <div className="flex items-center justify-between mb-4">
               <div>
-                <p className="text-sm font-medium text-gray-900">{video.name}</p>
+                <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{video.name}</p>
                 {videoInfo && (
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
                     {t('resize.original')}: {videoInfo.width} × {videoInfo.height}px
                     {videoInfo.duration && ` • ${Math.round(videoInfo.duration)}s`}
                   </p>
@@ -318,11 +318,11 @@ export function VideoResize() {
           {/* Presets */}
           <div className="card">
             <div className="flex items-center justify-between mb-3">
-              <label className="text-sm font-medium text-gray-700">{t('videoResize.presets')}</label>
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">{t('videoResize.presets')}</label>
               {hasChanges && (
                 <button
                   onClick={resetToOriginal}
-                  className="flex items-center gap-1 px-2 py-1 text-xs text-gray-600 bg-gray-100 rounded hover:bg-gray-200 transition-colors"
+                  className="flex items-center gap-1 px-2 py-1 text-xs text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
                 >
                   <RotateCcw className="w-3 h-3" />
                   {t('common.reset')}
@@ -342,8 +342,8 @@ export function VideoResize() {
                       selectedPreset === preset.label
                         ? 'bg-primary-500 text-white shadow-md'
                         : isDisabled
-                        ? 'bg-gray-50 text-gray-300 cursor-not-allowed'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        ? 'bg-gray-50 dark:bg-gray-800/50 text-gray-300 cursor-not-allowed'
+                        : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
                     }`}
                   >
                     <Icon className="w-4 h-4" />
@@ -358,11 +358,11 @@ export function VideoResize() {
           {/* Custom dimensions */}
           <div className="card">
             <div className="flex items-center justify-between mb-3">
-              <label className="text-sm font-medium text-gray-700">{t('resize.dimensions')}</label>
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">{t('resize.dimensions')}</label>
               <button
                 onClick={() => setKeepRatio(!keepRatio)}
                 className={`flex items-center gap-1.5 px-2 py-1 rounded text-xs transition-colors ${
-                  keepRatio ? 'bg-primary-100 text-primary-700' : 'bg-gray-100 text-gray-600'
+                  keepRatio ? 'bg-primary-100 text-primary-700' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400'
                 }`}
               >
                 {keepRatio ? <Link className="w-3 h-3" /> : <Unlink className="w-3 h-3" />}
@@ -372,38 +372,38 @@ export function VideoResize() {
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs text-gray-500 mb-1">{t('resize.width')}</label>
+                <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">{t('resize.width')}</label>
                 <div className="flex items-center gap-2">
                   <input
                     type="number"
                     value={width}
                     onChange={(e) => handleWidthChange(parseInt(e.target.value) || 640)}
-                    className="w-full px-3 py-2 border border-gray-200 rounded-lg"
+                    className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 rounded-lg"
                     min={1}
                   />
-                  <span className="text-gray-400 text-sm">px</span>
+                  <span className="text-gray-400 dark:text-gray-500 text-sm">px</span>
                 </div>
               </div>
               <div>
-                <label className="block text-xs text-gray-500 mb-1">{t('resize.height')}</label>
+                <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">{t('resize.height')}</label>
                 <div className="flex items-center gap-2">
                   <input
                     type="number"
                     value={height}
                     onChange={(e) => handleHeightChange(parseInt(e.target.value) || 360)}
-                    className="w-full px-3 py-2 border border-gray-200 rounded-lg"
+                    className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 rounded-lg"
                     min={1}
                   />
-                  <span className="text-gray-400 text-sm">px</span>
+                  <span className="text-gray-400 dark:text-gray-500 text-sm">px</span>
                 </div>
               </div>
             </div>
 
             {/* Scale info */}
             {scaleInfo && videoInfo && (
-              <div className="mt-4 p-3 bg-gray-50 rounded-lg">
+              <div className="mt-4 p-3 bg-gray-50 dark:bg-gray-900/50 rounded-lg">
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-600">
+                  <span className="text-gray-600 dark:text-gray-400">
                     {videoInfo.width}×{videoInfo.height} → {width}×{height}
                   </span>
                   <span className={`font-medium ${scaleInfo.color}`}>
@@ -416,8 +416,8 @@ export function VideoResize() {
 
           {/* Error message */}
           {error && (
-            <div className="card bg-red-50 border-red-200">
-              <div className="flex items-center gap-2 text-red-700">
+            <div className="card bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800">
+              <div className="flex items-center gap-2 text-red-700 dark:text-red-400">
                 <X className="w-5 h-5" />
                 <span className="font-medium">{error}</span>
               </div>

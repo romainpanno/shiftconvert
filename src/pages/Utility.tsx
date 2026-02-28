@@ -55,8 +55,8 @@ export function Utility() {
   if (!utility || !UtilityComponent) {
     return (
       <div className="py-12 px-4 text-center">
-        <h1 className="text-2xl font-bold text-gray-900 mb-4">{t('utilities.notFound')}</h1>
-        <Link to="/utilities" className="text-primary-600 hover:underline">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">{t('utilities.notFound')}</h1>
+        <Link to="/utilities" className="text-primary-600 dark:text-primary-400 hover:underline">
           {t('utilities.backToUtilities')}
         </Link>
       </div>
@@ -72,17 +72,17 @@ export function Utility() {
         style={{ height: 'calc(100dvh - 64px)' }}
       >
         {/* Compact header */}
-        <div className="flex items-center gap-3 py-2 shrink-0 border-b border-gray-100 mb-3">
+        <div className="flex items-center gap-3 py-2 shrink-0 border-b border-gray-100 dark:border-gray-700 mb-3">
           <Link
             to="/utilities"
-            className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900 shrink-0"
+            className="inline-flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 shrink-0"
           >
             <ArrowLeft className="w-4 h-4" />
             <span className="hidden sm:inline">{t('utilities.backToUtilities')}</span>
           </Link>
-          <div className="w-px h-4 bg-gray-200 shrink-0" />
-          <h1 className="text-base font-bold text-gray-900 truncate">{t(`utility.${utility.id}`)}</h1>
-          <p className="text-sm text-gray-400 truncate hidden md:block">{t(`utility.${utility.id}.desc`)}</p>
+          <div className="w-px h-4 bg-gray-200 dark:bg-gray-700 shrink-0" />
+          <h1 className="text-base font-bold text-gray-900 dark:text-gray-100 truncate">{t(`utility.${utility.id}`)}</h1>
+          <p className="text-sm text-gray-400 dark:text-gray-500 truncate hidden md:block">{t(`utility.${utility.id}.desc`)}</p>
         </div>
         {/* Editor fills remaining space */}
         <div className="flex-1 min-h-0 flex flex-col">
@@ -99,13 +99,13 @@ export function Utility() {
         <div className="mb-8">
           <Link
             to="/utilities"
-            className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 mb-4"
+            className="inline-flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 mb-4"
           >
             <ArrowLeft className="w-4 h-4" />
             {t('utilities.backToUtilities')}
           </Link>
-          <h1 className="text-3xl font-bold text-gray-900">{t(`utility.${utility.id}`)}</h1>
-          <p className="text-gray-600 mt-1">{t(`utility.${utility.id}.desc`)}</p>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">{t(`utility.${utility.id}`)}</h1>
+          <p className="text-gray-600 dark:text-gray-400 mt-1">{t(`utility.${utility.id}.desc`)}</p>
         </div>
 
         {/* Utility content */}

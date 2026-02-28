@@ -130,15 +130,15 @@ export function FileDropzone({ acceptedFormats }: FileDropzoneProps) {
           accept={acceptString}
           onChange={handleFileSelect}
         />
-        <Upload className="w-12 h-12 text-gray-400 mb-4" />
-        <p className="text-lg font-medium text-gray-700 mb-1">
+        <Upload className="w-12 h-12 text-gray-400 dark:text-gray-500 mb-4" />
+        <p className="text-lg font-medium text-gray-700 dark:text-gray-300 mb-1">
           {t('dropzone.dragHere')}
         </p>
-        <p className="text-sm text-gray-500">
+        <p className="text-sm text-gray-500 dark:text-gray-400">
           {t('dropzone.orClick')}
         </p>
         {acceptedFormats && (
-          <p className="text-xs text-gray-400 mt-2">
+          <p className="text-xs text-gray-400 dark:text-gray-500 mt-2">
             {t('dropzone.accepted')} : {acceptedFormats.join(', ').toUpperCase()}
           </p>
         )}
@@ -160,16 +160,16 @@ function FilePreview({ file }: { file: FileItem }) {
   const { removeFile } = useConversionStore();
 
   return (
-    <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 sm:gap-3 p-3 bg-white rounded-lg border border-gray-200">
-      <FileIcon className="w-8 h-8 text-gray-400 flex-shrink-0" />
+    <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 sm:gap-3 p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+      <FileIcon className="w-8 h-8 text-gray-400 dark:text-gray-500 flex-shrink-0" />
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium text-gray-900 truncate">{file.name}</p>
-        <p className="text-xs text-gray-500">{formatSize(file.size)}</p>
+        <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{file.name}</p>
+        <p className="text-xs text-gray-500 dark:text-gray-400">{formatSize(file.size)}</p>
       </div>
 
       <button
         onClick={() => removeFile(file.id)}
-        className="text-gray-400 hover:text-red-500 p-1.5 transition-colors sm:order-last"
+        className="text-gray-400 hover:text-red-500 dark:hover:text-red-400 p-1.5 transition-colors sm:order-last"
         title={t('dropzone.remove')}
       >
         <X className="w-5 h-5 sm:w-4 sm:h-4" />
@@ -178,14 +178,14 @@ function FilePreview({ file }: { file: FileItem }) {
       {file.status === 'converting' && (
         <div className="flex items-center gap-2 w-full sm:w-auto mt-2 sm:mt-0">
           <div className="flex-1 sm:w-24 sm:flex-none">
-            <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+            <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
               <div
                 className="h-full bg-primary-500 transition-all duration-300"
                 style={{ width: `${file.progress}%` }}
               />
             </div>
           </div>
-          <span className="text-xs text-gray-500 w-10">{Math.round(file.progress)}%</span>
+          <span className="text-xs text-gray-500 dark:text-gray-400 w-10">{Math.round(file.progress)}%</span>
         </div>
       )}
 
@@ -201,7 +201,7 @@ function FilePreview({ file }: { file: FileItem }) {
       )}
 
       {file.status === 'error' && (
-        <div className="flex items-center gap-1.5 text-red-600 w-full sm:w-auto mt-2 sm:mt-0">
+        <div className="flex items-center gap-1.5 text-red-600 dark:text-red-400 w-full sm:w-auto mt-2 sm:mt-0">
           <AlertCircle className="w-4 h-4 flex-shrink-0" />
           <span className="text-sm truncate">{file.error || t('common.error')}</span>
         </div>

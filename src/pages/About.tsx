@@ -7,17 +7,17 @@ export function About() {
   return (
     <div className="py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-3xl mx-auto">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">{t('about.title')}</h1>
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-8">{t('about.title')}</h1>
 
         <div className="prose prose-gray max-w-none">
           <section className="card mb-6">
             <div className="flex items-start gap-4">
-              <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                <Shield className="w-5 h-5 text-green-600" />
+              <div className="w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
+                <Shield className="w-5 h-5 text-green-600 dark:text-green-400" />
               </div>
               <div>
-                <h2 className="text-xl font-semibold text-gray-900 mb-2">{t('about.privacy.title')}</h2>
-                <p className="text-gray-600">
+                <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">{t('about.privacy.title')}</h2>
+                <p className="text-gray-600 dark:text-gray-400">
                   {t('about.privacy.text')}
                 </p>
               </div>
@@ -26,12 +26,12 @@ export function About() {
 
           <section className="card mb-6">
             <div className="flex items-start gap-4">
-              <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                <Code className="w-5 h-5 text-blue-600" />
+              <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
+                <Code className="w-5 h-5 text-blue-600 dark:text-blue-400" />
               </div>
               <div>
-                <h2 className="text-xl font-semibold text-gray-900 mb-2">{t('about.technology.title')}</h2>
-                <p className="text-gray-600">
+                <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">{t('about.technology.title')}</h2>
+                <p className="text-gray-600 dark:text-gray-400">
                   {t('about.technology.text')}
                 </p>
               </div>
@@ -40,12 +40,12 @@ export function About() {
 
           <section className="card mb-6">
             <div className="flex items-start gap-4">
-              <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                <Lock className="w-5 h-5 text-purple-600" />
+              <div className="w-10 h-10 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
+                <Lock className="w-5 h-5 text-purple-600 dark:text-purple-400" />
               </div>
               <div>
-                <h2 className="text-xl font-semibold text-gray-900 mb-2">{t('about.free.title')}</h2>
-                <p className="text-gray-600">
+                <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">{t('about.free.title')}</h2>
+                <p className="text-gray-600 dark:text-gray-400">
                   {t('about.free.text')}
                 </p>
               </div>
@@ -54,12 +54,12 @@ export function About() {
 
           <section className="card">
             <div className="flex items-start gap-4">
-              <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                <Github className="w-5 h-5 text-gray-600" />
+              <div className="w-10 h-10 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center flex-shrink-0">
+                <Github className="w-5 h-5 text-gray-600 dark:text-gray-400" />
               </div>
               <div>
-                <h2 className="text-xl font-semibold text-gray-900 mb-2">{t('about.opensource.title')}</h2>
-                <p className="text-gray-600">
+                <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">{t('about.opensource.title')}</h2>
+                <p className="text-gray-600 dark:text-gray-400">
                   {t('about.opensource.text')}
                 </p>
               </div>

@@ -313,38 +313,38 @@ export function FontMetadataEditor() {
             }}
           />
           <Upload className="w-10 h-10 text-gray-400 mb-3" />
-          <p className="text-base font-medium text-gray-700 mb-1">
+          <p className="text-base font-medium text-gray-700 dark:text-gray-300 mb-1">
             {t('dropzone.dragHere')}
           </p>
-          <p className="text-sm text-gray-500">TTF, OTF, WOFF</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">TTF, OTF, WOFF</p>
         </label>
       </div>
 
       {/* Batch edit */}
       {files.length > 1 && (
         <div className="card">
-          <h3 className="font-medium text-gray-900 mb-4">
+          <h3 className="font-medium text-gray-900 dark:text-gray-100 mb-4">
             Édition en lot ({files.length} fichiers)
           </h3>
-          <p className="text-xs text-gray-500 mb-4">
+          <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">
             Les champs remplis seront appliqués à tous les fichiers
           </p>
           {Object.keys(categoryLabels).map((category) => {
             const categoryFields = metadataFields.filter((f) => f.category === category);
             return (
               <div key={category} className="mb-4">
-                <h4 className="text-xs font-medium text-gray-600 mb-2">
+                <h4 className="text-xs font-medium text-gray-600 dark:text-gray-400 mb-2">
                   {categoryLabels[category]}
                 </h4>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                   {categoryFields.map(({ key, label }) => (
                     <div key={key}>
-                      <label className="block text-xs text-gray-500 mb-1">{label}</label>
+                      <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">{label}</label>
                       <input
                         type="text"
                         value={batchEdit[key] || ''}
                         onChange={(e) => setBatchEdit((prev) => ({ ...prev, [key]: e.target.value }))}
-                        className="w-full px-3 py-1.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                        className="w-full px-3 py-1.5 text-sm border border-gray-200 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                         placeholder={`Appliquer à tous...`}
                       />
                     </div>
@@ -370,7 +370,7 @@ export function FontMetadataEditor() {
             <div className="flex justify-end">
               <button
                 onClick={clearAllFiles}
-                className="flex items-center gap-1 px-3 py-1.5 text-sm text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition-colors"
+                className="flex items-center gap-1 px-3 py-1.5 text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/40 transition-colors"
               >
                 <Trash2 className="w-4 h-4" />
                 {t('convert.clearAll')}
@@ -385,14 +385,14 @@ export function FontMetadataEditor() {
                     {fontFile.name.split('.').pop()?.toUpperCase()}
                   </div>
                   <div>
-                    <p className="font-medium text-gray-900">{fontFile.name}</p>
-                    <p className="text-xs text-gray-500">{formatSize(fontFile.size)}</p>
+                    <p className="font-medium text-gray-900 dark:text-gray-100">{fontFile.name}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">{formatSize(fontFile.size)}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
                   {fontFile.modified && (
                     <>
-                      <span className="text-xs text-amber-600 bg-amber-50 px-2 py-1 rounded">
+                      <span className="text-xs text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 px-2 py-1 rounded">
                         Modifié
                       </span>
                       <button
@@ -425,18 +425,18 @@ export function FontMetadataEditor() {
                 const categoryFields = metadataFields.filter((f) => f.category === category);
                 return (
                   <div key={category} className="mb-4">
-                    <h4 className="text-sm font-medium text-gray-700 mb-2 border-b border-gray-100 pb-1">
+                    <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 border-b border-gray-100 dark:border-gray-700 pb-1">
                       {categoryLabels[category]}
                     </h4>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                       {categoryFields.map(({ key, label }) => (
                         <div key={key}>
-                          <label className="block text-xs text-gray-500 mb-1">{label}</label>
+                          <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">{label}</label>
                           <input
                             type="text"
                             value={fontFile.editedMetadata[key]}
                             onChange={(e) => updateMetadata(fontFile.id, key, e.target.value)}
-                            className="w-full px-3 py-1.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                            className="w-full px-3 py-1.5 text-sm border border-gray-200 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                           />
                         </div>
                       ))}

@@ -1025,8 +1025,8 @@ export function VideoEditor() {
           <Monitor className="w-8 h-8 text-white" />
         </div>
         <div>
-          <h2 className="text-lg font-bold text-gray-900">{t('videoEditor.desktopOnly')}</h2>
-          <p className="text-sm text-gray-500 mt-1 max-w-xs">{t('videoEditor.desktopOnlyDesc')}</p>
+          <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">{t('videoEditor.desktopOnly')}</h2>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 max-w-xs">{t('videoEditor.desktopOnlyDesc')}</p>
         </div>
       </div>
     );
@@ -1079,15 +1079,15 @@ export function VideoEditor() {
               className={`shrink-0 border-2 border-dashed rounded-2xl p-6 text-center transition-all ${
                 isDraggingMedia
                   ? 'border-primary-500 bg-primary-50'
-                  : 'border-gray-300 hover:border-primary-400 hover:bg-gray-50'
+                  : 'border-gray-300 dark:border-gray-600 hover:border-primary-400 hover:bg-gray-50 dark:hover:bg-gray-800/50'
               }`}
               onDragOver={(e) => { e.preventDefault(); setIsDraggingMedia(true); }}
               onDragLeave={() => setIsDraggingMedia(false)}
               onDrop={handleDrop}
             >
               <Upload className="w-8 h-8 text-gray-400 mx-auto mb-3" />
-              <p className="font-medium text-gray-700">{t('videoEditor.dropMedia')}</p>
-              <p className="text-xs text-gray-500 mt-1">{t('videoEditor.formats')}</p>
+              <p className="font-medium text-gray-700 dark:text-gray-300">{t('videoEditor.dropMedia')}</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{t('videoEditor.formats')}</p>
               <div className="flex items-center justify-center gap-3 mt-4">
                 <button
                   className="btn btn-secondary flex items-center gap-2 text-sm py-1.5"
@@ -1112,14 +1112,14 @@ export function VideoEditor() {
               className={`shrink-0 flex items-center gap-2 px-3 py-2 rounded-xl border-2 border-dashed transition-all ${
                 isDraggingMedia
                   ? 'border-primary-500 bg-primary-50'
-                  : 'border-gray-200 hover:border-primary-300'
+                  : 'border-gray-200 dark:border-gray-600 hover:border-primary-300'
               }`}
               onDragOver={(e) => { e.preventDefault(); setIsDraggingMedia(true); }}
               onDragLeave={() => setIsDraggingMedia(false)}
               onDrop={handleDrop}
             >
               <Upload className="w-4 h-4 text-gray-400 shrink-0" />
-              <span className="text-xs text-gray-500 flex-1">{t('videoEditor.dropMedia')}</span>
+              <span className="text-xs text-gray-500 dark:text-gray-400 flex-1">{t('videoEditor.dropMedia')}</span>
               <button
                 className="btn btn-secondary flex items-center gap-1.5 text-xs py-1 px-2"
                 onClick={() => mediaInputRef.current?.click()}
@@ -1181,13 +1181,13 @@ export function VideoEditor() {
                     }
                   }}
                 />
-                <span className="text-xs text-gray-500 w-24 text-right shrink-0">
+                <span className="text-xs text-gray-500 dark:text-gray-400 w-24 text-right shrink-0">
                   {formatSec(playhead)} / {formatSec(totalDuration)}
                 </span>
               </div>
             </div>
           ) : (
-            <p className="text-sm text-gray-400 py-4 text-center">{t('videoEditor.noClips')}</p>
+            <p className="text-sm text-gray-400 dark:text-gray-500 py-4 text-center">{t('videoEditor.noClips')}</p>
           )}
         </div>
 
@@ -1197,7 +1197,7 @@ export function VideoEditor() {
 
             {/* Output format */}
             <div className="card shrink-0 space-y-2">
-              <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">{t('videoEditor.outputFormat')}</h4>
+              <h4 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">{t('videoEditor.outputFormat')}</h4>
               <div className="grid grid-cols-3 gap-1">
                 {RATIO_PRESETS.map((p) => (
                   <button
@@ -1205,7 +1205,7 @@ export function VideoEditor() {
                     className={`text-xs py-1 px-1.5 rounded border transition-colors ${
                       ratioPreset === p.id
                         ? 'bg-primary-100 border-primary-400 text-primary-700 font-semibold'
-                        : 'bg-white border-gray-200 text-gray-600 hover:border-primary-300'
+                        : 'bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:border-primary-300'
                     }`}
                     onClick={() => { setRatioPreset(p.id); setOutW(p.w); setOutH(p.h); }}
                   >
@@ -1216,7 +1216,7 @@ export function VideoEditor() {
                   className={`text-xs py-1 px-1.5 rounded border transition-colors ${
                     ratioPreset === 'custom'
                       ? 'bg-primary-100 border-primary-400 text-primary-700 font-semibold'
-                      : 'bg-white border-gray-200 text-gray-600 hover:border-primary-300'
+                      : 'bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:border-primary-300'
                   }`}
                   onClick={() => setRatioPreset('custom')}
                 >
@@ -1230,19 +1230,19 @@ export function VideoEditor() {
                     value={customW}
                     min={100}
                     max={7680}
-                    className="w-full text-xs border border-gray-200 rounded px-2 py-1 focus:outline-none focus:border-primary-400"
+                    className="w-full text-xs border border-gray-200 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 rounded px-2 py-1 focus:outline-none focus:border-primary-400"
                     onChange={(e) => {
                       const v = Math.max(100, Math.min(7680, parseInt(e.target.value) || 1280));
                       setCustomW(v); setOutW(v);
                     }}
                   />
-                  <span className="text-gray-400 text-xs shrink-0">×</span>
+                  <span className="text-gray-400 dark:text-gray-500 text-xs shrink-0">×</span>
                   <input
                     type="number"
                     value={customH}
                     min={100}
                     max={7680}
-                    className="w-full text-xs border border-gray-200 rounded px-2 py-1 focus:outline-none focus:border-primary-400"
+                    className="w-full text-xs border border-gray-200 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 rounded px-2 py-1 focus:outline-none focus:border-primary-400"
                     onChange={(e) => {
                       const v = Math.max(100, Math.min(7680, parseInt(e.target.value) || 720));
                       setCustomH(v); setOutH(v);
@@ -1250,11 +1250,11 @@ export function VideoEditor() {
                   />
                 </div>
               )}
-              <p className="text-[10px] text-gray-400">{outW} × {outH} px</p>
+              <p className="text-[10px] text-gray-400 dark:text-gray-500">{outW} × {outH} px</p>
 
               {/* Fit mode */}
-              <div className="pt-1 border-t border-gray-100 space-y-1.5">
-                <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide">{t('videoEditor.scaleMode')}</p>
+              <div className="pt-1 border-t border-gray-100 dark:border-gray-700 space-y-1.5">
+                <p className="text-[10px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wide">{t('videoEditor.scaleMode')}</p>
                 <div className="flex gap-1">
                   {([
                     { id: 'fit',     label: 'Fit',     descKey: 'videoEditor.fitDesc' as const },
@@ -1267,7 +1267,7 @@ export function VideoEditor() {
                       className={`flex-1 text-xs py-1 rounded border transition-colors ${
                         fitMode === m.id
                           ? 'bg-primary-100 border-primary-400 text-primary-700 font-semibold'
-                          : 'bg-white border-gray-200 text-gray-600 hover:border-primary-300'
+                          : 'bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:border-primary-300'
                       }`}
                       onClick={() => setFitMode(m.id)}
                     >
@@ -1275,7 +1275,7 @@ export function VideoEditor() {
                     </button>
                   ))}
                 </div>
-                <p className="text-[10px] text-gray-400">
+                <p className="text-[10px] text-gray-400 dark:text-gray-500">
                   {fitMode === 'fit' ? t('videoEditor.fitHint') :
                    fitMode === 'fill' ? t('videoEditor.fillHint') :
                    t('videoEditor.stretchHint')}
@@ -1287,7 +1287,7 @@ export function VideoEditor() {
             {selectedClip && (
               <div className="card space-y-3 shrink-0">
                 <div className="flex items-center justify-between">
-                  <h3 className="font-semibold text-gray-900 text-sm truncate">{selectedClip.name}</h3>
+                  <h3 className="font-semibold text-gray-900 dark:text-gray-100 text-sm truncate">{selectedClip.name}</h3>
                   <button
                     className="text-xs text-red-500 hover:text-red-700 flex items-center gap-1 shrink-0"
                     onClick={() => removeClip(selectedClip.id)}
@@ -1297,7 +1297,7 @@ export function VideoEditor() {
                   </button>
                 </div>
                 {selectedClip.type === 'video' && (
-                  <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+                  <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
                     <input
                       type="checkbox"
                       checked={selectedClip.muteVideoAudio}
@@ -1312,7 +1312,7 @@ export function VideoEditor() {
                     {t('videoEditor.muteAudio')}
                   </label>
                 )}
-                <p className="text-xs text-gray-400">
+                <p className="text-xs text-gray-400 dark:text-gray-500">
                   {t('videoEditor.totalDuration')}: {formatSec(selectedClip.displayDuration)}
                 </p>
               </div>
@@ -1324,7 +1324,7 @@ export function VideoEditor() {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2 min-w-0">
                     <Volume2 className="w-4 h-4 text-green-600 shrink-0" />
-                    <span className="text-sm font-medium text-gray-800 truncate">{a.name}</span>
+                    <span className="text-sm font-medium text-gray-800 dark:text-gray-200 truncate">{a.name}</span>
                   </div>
                   <button
                     className="text-xs text-red-500 hover:text-red-700 flex items-center gap-1 shrink-0 ml-2"
@@ -1335,7 +1335,7 @@ export function VideoEditor() {
                   </button>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="text-xs text-gray-500">{t('videoEditor.volume')}</span>
+                  <span className="text-xs text-gray-500 dark:text-gray-400">{t('videoEditor.volume')}</span>
                   <input
                     type="range"
                     min={0}
@@ -1351,7 +1351,7 @@ export function VideoEditor() {
                       setOutputUrl(null);
                     }}
                   />
-                  <span className="text-xs text-gray-500 w-8 text-right">{Math.round(a.volume * 100)}%</span>
+                  <span className="text-xs text-gray-500 dark:text-gray-400 w-8 text-right">{Math.round(a.volume * 100)}%</span>
                 </div>
               </div>
             ))}
@@ -1378,13 +1378,13 @@ export function VideoEditor() {
                 </button>
                 {isExporting && (
                   <div className="flex items-center gap-2">
-                    <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
+                    <div className="flex-1 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
                       <div
                         className="h-full bg-primary-500 transition-all duration-300"
                         style={{ width: `${exportProgress}%` }}
                       />
                     </div>
-                    <span className="text-xs text-gray-500 w-8 text-right">{exportProgress}%</span>
+                    <span className="text-xs text-gray-500 dark:text-gray-400 w-8 text-right">{exportProgress}%</span>
                   </div>
                 )}
               </div>
@@ -1392,11 +1392,11 @@ export function VideoEditor() {
 
             {/* Export result */}
             {outputUrl && (
-              <div className="card border-green-200 bg-green-50 shrink-0 space-y-3">
+              <div className="card border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/20 shrink-0 space-y-3">
                 <div className="flex items-center justify-between gap-2 flex-wrap">
                   <div>
-                    <p className="font-semibold text-green-900 text-sm">{t('videoEditor.exportDone')}</p>
-                    <p className="text-xs text-green-700">{t('videoEditor.exportDoneDesc')}</p>
+                    <p className="font-semibold text-green-900 dark:text-green-300 text-sm">{t('videoEditor.exportDone')}</p>
+                    <p className="text-xs text-green-700 dark:text-green-400">{t('videoEditor.exportDoneDesc')}</p>
                   </div>
                   <a
                     href={outputUrl}
@@ -1424,27 +1424,27 @@ export function VideoEditor() {
         <div className="card overflow-hidden p-0 flex-1 min-h-0 flex flex-col">
 
           {/* ── Toolbar: zoom + track remove ── */}
-          <div className="flex items-center gap-2 px-3 py-1.5 border-b border-gray-100 shrink-0">
-            <button className="p-1 rounded hover:bg-gray-100 text-gray-600" onClick={() => setZoomPxPerSec((z) => Math.min(400, z * 1.25))} title={t('videoEditor.zoomIn')}><ZoomIn className="w-4 h-4" /></button>
-            <button className="p-1 rounded hover:bg-gray-100 text-gray-600" onClick={() => {
+          <div className="flex items-center gap-2 px-3 py-1.5 border-b border-gray-100 dark:border-gray-700 shrink-0">
+            <button className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400" onClick={() => setZoomPxPerSec((z) => Math.min(400, z * 1.25))} title={t('videoEditor.zoomIn')}><ZoomIn className="w-4 h-4" /></button>
+            <button className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400" onClick={() => {
               const containerWidth = timelineRef.current?.offsetWidth ?? 800;
               const minZoom = totalDuration > 0 ? containerWidth / totalDuration : 20;
               setZoomPxPerSec((z) => Math.max(minZoom, z * 0.8));
             }} title={t('videoEditor.zoomOut')}><ZoomOut className="w-4 h-4" /></button>
-            <div className="w-px h-4 bg-gray-200 mx-1" />
+            <div className="w-px h-4 bg-gray-200 dark:bg-gray-700 mx-1" />
             <span className="text-[10px] text-purple-400 font-medium">{videoTrackCount}V</span>
             <button
-              className="flex items-center gap-1 text-[11px] px-1.5 py-0.5 rounded bg-gray-50 hover:bg-red-50 hover:text-red-600 hover:border-red-200 text-gray-500 border border-gray-200 disabled:opacity-30 transition-colors"
+              className="flex items-center gap-1 text-[11px] px-1.5 py-0.5 rounded bg-gray-50 dark:bg-gray-700 hover:bg-red-50 dark:hover:bg-red-900/30 hover:text-red-600 dark:hover:text-red-400 hover:border-red-200 text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-gray-600 disabled:opacity-30 transition-colors"
               onClick={() => setVideoTrackCount((n) => { const next = Math.max(n - 1, 1); setClips((prev) => prev.map((c) => c.trackIndex >= next ? { ...c, trackIndex: next - 1 } : c)); return next; })}
               disabled={videoTrackCount <= 1} title={t('videoEditor.removeVideoTrack')}
             ><Trash2 className="w-3 h-3" /> {t('videoEditor.trackV')}</button>
             <span className="text-[10px] text-green-500 font-medium ml-1">{audioTrackCount}A</span>
             <button
-              className="flex items-center gap-1 text-[11px] px-1.5 py-0.5 rounded bg-gray-50 hover:bg-red-50 hover:text-red-600 hover:border-red-200 text-gray-500 border border-gray-200 disabled:opacity-30 transition-colors"
+              className="flex items-center gap-1 text-[11px] px-1.5 py-0.5 rounded bg-gray-50 dark:bg-gray-700 hover:bg-red-50 dark:hover:bg-red-900/30 hover:text-red-600 dark:hover:text-red-400 hover:border-red-200 text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-gray-600 disabled:opacity-30 transition-colors"
               onClick={() => setAudioTrackCount((n) => { const next = Math.max(n - 1, 0); setAudioClips((prev) => prev.map((a) => a.trackIndex >= next ? { ...a, trackIndex: Math.max(0, next - 1) } : a)); return next; })}
               disabled={audioTrackCount <= 0} title={t('videoEditor.removeAudioTrack')}
             ><Trash2 className="w-3 h-3" /> {t('videoEditor.trackA')}</button>
-            <span className="text-xs text-gray-400 ml-auto">{t('videoEditor.snapHint')}</span>
+            <span className="text-xs text-gray-400 dark:text-gray-500 ml-auto">{t('videoEditor.snapHint')}</span>
           </div>
 
           {/* ── Body: fixed labels column + scrollable content ── */}
